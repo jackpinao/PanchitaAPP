@@ -3,6 +3,8 @@ package com.pinao.panchitaapp
 import android.app.Application
 import com.pinao.panchitaapp.di.appModule
 import com.pinao.panchitaapp.di.dataModule
+import com.pinao.panchitaapp.di.repositoryModule
+import com.pinao.panchitaapp.di.useCaseModule
 import com.pinao.panchitaapp.di.viewModelModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -16,7 +18,7 @@ class PanchitaApp: Application() {
         startKoin{
             androidLogger(Level.DEBUG)
             androidContext(this@PanchitaApp)
-            modules(appModule, dataModule, viewModelModule)
+            modules(appModule, dataModule, viewModelModule, useCaseModule, repositoryModule)
         }
     }
 }

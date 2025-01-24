@@ -3,8 +3,11 @@ package com.pinao.panchitaapp.di
 import android.content.Context
 import androidx.room.Room
 import com.pinao.panchitaapp.data.local.database.AppDatabase
-import com.pinao.panchitaapp.data.repository.UserRepositoryImpl
+
+import com.pinao.panchitaapp.domain.model.Rechange
+import com.pinao.panchitaapp.domain.repository.RechangeRepository
 import com.pinao.panchitaapp.domain.repository.UserRepository
+import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -33,9 +36,5 @@ val dataModule = module {
     single(named(Qualifier.ProvideClientDao)) {
         get<AppDatabase>().clientDao()
     }
-    single<UserRepository>(named(Qualifier.ProvideUserRepository)) {
-        UserRepositoryImpl(get())
-    }
 
-    factoryOf(::UserRepositoryImpl)
 }

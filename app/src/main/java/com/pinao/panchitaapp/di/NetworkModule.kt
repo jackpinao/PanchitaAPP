@@ -22,5 +22,7 @@ enum class Qualifier {
     ProvideDetailTicketDao,
     ProvideUserDao,
     ProvideClientDao,
-    ProvideUserRepository
+    ProvideUserRepository,
+    ProvideRechangeRepository,
+    ProvideSaveRechangeUseCase
 }

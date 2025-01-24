@@ -6,7 +6,6 @@ import com.pinao.panchitaapp.domain.model.User
 import com.pinao.panchitaapp.domain.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 class UserRepositoryImpl(
     private val userDao: UserDao

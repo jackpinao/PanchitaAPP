@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -34,15 +35,27 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pinao.panchitaapp.domain.model.Rechange
 import com.pinao.panchitaapp.presentation.ui.Screen
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun ClaroRecargaScreen(claroRecargaViewModel: ClaroRecargaViewModel = koinViewModel()) {
+fun ClaroRecargaScreen(
+    claroRecargaViewModel: ClaroRecargaViewModel = koinViewModel()
+) {
+
+    val state by claroRecargaViewModel.state.collectAsState()
     var isEnabled by rememberSaveable { mutableStateOf(false) }
     var isValRechargeAmount by rememberSaveable { mutableStateOf("") }
     var isNumPhone by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
+
+    state.rechange?.let {
+        isEnabled = it.amount != 0
+        isValRechargeAmount = it.amount.toString()
+        isNumPhone = it.numPhone
+    }
+
     ClaroRecargaScreenContent(
         isEnabled,
         onEnable = { isEnabled = it },
@@ -146,7 +159,7 @@ private fun CenterApp(
                         "",
                         isEnabled,
                         onEnable,
-                        onValRechargeAmount
+                        onValRechargeAmount,
                     )
                 }
             }
@@ -163,6 +176,7 @@ private fun CenterApp(
                 isNumPhone,
                 isValRechargeAmount,
                 context,
+                claroRecargaViewModel
             )
         }
     }
@@ -254,7 +268,7 @@ private fun AddButtonOutlinedOther(
     text: String,
     isTextFieldEnabled: Boolean,
     onEnableTextField: (Boolean) -> Unit,
-    onValRechargeAmount: (String) -> Unit
+    onValRechargeAmount: (String) -> Unit,
 ) {
     OutlinedButton(
         onClick = {
@@ -277,10 +291,18 @@ private fun AddButtonOutlinedOther(
 private fun AddButtonElevate(
     isNumPhone: String,
     isValRechargeAmount: String,
-    context: Context
+    context: Context,
+    claroRecargaViewModel: ClaroRecargaViewModel
 ) {
     ElevatedButton(
         onClick = {
+            val rechange = Rechange(
+                numPhone = isNumPhone,
+                amount =  isValRechargeAmount.toInt()
+            )
+
+            claroRecargaViewModel.updateRechange(rechange)
+
             val intent = Intent(Intent.ACTION_DIAL).apply {
                 data = Uri.parse("tel:*789*1*$isNumPhone*$isValRechargeAmount*1*1357#")
             }

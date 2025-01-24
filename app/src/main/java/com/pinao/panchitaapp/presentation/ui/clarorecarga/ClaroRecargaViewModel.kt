@@ -1,46 +1,41 @@
 package com.pinao.panchitaapp.presentation.ui.clarorecarga
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.pinao.panchitaapp.domain.model.Rechange
+import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-class ClaroRecargaViewModel : ViewModel(
-) {
+class ClaroRecargaViewModel(
+    private val saveRechangeUseCase: SaveRechangeUseCase
+) : ViewModel() {
 
-    private val _numPhone = MutableLiveData<String>()
-    val numPhone: LiveData<String> = _numPhone
-    private val _numRec = MutableLiveData<String>()
-    val numRec: LiveData<String> = _numRec
-    private val _codRec = MutableLiveData<String>()
-    val codRec: LiveData<String> = _codRec
-
-//    val numPhone = ""
-//    val numRec = ""
-//    val codRec = ""
-
-    fun setNumPhone(numPhone: String) {
-        _numPhone.value = numPhone
-    }
-
-    fun setNumRec(numRec: String) {
-        _numRec.value = numRec
-    }
+    private val _state = MutableStateFlow(UiState())
+    val state: StateFlow<UiState> = _state.asStateFlow()
 
 //    init {
-//        val intent = Intent(Intent.ACTION_VIEW)
-//        intent.data = Uri.parse(codRec)
-//        if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
-//                getApplication(),
-//                Manifest.permission.CALL_PHONE
-//            )
-//        ) {
-//            return
+//        viewModelScope.launch{
+//            _state.value = UiState(isLoading = true)
+//            _state.value = UiState(rechange = Rechange())
+//            saveRechangeUseCase.invoke(state.value.rechange!!)
 //        }
-//        getApplication<Application>().startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-//
 //    }
 
-    fun getGreeting(): String {
-        return "Hello Android!"
+    fun updateRechange(rechange: Rechange) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(rechange = rechange)
+            saveRechangeUseCase.invoke(rechange)
+        }
+
     }
+
+    data class UiState(
+        val rechange: Rechange? = null,
+        val isLoading: Boolean = false
+    )
+
 }
+
