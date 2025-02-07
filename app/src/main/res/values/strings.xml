@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">PanchitaAPP</string>
+    <!-- Add your AdMob App ID here -->
+    <string name="id_admob_app">ca-app-pub-3940256099942544/1033173712</string>
+
+    <string name="home">Home</string>
+    <string name="settings">Settings</string>
+    <string name="recarga">Recarga</string>
+</resources>
