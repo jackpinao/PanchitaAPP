@@ -37,7 +37,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pinao.panchitaapp.domain.model.Rechange
 import com.pinao.panchitaapp.presentation.ui.Screen
-import org.koin.androidx.compose.koinViewModel
+//import org.koin.androidx.compose.koinViewModel
+//import org.koin.androidx.viewmodel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ClaroRecargaScreen(

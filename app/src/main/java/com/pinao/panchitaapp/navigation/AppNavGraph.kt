@@ -37,6 +37,8 @@ import com.pinao.panchitaapp.presentation.ui.home.HomeViewModel
 import com.pinao.panchitaapp.presentation.ui.login.LoginViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+//import org.koin.androidx.viewmodel.ext.android.getViewModel
+import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,9 +47,12 @@ fun AppNavGraph(
     navController: NavHostController = rememberNavController(),
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
+//    homeViewModel: HomeViewModel = getViewModel(),
+//    loginViewModel: LoginViewModel = getViewModel(),
+//    rechargeViewModel: ClaroRecargaViewModel = getViewModel()
     homeViewModel: HomeViewModel,
     loginViewModel: LoginViewModel,
-    rechargeViewModel: ClaroRecargaViewModel
+    rechargeViewModel: ClaroRecargaViewModel = getViewModel<ClaroRecargaViewModel>()
 ) {
     //val scope = rememberCoroutineScope()
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()

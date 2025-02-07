@@ -3,6 +3,7 @@ package com.pinao.panchitaapp.data.local.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -21,6 +22,7 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.NO_ACTION
         )
     ],
+    indices = [Index(value = ["idUser"]), Index(value = ["idClient"])],
     ignoredColumns = ["details"]
 )
 data class TicketEntity(
@@ -31,11 +33,11 @@ data class TicketEntity(
     @ColumnInfo(name = "total")
     val total: Double,
     @ColumnInfo(name = "state")
-    val state : String,
+    val state: String,
     @ColumnInfo(name = "idUser")
     val idUser: Int,
     @ColumnInfo(name = "idClient")
     val idClient: Int
-){
+) {
     var details: List<DetailTicketEntity> = emptyList()
 }

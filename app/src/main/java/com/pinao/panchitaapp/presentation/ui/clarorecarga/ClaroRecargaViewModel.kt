@@ -3,6 +3,7 @@ package com.pinao.panchitaapp.presentation.ui.clarorecarga
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pinao.panchitaapp.domain.model.Rechange
+import com.pinao.panchitaapp.domain.repository.RechangeRepository
 import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ClaroRecargaViewModel(
+    //private val repository: RechangeRepository
     private val saveRechangeUseCase: SaveRechangeUseCase
 ) : ViewModel() {
 
@@ -27,14 +29,16 @@ class ClaroRecargaViewModel(
     fun updateRechange(rechange: Rechange) {
         viewModelScope.launch {
             _state.value = _state.value.copy(rechange = rechange)
-            saveRechangeUseCase.invoke(rechange)
+            //repository.save(rechange)
+            //saveRechangeUseCase.invoke(rechange)
         }
 
     }
 
     data class UiState(
         val rechange: Rechange? = null,
-        val isLoading: Boolean = false
+        val isLoading: Boolean = false,
+        val error: String = ""
     )
 
 }
