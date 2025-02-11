@@ -6,20 +6,22 @@ import com.pinao.panchitaapp.domain.model.Rechange
 import com.pinao.panchitaapp.domain.repository.RechangeRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class RechangeRepositoryImpl(
+class RechangeRepositoryImpl @Inject constructor (
     private val rechangeDao: RechangeDao
 ): RechangeRepository {
 
-    override suspend fun save(rechange: Rechange): Long {
-        return if (rechange.id == 0) {
+    override suspend fun save(rechange: Rechange) {
+        if (rechange.id == 0) {
             rechangeDao.insert(RechangeMapper.toDatabase(rechange))
         } else {
-            rechangeDao.update(RechangeMapper.toDatabase(rechange)).toLong()
+            rechangeDao.update(RechangeMapper.toDatabase(rechange))
         }
     }
 
-    override suspend fun delete(rechange: Rechange): Int {
+    override suspend fun delete(rechange: Rechange) {
         return rechangeDao.delete(RechangeMapper.toDatabase(rechange))
     }
 

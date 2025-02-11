@@ -5,12 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.pinao.panchitaapp.domain.model.Rechange
 import com.pinao.panchitaapp.domain.repository.RechangeRepository
 import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ClaroRecargaViewModel(
+@HiltViewModel
+class ClaroRecargaViewModel @Inject constructor (
     //private val repository: RechangeRepository
     private val saveRechangeUseCase: SaveRechangeUseCase
 ) : ViewModel() {
@@ -30,7 +33,7 @@ class ClaroRecargaViewModel(
         viewModelScope.launch {
             _state.value = _state.value.copy(rechange = rechange)
             //repository.save(rechange)
-            //saveRechangeUseCase.invoke(rechange)
+            saveRechangeUseCase.invoke(rechange)
         }
 
     }

@@ -14,23 +14,15 @@ import kotlinx.coroutines.flow.emptyFlow
 interface RechangeDao {
 
     @Insert (onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(rechange: RechangeEntity): Long {
-        return 0
-    }
+    suspend fun insert(rechange: RechangeEntity): Long
 
     @Update
-    suspend fun update(rechange: RechangeEntity): Int {
-        return 0
-    }
+    suspend fun update(rechange: RechangeEntity)
 
     @Delete
-    suspend fun delete(rechange: RechangeEntity): Int {
-        return 0
-    }
+    suspend fun delete(rechange: RechangeEntity)
 
     @Query("SELECT * FROM rechange WHERE date LIKE '%' || :date || '%'")
-    fun listForDate(date: String): Flow<List<RechangeEntity>> {
-        return emptyFlow()
-    }
+    fun listForDate(date: String): Flow<List<RechangeEntity>>
 
 }

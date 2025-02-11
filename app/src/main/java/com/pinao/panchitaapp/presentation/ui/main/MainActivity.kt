@@ -16,9 +16,10 @@ import com.pinao.panchitaapp.presentation.theme.resource.PanchitaAPPTheme
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaViewModel
 import com.pinao.panchitaapp.presentation.ui.home.HomeViewModel
 import com.pinao.panchitaapp.presentation.ui.login.LoginViewModel
-import org.koin.android.ext.android.inject
+import dagger.hilt.android.AndroidEntryPoint
+//import org.koin.android.ext.android.inject
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
 //    @Inject

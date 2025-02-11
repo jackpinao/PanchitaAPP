@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     //Hilt
-    //alias(libs.plugins.dagger.hilt.android)
+    alias(libs.plugins.dagger.hilt.android)
     //Annotation kapt
     alias(libs.plugins.kotlin.kapt)
     //Annotation ksp
@@ -25,6 +25,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+//        javaCompileOptions {
+//            annotationProcessorOptions {
+//                arguments += ["room.schemaLocation:" "$projectDir/schemas".toString()]
+//            }
+//        }
     }
 
     buildTypes {
@@ -65,19 +71,19 @@ android {
 }
 
 
-//tasks.withType<JavaCompile> {
-//    options.compilerArgs.add("-Xlint:deprecation")
-//}
-//kapt {
-//    correctErrorTypes = true
-//    arguments {
-//        arg("dagger.fastInit", "enabled")
-//        arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
-//        arg("dagger.hilt.android.internal.projectType", "APP")
-//        arg("dagger.hilt.internal.useAggregatingRootProcessor", "true")
-//        arg("kapt.kotlin.generated", layout.buildDirectory.dir("generated/source/kaptKotlin").get().asFile.absolutePath)
-//    }
-//}
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-Xlint:deprecation")
+}
+kapt {
+    correctErrorTypes = true
+    arguments {
+        arg("dagger.fastInit", "enabled")
+        arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
+        arg("dagger.hilt.android.internal.projectType", "APP")
+        arg("dagger.hilt.internal.useAggregatingRootProcessor", "true")
+        arg("kapt.kotlin.generated", layout.buildDirectory.dir("generated/source/kaptKotlin").get().asFile.absolutePath)
+    }
+}
 
 dependencies {
 
@@ -107,14 +113,14 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
 
     //Koin android
-    implementation(libs.koin.android)
-    implementation(libs.koin.core)
-    implementation(libs.koin.compose)
-    implementation(libs.koin.coroutines)
-    implementation(libs.koin.compose.viewmodel)
-    implementation(libs.koin.android.compose)
+//    implementation(libs.koin.android)
+//    implementation(libs.koin.core)
+//    implementation(libs.koin.compose)
+//    implementation(libs.koin.coroutines)
+//    implementation(libs.koin.compose.viewmodel)
+//    implementation(libs.koin.android.compose)
     //implementation(libs.koin.annotation)
-    implementation(libs.koin.ksp.compiler)
+//    implementation(libs.koin.ksp.compiler)
 
     //LiveData
     implementation(libs.runtime.livedata)

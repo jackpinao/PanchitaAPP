@@ -39,11 +39,11 @@ import com.pinao.panchitaapp.domain.model.Rechange
 import com.pinao.panchitaapp.presentation.ui.Screen
 //import org.koin.androidx.compose.koinViewModel
 //import org.koin.androidx.viewmodel
-import org.koin.compose.viewmodel.koinViewModel
+//import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ClaroRecargaScreen(
-    claroRecargaViewModel: ClaroRecargaViewModel = koinViewModel()
+    claroRecargaViewModel: ClaroRecargaViewModel
 ) {
 
     val state by claroRecargaViewModel.state.collectAsState()
@@ -110,7 +110,7 @@ fun ClaroRecargaScreenContent(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun TopBar() {
     TopAppBar(
-        title = { Text(text = "Recarga Claro Top") }
+        title = { Text(text = "Recarga Claro") }
     )
 }
 
@@ -185,7 +185,6 @@ private fun CenterApp(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun BottomBar() {
     BottomAppBar() {
         Text(text = "Recarga Claro Bottom")
