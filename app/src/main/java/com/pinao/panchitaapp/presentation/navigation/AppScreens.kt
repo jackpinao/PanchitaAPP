@@ -1,4 +1,4 @@
-package com.pinao.panchitaapp.navigation
+package com.pinao.panchitaapp.presentation.navigation
 
 sealed class AppScreens(val route: String){
 

@@ -1,4 +1,4 @@
-package com.pinao.panchitaapp.navigation
+package com.pinao.panchitaapp.presentation.navigation
 
 import androidx.navigation.NavController
 
@@ -6,6 +6,7 @@ object AllDestinations {
     const val HOME_ROUTE = "home"
     const val LOGIN_ROUTE = "login"
     const val RECARGA = "recarga"
+    const val DETAIL_RECARGA = "detail_recarga"
 }
 
 class AppNavigationActions(
@@ -29,4 +30,5 @@ class AppNavigationActions(
             restoreState = true
         }
     }
+
 }

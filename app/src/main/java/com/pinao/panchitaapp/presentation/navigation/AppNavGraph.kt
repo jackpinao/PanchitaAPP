@@ -1,5 +1,7 @@
-package com.pinao.panchitaapp.navigation
+package com.pinao.panchitaapp.presentation.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -40,6 +42,7 @@ import kotlinx.coroutines.launch
 //import org.koin.androidx.viewmodel.ext.android.getViewModel
 //import org.koin.androidx.compose.getViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavGraph(

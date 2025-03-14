@@ -98,6 +98,7 @@ dependencies {
 
     //Navigation
     implementation(libs.navigation.compose)
+    implementation(libs.androidx.material)
 
     //Room
     implementation(libs.androidx.room.ktx)
@@ -160,12 +161,14 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.mockito)
+    androidTestImplementation(libs.hamcrest)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     testImplementation (libs.koin.test.junit4)
     testImplementation(libs.mockito)
     testImplementation(libs.mockk)
     testImplementation(libs.androidx.core.testing)
+    testImplementation (libs.hamcrest)
 }
 
 ksp{

@@ -3,44 +3,73 @@ package com.pinao.panchitaapp.presentation.ui.clarorecarga
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.BottomAppBar
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.TabRow
+import androidx.compose.material.TextButton
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.domain.model.Rechange
+import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import com.pinao.panchitaapp.presentation.ui.Screen
+import org.w3c.dom.Text
+
 //import org.koin.androidx.compose.koinViewModel
 //import org.koin.androidx.viewmodel
 //import org.koin.compose.viewmodel.koinViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ClaroRecargaScreen(
     claroRecargaViewModel: ClaroRecargaViewModel
@@ -70,6 +99,7 @@ fun ClaroRecargaScreen(
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ClaroRecargaScreenContent(
     isEnabled: Boolean,
@@ -79,41 +109,133 @@ fun ClaroRecargaScreenContent(
     claroRecargaViewModel: ClaroRecargaViewModel,
     isNumPhone: String,
     onNumPhone: (String) -> Unit,
-    context: Context
+    context: Context,
 ) {
 
     Screen {
-        Scaffold(
-            topBar = {
-                TopBar()
-            },
-            bottomBar = {
-                BottomBar()
-            }
-        ) { padding ->
-            CenterApp(
-                padding,
-                isEnabled,
-                onEnable,
-                isValRechargeAmount,
-                onValRechargeAmount,
-                isNumPhone,
-                onNumPhone,
-                claroRecargaViewModel,
-                context
-            )
-        }
+        TopBar(
+            PaddingValues(0.dp),
+            isEnabled,
+            onEnable,
+            isValRechargeAmount,
+            onValRechargeAmount,
+            claroRecargaViewModel,
+            isNumPhone,
+            onNumPhone,
+            context
+        )
+//        Scaffold(
+//            topBar = {
+//                TopBar(
+//                    PaddingValues(0.dp),
+//                    isEnabled,
+//                    onEnable,
+//                    isValRechargeAmount,
+//                    onValRechargeAmount,
+//                    claroRecargaViewModel,
+//                    isNumPhone,
+//                    onNumPhone,
+//                    context
+//                )
+//            },
+//            bottomBar = {
+//
+//                BottomBar(navController)
+//            }
+//        ) { padding ->
+//            TopBar(
+//                padding,
+//                isEnabled,
+//                onEnable,
+//                isValRechargeAmount,
+//                onValRechargeAmount,
+//                claroRecargaViewModel,
+//                isNumPhone,
+//                onNumPhone,
+//                context
+//            )
+////            CenterApp(
+////                padding,
+////                isEnabled,
+////                onEnable,
+////                isValRechargeAmount,
+////                onValRechargeAmount,
+////                isNumPhone,
+////                onNumPhone,
+////                claroRecargaViewModel,
+////                context
+////            )
+//        }
     }
 }
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun TopBar() {
-    TopAppBar(
-        title = { Text(text = "Recarga Claro") }
+private fun TopBar(
+    padding: PaddingValues,
+    isEnabled: Boolean,
+    onEnable: (Boolean) -> Unit,
+    isValRechargeAmount: String,
+    onValRechargeAmount: (String) -> Unit,
+    claroRecargaViewModel: ClaroRecargaViewModel,
+    isNumPhone: String,
+    onNumPhone: (String) -> Unit,
+    context: Context,
+) {
+
+    val tabs = listOf(
+        TabData("Recarga", ImageVector.vectorResource(R.drawable.baseline_add_call_24)),
+        TabData("Historial", ImageVector.vectorResource(R.drawable.baseline_history_24))
     )
+    val selectedTab = remember { mutableIntStateOf(0) }
+
+    Column {
+        TabRow(selectedTabIndex = selectedTab.value) {
+            tabs.forEachIndexed { index, tab ->
+                Tab(
+                    selected = selectedTab.value == index,
+                    onClick = { selectedTab.value = index },
+                    text = { Text(text = tab.title) },
+                    icon = {
+                        Icon(
+                            imageVector = tab.icon,
+                            contentDescription = null
+                        )
+                    }
+                )
+            }
+        }
+        when (
+            selectedTab.value
+        ) {
+            0 -> {
+                CenterApp(
+                    padding,
+                    isEnabled,
+                    onEnable,
+                    isValRechargeAmount,
+                    onValRechargeAmount,
+                    isNumPhone,
+                    onNumPhone,
+                    claroRecargaViewModel,
+                    context
+                )
+            }
+
+            1 -> {
+                CenterApp2(
+                    padding
+                )
+            }
+        }
+    }
+
 }
 
+data class TabData(val title: String, val icon: ImageVector)
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun CenterApp(
     padding: PaddingValues,
@@ -184,10 +306,124 @@ private fun CenterApp(
     }
 }
 
+
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BottomBar() {
-    BottomAppBar() {
-        Text(text = "Recarga Claro Bottom")
+private fun CenterApp2(
+    padding: PaddingValues
+) {
+    val datePickerState = rememberDatePickerState()
+    val snackState = remember { SnackbarHostState() }
+    val snackScope = rememberCoroutineScope()
+    SnackbarHost(hostState = snackState, Modifier)
+    val openDialog = remember { mutableStateOf(false) }
+    val dateTime = GetCurrentDateTime().getCurrentDateTime2()
+    var isDate by rememberSaveable { mutableStateOf(dateTime) }
+    val onDate: (String) -> Unit = { isDate = it }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+    ) {
+        item {
+            Text(text = "Historial de recargas")
+        }
+        item {
+            //DatePicker(state = datePickerState)
+            Text(text = "Fecha de recarga")
+            Row {
+
+                Text(isDate)
+                IconButton(
+                    onClick = {
+                        openDialog.value = true
+                    }
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.baseline_calendar_month_24),
+                        contentDescription = null
+                    )
+                }
+                if (openDialog.value) {
+                    val confirmEnabled = remember {
+                        derivedStateOf {
+                            //datePickerState.selectedDateMillis != null
+                            true
+                        }
+                    }
+                    DatePickerDialog(
+                        onDismissRequest = {
+                            openDialog.value = false
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    openDialog.value = false
+//                                    snackScope.launch {
+//                                        snackState.showSnackbar(
+//                                            "Selected date: ${datePickerState.selectedDateMillis}"
+//                                        )
+//                                    }
+                                    val date = datePickerState.selectedDateMillis?.let {
+                                        GetCurrentDateTime().getCurrentDateTime3(
+                                            it
+                                        )
+                                    }
+                                    println(date)
+                                    onDate(date ?: isDate)
+                                    //onDate(datePickerState.selectedDateMillis.toString())
+                                },
+                                enabled = confirmEnabled.value
+                            ) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    openDialog.value = false
+                                }
+                            ) {
+                                Text("Cancel")
+                            }
+                        }
+                    ) {
+                        DatePicker(
+                            state = datePickerState,
+                            modifier = Modifier.verticalScroll(rememberScrollState())
+                        )
+                    }
+                }
+            }
+
+        }
+
+        item{
+            OutlinedCard(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colors.surface,
+                ),
+                border = BorderStroke(1.dp,
+                    MaterialTheme.colors.primary),
+                modifier = Modifier
+                    .size(width = 240.dp, height = 100.dp)
+            ) {
+                androidx.compose.material.Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.baseline_history_24),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+                Text(
+                    text = "Historial de recargas",
+                    modifier = Modifier.padding(
+                        start = 8.dp, top = 8.dp
+                    ),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 }
 
@@ -288,6 +524,8 @@ private fun AddButtonOutlinedOther(
     }
 }
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun AddButtonElevate(
     isNumPhone: String,
@@ -297,9 +535,12 @@ private fun AddButtonElevate(
 ) {
     ElevatedButton(
         onClick = {
+
+            val date = GetCurrentDateTime().getCurrentDateTime()
             val rechange = Rechange(
                 numPhone = isNumPhone,
-                amount =  isValRechargeAmount.toInt()
+                date = date,
+                amount = isValRechargeAmount.toInt()
             )
 
             claroRecargaViewModel.updateRechange(rechange)
@@ -348,3 +589,4 @@ fun LimitedTextField(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )
 }
+

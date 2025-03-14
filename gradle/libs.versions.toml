@@ -1,5 +1,5 @@
 [versions]
-agp = "8.8.0"
+agp = "8.9.0"
 coreTesting = "2.2.0"
 koinTestJunit4 = "4.0.2"
 kotlin = "2.0.10"
@@ -11,11 +11,12 @@ kotlinxCoroutinesAndroid = "1.10.1"
 kotlinx-serialization = "1.8.0"
 kotlinxCoroutinesTest = "1.10.1"
 lifecycleRuntimeKtx = "2.8.7"
-activityCompose = "1.10.0"
-composeBom = "2025.01.01"
+activityCompose = "1.10.1"
+composeBom = "2025.03.00"
 
+material = "1.7.8"
 playServicesAds = "23.5.0"
-firebaseAnalytics = "22.2.0"
+firebaseAnalytics = "22.3.0"
 roomKtx = "2.6.1"
 hiltAndroid = "2.55"
 mpandroidchart = "3.1.0"
@@ -23,29 +24,34 @@ zxingAndroidEmbedded = "4.3.0"
 core = "3.5.3"
 libreiaapcs = "1.1.0"
 kspVersion = "2.0.10-1.0.24"
-safeargsVersion = "2.8.6"
-navigationVersion = "2.8.6"
+safeargsVersion = "2.8.9"
+navigationVersion = "2.8.9"
 hiltCompiler = "1.2.0"
 hiltNavigationCompose = "1.2.0"
-runtimeLivedata = "1.7.7"
+runtimeLivedata = "1.7.8"
 playServicesAdsLite = "23.5.0"
 splashScreen = "1.0.1"
 retrofit = "2.11.0"
 koinVersion = "4.0.2"
 koinAnnotationVersion = "2.0.0-RC1"
 koinCompose = "4.0.2"
-mockitoVersion = "5.15.2"
-mockkVersion = "1.13.16"
-junitJupiter = "5.11.4"
+mockitoVersion = "5.16.0"
+mockkVersion = "1.13.17"
+junitJupiter = "5.12.0"
 lifecycleViewmodelCompose = "2.8.4"
 coroutines = "1.10.1"
+hamcrest = "3.0"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
+androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+hamcrest = { group = "org.hamcrest", name = "hamcrest-library", version.ref = "hamcrest" }
+
 
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }

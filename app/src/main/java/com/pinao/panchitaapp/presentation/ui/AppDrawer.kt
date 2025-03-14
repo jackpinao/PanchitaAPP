@@ -29,7 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.pinao.panchitaapp.R
-import com.pinao.panchitaapp.navigation.AppScreens
+import com.pinao.panchitaapp.presentation.navigation.AppScreens
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
