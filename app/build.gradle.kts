@@ -50,7 +50,8 @@ android {
                 variant.outputs
                     .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
                     .forEach { output ->
-                        val outputFileName = "panchitaapp - ${variant.baseName} - ${variant.versionName} ${variant.versionCode}.apk"
+                        val outputFileName =
+                            "panchitaapp - ${variant.baseName} - ${variant.versionName} ${variant.versionCode}.apk"
                         println("OutputFileName: $outputFileName")
                         output.outputFileName = outputFileName
                     }
@@ -81,7 +82,10 @@ kapt {
         arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
         arg("dagger.hilt.android.internal.projectType", "APP")
         arg("dagger.hilt.internal.useAggregatingRootProcessor", "true")
-        arg("kapt.kotlin.generated", layout.buildDirectory.dir("generated/source/kaptKotlin").get().asFile.absolutePath)
+        arg(
+            "kapt.kotlin.generated",
+            layout.buildDirectory.dir("generated/source/kaptKotlin").get().asFile.absolutePath
+        )
     }
 }
 
@@ -149,7 +153,7 @@ dependencies {
     //Corrutinas
     implementation(libs.kotlinx.coroutines.android)
     testImplementation(libs.kotlinx.coroutines.test)
-    
+
     implementation(libs.kotlin.coroutines.core)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.serialization.json)
@@ -164,13 +168,13 @@ dependencies {
     androidTestImplementation(libs.hamcrest)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    testImplementation (libs.koin.test.junit4)
+    testImplementation(libs.koin.test.junit4)
     testImplementation(libs.mockito)
     testImplementation(libs.mockk)
     testImplementation(libs.androidx.core.testing)
-    testImplementation (libs.hamcrest)
+    testImplementation(libs.hamcrest)
 }
 
-ksp{
+ksp {
     arg("KOIN_CONFIG_CHECK", "true")
 }

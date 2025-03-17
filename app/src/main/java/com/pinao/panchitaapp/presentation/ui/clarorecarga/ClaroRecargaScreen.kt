@@ -422,6 +422,13 @@ private fun CenterApp2(
                     ),
                     textAlign = TextAlign.Center
                 )
+                Text(
+                    text = "Ver historial de recargas",
+                    modifier = Modifier.padding(
+                        start = 8.dp, top = 8.dp
+                    ),
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
