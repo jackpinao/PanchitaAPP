@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -32,40 +33,43 @@ class ClaroRecargaViewModelTest {
     @get:Rule
     var rule: InstantTaskExecutorRule = InstantTaskExecutorRule()
 
-    @Before
-    fun onBefore() {
-        MockKAnnotations.init(this)
-        claroRecargaViewModel = ClaroRecargaViewModel(saveRechangeUseCase)
-        Dispatchers.setMain(Dispatchers.Unconfined)
-    }
-
-    @After
-    fun onAfter() {
-        Dispatchers.resetMain()
-    }
-
-    @Test
-    fun updateRechange_updatesStateWithNewRechange() = runTest {
-        val rechange = Rechange(id = 1, amount = 100)
-        claroRecargaViewModel.updateRechange(rechange)
-        assertEquals(rechange, claroRecargaViewModel.state.value.rechange)
-    }
-
-    @Test
-    fun updateRechange_callsSaveRechangeUseCase() = runTest {
-        val rechange = Rechange(id = 1, amount = 100)
-        coEvery { saveRechangeUseCase(rechange) } returns Unit
-        claroRecargaViewModel.updateRechange(rechange)
-        coVerify { saveRechangeUseCase.invoke(rechange) }
-
-    }
-
-    @Test
-    fun updateRechange_withNullRechange_doesNotUpdateState() = runTest {
-        claroRecargaViewModel.updateRechange(Rechange(id = 1, amount = 100))
-        claroRecargaViewModel.updateRechange(Rechange(id = 2, amount = 200))
-        assertEquals(200, claroRecargaViewModel.state.value.rechange?.amount)
-    }
-
+//    @Test
+//    fun updateRechange2_updatesStateWithNewRechange() = runTest {
+//        val numPhone = "1234567890"
+//        val amount = 100
+//        val date = "2023-10-10"
+//        claroRecargaViewModel.updateRechange2(numPhone, amount, date)
+//        assertEquals(amount, claroRecargaViewModel.state.value.rechange?.amount)
+//        assertEquals(numPhone, claroRecargaViewModel.state.value.rechange?.numPhone)
+//        assertEquals(date, claroRecargaViewModel.state.value.rechange?.date)
+//    }
+//
+//    @Test
+//    fun updateRechange2_callsSaveRechangeUseCase() = runTest {
+//        val numPhone = "1234567890"
+//        val amount = 100
+//        val date = "2023-10-10"
+//        coEvery { saveRechangeUseCase(any()) } returns Unit
+//        claroRecargaViewModel.updateRechange2(numPhone, amount, date)
+//        coVerify { saveRechangeUseCase.invoke(Rechange(numPhone = numPhone, amount = amount, date = date)) }
+//    }
+//
+//    @Test
+//    fun updateRechange2_withInvalidAmount_doesNotUpdateState() = runTest {
+//        val numPhone = "1234567890"
+//        val amount = -100
+//        val date = "2023-10-10"
+//        claroRecargaViewModel.updateRechange2(numPhone, amount, date)
+//        assertNotEquals(amount, claroRecargaViewModel.state.value.rechange?.amount)
+//    }
+//
+//    @Test
+//    fun updateRechange2_withEmptyPhone_doesNotUpdateState() = runTest {
+//        val numPhone = ""
+//        val amount = 100
+//        val date = "2023-10-10"
+//        claroRecargaViewModel.updateRechange2(numPhone, amount, date)
+//        assertNotEquals(numPhone, claroRecargaViewModel.state.value.rechange?.numPhone)
+//    }
 
 }

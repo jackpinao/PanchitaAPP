@@ -4,6 +4,7 @@ import com.pinao.panchitaapp.data.local.entity.RechangeEntity
 import com.pinao.panchitaapp.domain.model.Rechange
 
 object RechangeMapper {
+
     fun toDomain(entity: RechangeEntity): Rechange {
         return Rechange(
             id = entity.id,

@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "70783010565",
+    "project_id": "chasqui-fbaf2",
+    "storage_bucket": "chasqui-fbaf2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:70783010565:android:652860c0309c3ed869596c",
+        "android_client_info": {
+          "package_name": "com.pinao.chasqui"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "70783010565-u05053q4g704fuut1btghd0o6og8jc8q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCT4RM3So6Pu6ViV8DeLyPyU_j1N-owFBQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "70783010565-0l9nd2dp1blkt8hoe73im8gbjea8hdlf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:70783010565:android:9e74a7ceafc065bf69596c",
+        "android_client_info": {
+          "package_name": "com.pinao.panchitaapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "70783010565-u05053q4g704fuut1btghd0o6og8jc8q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCT4RM3So6Pu6ViV8DeLyPyU_j1N-owFBQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "70783010565-0l9nd2dp1blkt8hoe73im8gbjea8hdlf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

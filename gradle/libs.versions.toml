@@ -1,8 +1,9 @@
 [versions]
 agp = "8.9.0"
 coreTesting = "2.2.0"
+firebaseBom = "33.10.0"
 koinTestJunit4 = "4.0.2"
-kotlin = "2.0.10"
+kotlin = "2.0.21"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -16,7 +17,7 @@ composeBom = "2025.03.00"
 
 material = "1.7.8"
 playServicesAds = "23.5.0"
-firebaseAnalytics = "22.3.0"
+
 roomKtx = "2.6.1"
 hiltAndroid = "2.55"
 mpandroidchart = "3.1.0"
@@ -41,12 +42,17 @@ junitJupiter = "5.12.0"
 lifecycleViewmodelCompose = "2.8.4"
 coroutines = "1.10.1"
 hamcrest = "3.0"
+gms = "4.4.2"
+crashlytics = "3.0.3"
 
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -89,7 +95,8 @@ navigation-compose = { group = "androidx.navigation", name = "navigation-compose
 
 # for google admod
 #play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
-firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics", version.ref = "firebaseAnalytics" }
+
+
 #play-services-ads-lite = { group = "com.google.android.gms", name = "play-services-ads-lite", version.ref = "playServicesAdsLite" }
 
 # Room
@@ -142,3 +149,5 @@ kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "kspVersion" }
 # Navigation safe
 navigation-safe-args = { id = "androidx.navigation.safeargs.kotlin", version.ref = "safeargsVersion" }
+gms = { id = "com.google.gms.google-services", version.ref = "gms" }
+crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }

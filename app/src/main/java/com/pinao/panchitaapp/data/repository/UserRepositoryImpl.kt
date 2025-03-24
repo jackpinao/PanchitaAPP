@@ -44,8 +44,8 @@ class UserRepositoryImpl(
     }
 
     override fun listDate(data: String): Flow<List<User>> {
-        return userDao.listForName(data).map {
-            it.map { userEntity ->
+        return userDao.listForName(data).map { items ->
+            items.map { userEntity ->
                 UserMapper.toDomain(userEntity)
             }
         }

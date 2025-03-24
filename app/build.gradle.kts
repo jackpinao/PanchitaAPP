@@ -11,6 +11,8 @@ plugins {
     //navigation safe args
     alias(libs.plugins.navigation.safe.args)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.gms)
+    alias(libs.plugins.crashlytics)
 }
 
 android {
@@ -139,7 +141,6 @@ dependencies {
 
     //Admod
     //implementation(libs.play.services.ads)
-    implementation(libs.firebase.analytics)
 
     //Library
     //implementation(libs.librery.pcs)
@@ -157,6 +158,9 @@ dependencies {
     implementation(libs.kotlin.coroutines.core)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.serialization.json)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 
     //Test
     testImplementation(libs.junit)

@@ -13,16 +13,19 @@ import kotlinx.coroutines.flow.emptyFlow
 @Dao
 interface RechangeDao {
 
-    @Insert (onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(rechange: RechangeEntity): Long
 
-    @Update
-    suspend fun update(rechange: RechangeEntity)
+//    @Update
+//    suspend fun update(rechange: RechangeEntity)
 
     @Delete
     suspend fun delete(rechange: RechangeEntity)
 
+    @Query("SELECT * FROM rechange ORDER BY date DESC")
+    fun getAllDateRechange(): Flow<List<RechangeEntity>>
+
     @Query("SELECT * FROM rechange WHERE date LIKE '%' || :date || '%'")
-    fun listForDate(date: String): Flow<List<RechangeEntity>>
+    fun getListForDate(date: String): Flow<RechangeEntity>
 
 }

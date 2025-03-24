@@ -9,27 +9,30 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
-class RechangeRepositoryImpl @Inject constructor (
+@Singleton
+class RechangeRepositoryImpl @Inject constructor(
     private val rechangeDao: RechangeDao
-): RechangeRepository {
+) : RechangeRepository {
 
     override suspend fun save(rechange: Rechange) {
-        if (rechange.id == 0) {
-            rechangeDao.insert(RechangeMapper.toDatabase(rechange))
-        } else {
-            rechangeDao.update(RechangeMapper.toDatabase(rechange))
-        }
+        rechangeDao.insert(RechangeMapper.toDatabase(rechange))
     }
 
     override suspend fun delete(rechange: Rechange) {
         return rechangeDao.delete(RechangeMapper.toDatabase(rechange))
     }
 
-    override suspend fun listDate(data: String): Flow<List<Rechange>> {
-        return rechangeDao.listForDate(data).map {
-            it.map { rechangeEntity ->
+    override fun listAllDateRechange(): Flow<List<Rechange>> {
+        return rechangeDao.getAllDateRechange().map { items ->
+            items.map { rechangeEntity ->
                 RechangeMapper.toDomain(rechangeEntity)
             }
+        }
+    }
+
+    override fun listForDate(data: String): Flow<Rechange> {
+        return rechangeDao.getListForDate(data).map { rechangeEntity ->
+            RechangeMapper.toDomain(rechangeEntity)
         }
     }
 
