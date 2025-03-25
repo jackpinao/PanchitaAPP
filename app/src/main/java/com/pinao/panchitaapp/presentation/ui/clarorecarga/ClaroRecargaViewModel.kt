@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -37,11 +38,18 @@ class ClaroRecargaViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val dateToday = GetCurrentDateTime().getCurrentDateTime2()
-    var uiState: StateFlow<RechangeUiState> = getAllDateRechangeUseCase().map(::Success)
+
+    val uiState: StateFlow<RechangeUiState> = getListForDateRechangeUC(dateToday).map(::Success)
         .catch { Error(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Loading)
 
-    val flow: Flow<List<Rechange>> = getAllDateRechangeUseCase.invoke()
+
+//    val uiState: StateFlow<RechangeUiState> = getAllDateRechangeUseCase().map(::Success)
+//        .catch { Error(it) }
+//        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Loading)
+
+    private val _dateFilterRechanges = MutableStateFlow<List<Rechange>>(emptyList())
+    val dateFilterRechanges: StateFlow<List<Rechange>> = _dateFilterRechanges.asStateFlow()
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
@@ -59,9 +67,9 @@ class ClaroRecargaViewModel @Inject constructor(
 
     fun getForDateRechange(date: String) {
         viewModelScope.launch {
-            getListForDateRechangeUC(date).collect {
-                _state.value = _state.value.copy(rechange = it)
-            }
+            getListForDateRechangeUC(date)
+                .catch { _dateFilterRechanges.value = emptyList() }
+                .collect { rechanges -> _dateFilterRechanges.value = rechanges }
         }
     }
 

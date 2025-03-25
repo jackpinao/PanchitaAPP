@@ -30,9 +30,11 @@ class RechangeRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun listForDate(data: String): Flow<Rechange> {
-        return rechangeDao.getListForDate(data).map { rechangeEntity ->
-            RechangeMapper.toDomain(rechangeEntity)
+    override fun listForDate(data: String): Flow<List<Rechange>> {
+        return rechangeDao.getListForDate(data).map { items ->
+            items.map { rechangeEntity ->
+                RechangeMapper.toDomain(rechangeEntity)
+            }
         }
     }
 

@@ -25,7 +25,7 @@ interface RechangeDao {
     @Query("SELECT * FROM rechange ORDER BY date DESC")
     fun getAllDateRechange(): Flow<List<RechangeEntity>>
 
-    @Query("SELECT * FROM rechange WHERE date LIKE '%' || :date || '%'")
-    fun getListForDate(date: String): Flow<RechangeEntity>
+    @Query("SELECT * FROM rechange WHERE date LIKE '%' || :date || '%' ORDER BY date DESC")
+    fun getListForDate(date: String): Flow<List<RechangeEntity>>
 
 }

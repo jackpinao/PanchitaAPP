@@ -7,5 +7,5 @@ interface RechangeRepository {
     suspend fun save(rechange: Rechange)
     suspend fun delete(rechange: Rechange)
     fun listAllDateRechange(): Flow<List<Rechange>>
-    fun listForDate(data: String): Flow<Rechange>
+    fun listForDate(data: String): Flow<List<Rechange>>
 }

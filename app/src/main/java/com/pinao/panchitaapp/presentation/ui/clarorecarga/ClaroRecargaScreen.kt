@@ -2,7 +2,6 @@ package com.pinao.panchitaapp.presentation.ui.clarorecarga
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -43,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -71,7 +70,6 @@ import com.pinao.panchitaapp.domain.model.Rechange
 import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import com.pinao.panchitaapp.presentation.ui.Screen
 import androidx.core.net.toUri
-import kotlinx.coroutines.launch
 
 //import org.koin.androidx.compose.koinViewModel
 //import org.koin.androidx.viewmodel
@@ -122,7 +120,7 @@ fun ClaroRecargaScreen(
                 isNumPhone,
                 onNumPhone = { isNumPhone = it },
                 context,
-                (uiState as RechangeUiState.Success).rechange
+                (uiState as RechangeUiState.Success).rechangeList
             )
         }
     }
@@ -322,6 +320,11 @@ private fun CenterApp2(
     var isDate by rememberSaveable { mutableStateOf(dateTime) }
     val onDate: (String) -> Unit = { isDate = it }
     val coroutineScope = rememberCoroutineScope()
+    val rechanges by claroRecargaViewModel.dateFilterRechanges.collectAsState()
+//    var filterDate: String? = null
+    var filterDate by rememberSaveable { mutableStateOf("") }
+    val amountTotal: Int = listRechange.sumOf { it.amount }
+    val amountTotal2: Int = rechanges.sumOf { it.amount }
 
     Column(
         modifier = Modifier
@@ -329,6 +332,7 @@ private fun CenterApp2(
             .padding(padding)
     ) {
 
+//        var filterDate by rememberSaveable { mutableStateOf("") }
         Text(text = "Historial de recargas")
         //DatePicker(state = datePickerState)
         Text(text = "Fecha de recarga")
@@ -346,7 +350,7 @@ private fun CenterApp2(
 
                 },
                 modifier = Modifier.padding(end = 10.dp, start = 10.dp),
-                enabled = false
+                enabled = true
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.baseline_calendar_month_24),
@@ -369,16 +373,14 @@ private fun CenterApp2(
                             onClick = {
                                 openDialog.value = false
 
-                                val date = datePickerState.selectedDateMillis?.let {
+                                filterDate = datePickerState.selectedDateMillis?.let {
                                     GetCurrentDateTime().getCurrentDateTime3(
                                         it
                                     )
-                                }
-                                println(date)
-                                onDate(date ?: isDate)
-                                if (date != null) {
-                                    claroRecargaViewModel.getForDateRechange(date)
-                                }
+                                }.toString()
+                                println(filterDate)
+                                onDate(filterDate)
+                                claroRecargaViewModel.getForDateRechange(filterDate)
                             },
                             enabled = confirmEnabled.value
                         ) {
@@ -401,11 +403,41 @@ private fun CenterApp2(
                     )
                 }
             }
+            if (filterDate == "") {
+                Text(
+                    text = "Total: $amountTotal"
+                )
+
+            }else {
+                Text(
+                    text = "Total: $amountTotal2"
+                )
+            }
         }
 
+
         LazyColumn {
-            items(listRechange, key = { it.id }) { rechange ->
-                ItemRechange(rechange, claroRecargaViewModel)
+            if (filterDate == "") {
+                if (listRechange.isEmpty()) {
+                    item {
+                        Text("No hay recargas")
+                    }
+                } else {
+                    items(listRechange, key = { it.id }) { rechange ->
+                        ItemRechange(rechange, claroRecargaViewModel)
+                         rechange.amount
+                    }
+                }
+            } else {
+                if (rechanges.isEmpty()) {
+                    item {
+                        Text("No hay recargas")
+                    }
+                } else {
+                    items(rechanges) { rechange ->
+                        ItemRechange(rechange, claroRecargaViewModel)
+                    }
+                }
             }
         }
     }

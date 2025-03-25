@@ -8,7 +8,7 @@ import javax.inject.Inject
 class GetListForDateRechangeUC @Inject constructor(
     private val repository: RechangeRepositoryImpl
 ) {
-     operator fun invoke(date: String) : Flow<Rechange> {
+     operator fun invoke(date: String) : Flow<List<Rechange>> {
         return repository.listForDate(date)
     }
 }
