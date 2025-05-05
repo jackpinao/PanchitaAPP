@@ -108,7 +108,6 @@ dependencies {
 
     //Room
     implementation(libs.androidx.room.ktx)
-    testImplementation(libs.junit.jupiter)
     //implementation(libs.play.services.ads.lite)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
@@ -153,7 +152,7 @@ dependencies {
     implementation(libs.splash.screen)
     //Corrutinas
     implementation(libs.kotlinx.coroutines.android)
-    testImplementation(libs.kotlinx.coroutines.test)
+
 
     implementation(libs.kotlin.coroutines.core)
     implementation(libs.lifecycle.viewmodel.compose)
@@ -163,20 +162,24 @@ dependencies {
     implementation(libs.firebase.analytics)
 
     //Test
-    testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.mockito)
     androidTestImplementation(libs.hamcrest)
+
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    testImplementation(libs.junit)
     testImplementation(libs.koin.test.junit4)
     testImplementation(libs.mockito)
-    testImplementation(libs.mockk)
+    //testImplementation(libs.mockk)
     testImplementation(libs.androidx.core.testing)
     testImplementation(libs.hamcrest)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.junit.jupiter)
 }
 
 ksp {

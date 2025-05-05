@@ -1,11 +1,17 @@
 package com.pinao.panchitaapp.domain.repository
 
-import com.pinao.panchitaapp.domain.model.Rechange
+import com.pinao.panchitaapp.domain.model.RechangeModel
 import kotlinx.coroutines.flow.Flow
 
 interface RechangeRepository {
-    suspend fun save(rechange: Rechange)
-    suspend fun delete(rechange: Rechange)
-    fun listAllDateRechange(): Flow<List<Rechange>>
-    fun listForDate(data: String): Flow<List<Rechange>>
+
+    //Dao
+    fun listAllDateRechangeFromDataBase(): Flow<List<RechangeModel>>
+    fun listForDate(data: String): Flow<List<RechangeModel>>
+    suspend fun save(rechangeModel: RechangeModel)
+    suspend fun delete(rechangeModel: RechangeModel)
+
+    //API
+    suspend fun listAllDateRechangeFromApi(): List<RechangeModel>
+
 }

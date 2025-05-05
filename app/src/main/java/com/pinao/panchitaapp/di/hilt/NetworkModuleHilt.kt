@@ -1,5 +1,7 @@
 package com.pinao.panchitaapp.di.hilt
 
+//import com.google.firebase.sessions.dagger.Provides
+import com.pinao.panchitaapp.data.network.rechange.RechangeApiClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,11 +17,17 @@ import javax.inject.Singleton
 object NetworkModuleHilt {
     @Provides
     @Singleton
-    @Named("ProvideRetrofit")
-    fun provideRetrofit(): Retrofit{
+//    @Named("ProvideRetrofit")
+    fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://jsonplaceholder.typicode.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideApiClient(retrofit: Retrofit): RechangeApiClient {
+        return retrofit.create(RechangeApiClient::class.java)
     }
 }
