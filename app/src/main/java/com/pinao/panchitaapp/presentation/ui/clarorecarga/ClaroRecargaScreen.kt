@@ -66,7 +66,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.pinao.panchitaapp.R
-import com.pinao.panchitaapp.domain.model.Rechange
+import com.pinao.panchitaapp.domain.model.RechangeModel
 import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import com.pinao.panchitaapp.presentation.ui.Screen
 import androidx.core.net.toUri
@@ -120,7 +120,7 @@ fun ClaroRecargaScreen(
                 isNumPhone,
                 onNumPhone = { isNumPhone = it },
                 context,
-                (uiState as RechangeUiState.Success).rechangeList
+                (uiState as RechangeUiState.Success).rechangeModelList
             )
         }
     }
@@ -144,7 +144,7 @@ fun ClaroRecargaScreenContent(
     isNumPhone: String,
     onNumPhone: (String) -> Unit,
     context: Context,
-    listRechange: List<Rechange>
+    listRechangeModel: List<RechangeModel>
 ) {
 
     Screen {
@@ -158,7 +158,7 @@ fun ClaroRecargaScreenContent(
             isNumPhone,
             onNumPhone,
             context,
-            listRechange
+            listRechangeModel
         )
 
     }
@@ -177,7 +177,7 @@ private fun TopBar(
     isNumPhone: String,
     onNumPhone: (String) -> Unit,
     context: Context,
-    listRechange: List<Rechange>
+    listRechangeModel: List<RechangeModel>
 ) {
 
     val tabs = listOf(
@@ -221,7 +221,7 @@ private fun TopBar(
                 CenterApp2(
                     padding,
                     claroRecargaViewModel,
-                    listRechange = listRechange
+                    listRechangeModel = listRechangeModel
                 )
             }
         }
@@ -309,7 +309,7 @@ private fun CenterApp(
 private fun CenterApp2(
     padding: PaddingValues,
     claroRecargaViewModel: ClaroRecargaViewModel,
-    listRechange: List<Rechange>
+    listRechangeModel: List<RechangeModel>
 ) {
     val datePickerState = rememberDatePickerState()
     val snackState = remember { SnackbarHostState() }
@@ -323,7 +323,7 @@ private fun CenterApp2(
     val rechanges by claroRecargaViewModel.dateFilterRechanges.collectAsState()
 //    var filterDate: String? = null
     var filterDate by rememberSaveable { mutableStateOf("") }
-    val amountTotal: Int = listRechange.sumOf { it.amount }
+    val amountTotal: Int = listRechangeModel.sumOf { it.amount }
     val amountTotal2: Int = rechanges.sumOf { it.amount }
 
     Column(
@@ -418,12 +418,12 @@ private fun CenterApp2(
 
         LazyColumn {
             if (filterDate == "") {
-                if (listRechange.isEmpty()) {
+                if (listRechangeModel.isEmpty()) {
                     item {
                         Text("No hay recargas")
                     }
                 } else {
-                    items(listRechange, key = { it.id }) { rechange ->
+                    items(listRechangeModel, key = { it.id }) { rechange ->
                         ItemRechange(rechange, claroRecargaViewModel)
                          rechange.amount
                     }
@@ -444,7 +444,7 @@ private fun CenterApp2(
 }
 
 @Composable
-fun ItemRechange(rechange: Rechange, claroRecargaViewModel: ClaroRecargaViewModel) {
+fun ItemRechange(rechangeModel: RechangeModel, claroRecargaViewModel: ClaroRecargaViewModel) {
     OutlinedCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colors.surface,
@@ -464,21 +464,21 @@ fun ItemRechange(rechange: Rechange, claroRecargaViewModel: ClaroRecargaViewMode
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "Número telefónico: " + rechange.numPhone,
+                text = "Número telefónico: " + rechangeModel.numPhone,
                 modifier = Modifier
                     .padding(start = 8.dp, top = 8.dp),
                 textAlign = TextAlign.Center
             )
 
             Text(
-                text = "Monto: " + rechange.amount,
+                text = "Monto: " + rechangeModel.amount,
                 modifier = Modifier
                     .padding(start = 8.dp, top = 8.dp),
                 textAlign = TextAlign.Center
             )
 
             Text(
-                text = "Fecha: " + rechange.date,
+                text = "Fecha: " + rechangeModel.date,
                 modifier = Modifier
                     .padding(start = 8.dp, top = 8.dp),
                 textAlign = TextAlign.Center
@@ -598,13 +598,13 @@ private fun AddButtonElevate(
         onClick = {
 
             val date = GetCurrentDateTime().getCurrentDateTime()
-            val rechange = Rechange(
+            val rechangeModel = RechangeModel(
                 numPhone = isNumPhone,
                 date = date,
                 amount = isValRechargeAmount.toInt()
             )
 
-            claroRecargaViewModel.updateRechange(rechange)
+            claroRecargaViewModel.updateRechange(rechangeModel)
             //claroRecargaViewModel.updateRechange2(isNumPhone, isValRechargeAmount.toInt(), date)
 
             val intent = Intent(Intent.ACTION_DIAL).apply {

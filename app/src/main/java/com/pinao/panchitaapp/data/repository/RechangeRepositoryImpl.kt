@@ -1,8 +1,10 @@
 package com.pinao.panchitaapp.data.repository
 
 import com.pinao.panchitaapp.data.local.dao.RechangeDao
+import com.pinao.panchitaapp.data.local.entity.RechangeEntity
 import com.pinao.panchitaapp.data.mapper.RechangeMapper
-import com.pinao.panchitaapp.domain.model.Rechange
+import com.pinao.panchitaapp.data.network.rechange.RechangeService
+import com.pinao.panchitaapp.domain.model.RechangeModel
 import com.pinao.panchitaapp.domain.repository.RechangeRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -11,18 +13,12 @@ import javax.inject.Singleton
 
 @Singleton
 class RechangeRepositoryImpl @Inject constructor(
+    private val api: RechangeService,
     private val rechangeDao: RechangeDao
 ) : RechangeRepository {
 
-    override suspend fun save(rechange: Rechange) {
-        rechangeDao.insert(RechangeMapper.toDatabase(rechange))
-    }
-
-    override suspend fun delete(rechange: Rechange) {
-        return rechangeDao.delete(RechangeMapper.toDatabase(rechange))
-    }
-
-    override fun listAllDateRechange(): Flow<List<Rechange>> {
+    /**Dao*/
+    override fun listAllDateRechangeFromDataBase(): Flow<List<RechangeModel>> {
         return rechangeDao.getAllDateRechange().map { items ->
             items.map { rechangeEntity ->
                 RechangeMapper.toDomain(rechangeEntity)
@@ -30,11 +26,29 @@ class RechangeRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun listForDate(data: String): Flow<List<Rechange>> {
+    override fun listForDate(data: String): Flow<List<RechangeModel>> {
         return rechangeDao.getListForDate(data).map { items ->
             items.map { rechangeEntity ->
                 RechangeMapper.toDomain(rechangeEntity)
             }
+        }
+    }
+
+    override suspend fun save(rechangeModel: RechangeModel) {
+        rechangeDao.insert(RechangeMapper.toDatabase(rechangeModel))
+    }
+
+    override suspend fun delete(rechangeModel: RechangeModel) {
+        return rechangeDao.delete(RechangeMapper.toDatabase(rechangeModel))
+    }
+
+
+    /**API*/
+
+    override suspend fun listAllDateRechangeFromApi(): List<RechangeModel> {
+        val response: List<RechangeEntity> = api.getAllRechanges()
+        return response.map { rechangeEntity ->
+            RechangeMapper.toDomain(rechangeEntity)
         }
     }
 
