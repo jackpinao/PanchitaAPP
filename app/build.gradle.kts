@@ -3,9 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     //Hilt
-    alias(libs.plugins.dagger.hilt.android)
+    //alias(libs.plugins.dagger.hilt.android)
     //Annotation kapt
-    alias(libs.plugins.kotlin.kapt)
+    //alias(libs.plugins.kotlin.kapt)
     //Annotation ksp
     alias(libs.plugins.ksp)
     //navigation safe args
@@ -66,7 +66,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
-        languageVersion = "1.9"
+        //languageVersion = "1.9"
     }
     buildFeatures {
         compose = true
@@ -77,19 +77,19 @@ android {
 tasks.withType<JavaCompile> {
     options.compilerArgs.add("-Xlint:deprecation")
 }
-kapt {
-    correctErrorTypes = true
-    arguments {
-        arg("dagger.fastInit", "enabled")
-        arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
-        arg("dagger.hilt.android.internal.projectType", "APP")
-        arg("dagger.hilt.internal.useAggregatingRootProcessor", "true")
-        arg(
-            "kapt.kotlin.generated",
-            layout.buildDirectory.dir("generated/source/kaptKotlin").get().asFile.absolutePath
-        )
-    }
-}
+//kapt {
+//    correctErrorTypes = true
+//    arguments {
+//        arg("dagger.fastInit", "enabled")
+//        arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
+//        arg("dagger.hilt.android.internal.projectType", "APP")
+//        arg("dagger.hilt.internal.useAggregatingRootProcessor", "true")
+//        arg(
+//            "kapt.kotlin.generated",
+//            layout.buildDirectory.dir("generated/source/kaptKotlin").get().asFile.absolutePath
+//        )
+//    }
+//}
 
 dependencies {
 
@@ -113,19 +113,26 @@ dependencies {
     implementation(libs.androidx.room.runtime)
 
     //Dagger hilt
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
-    kapt(libs.hilt.compiler)
-    implementation(libs.hilt.navigation.compose)
+//    implementation(libs.hilt.android)
+//    kapt(libs.hilt.android.compiler)
+//    kapt(libs.hilt.compiler)
+//    implementation(libs.hilt.navigation.compose)
 
     //Koin android
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.compose)
+    //implementation(libs.koin.android)
+    implementation(platform(libs.koin.annotations.bom))
+    implementation(libs.koin.annotations)
+    ksp(libs.koin.ksp.compiler)
 //    implementation(libs.koin.android)
 //    implementation(libs.koin.core)
 //    implementation(libs.koin.compose)
 //    implementation(libs.koin.coroutines)
 //    implementation(libs.koin.compose.viewmodel)
 //    implementation(libs.koin.android.compose)
-    //implementation(libs.koin.annotation)
+//    implementation(libs.koin.annotation)
 //    implementation(libs.koin.ksp.compiler)
 
     //LiveData
@@ -153,7 +160,6 @@ dependencies {
     //Corrutinas
     implementation(libs.kotlinx.coroutines.android)
 
-
     implementation(libs.kotlin.coroutines.core)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.serialization.json)
@@ -173,7 +179,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     testImplementation(libs.junit)
-    testImplementation(libs.koin.test.junit4)
+    //testImplementation(libs.koin.test.junit4)
     testImplementation(libs.mockito)
     //testImplementation(libs.mockk)
     testImplementation(libs.androidx.core.testing)
@@ -182,6 +188,32 @@ dependencies {
     testImplementation(libs.junit.jupiter)
 }
 
+
 ksp {
     arg("KOIN_CONFIG_CHECK", "true")
+    arg("KOIN_LOG_TIMES", "true")
 }
+
+
+// Custom task to run the module check test
+/*
+tasks.register<Test>("runModuleCheckTest") {
+    group = "verification"
+    description = "Runs the module check test"
+
+    val testTask = tasks.named<Test>("testDebugUnitTest").get()
+    testClassesDirs = testTask.testClassesDirs
+    classpath = testTask.classpath
+
+    filter {
+        includeTestsMatching("com.pinao.panchitaapp.ModuleCheck")
+    }
+
+    doLast {
+        executeTests()
+    }
+}
+
+tasks.matching { it.name.startsWith("assemble") }.configureEach {
+    dependsOn("runModuleCheckTest")
+}*/

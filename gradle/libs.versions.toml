@@ -1,11 +1,13 @@
 [versions]
-agp = "8.9.2"
+agp = "8.10.0"
 coreTesting = "2.2.0"
-coreTestingVersion = "2.1.0"
 firebaseBom = "33.13.0"
 koinTestJunit4 = "4.0.4"
 
-kotlin = "2.0.21"
+kotlin = "2.1.10"
+#kotlin = "2.1.10"
+kspVersion = "2.1.10-1.0.31"
+#kspVersion = "2.1.10-1.0.31"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -13,7 +15,6 @@ espressoCore = "3.6.1"
 kotlinxCoroutinesAndroid = "1.10.2"
 kotlinx-serialization = "1.8.1"
 kotlinxCoroutinesTest = "1.10.2"
-kotlinxCoroutinesTestVersion = "1.6.0"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
 composeBom = "2025.04.01"
@@ -27,19 +28,21 @@ zxingAndroidEmbedded = "4.3.0"
 core = "3.5.3"
 libreiaapcs = "1.1.0"
 
-#kspVersion = "2.0.21-1.0.24"
-kspVersion = "2.0.21-1.0.27"
 safeargsVersion = "2.8.9"
 navigationVersion = "2.8.9"
+
 hiltCompiler = "1.2.0"
 hiltNavigationCompose = "1.2.0"
+
 runtimeLivedata = "1.8.0"
 playServicesAdsLite = "23.5.0"
 splashScreen = "1.0.1"
 retrofit = "2.11.0"
-koinVersion = "4.0.2"
-koinAnnotationVersion = "2.0.0-RC1"
-koinCompose = "4.0.2"
+
+koinVersion = "4.0.4"
+koinAnnotationVersion = "2.0.0"
+koinCompose = "4.0.4"
+
 mockitoVersion = "5.17.0"
 mockkVersion = "1.13.17"
 junitJupiter = "5.12.2"
@@ -49,6 +52,8 @@ hamcrest = "3.0"
 gms = "4.4.2"
 crashlytics = "3.0.3"
 
+koin-bom = "4.1.0-Beta8"
+koin-annotations-bom = "2.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -63,7 +68,6 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 hamcrest = { group = "org.hamcrest", name = "hamcrest-library", version.ref = "hamcrest" }
 
-
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
@@ -75,17 +79,22 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 
 # Koin
-koin-android-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinCompose" }
-koin-android = {group = "io.insert-koin", name = "koin-android", version.ref = "koinVersion" }
-koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koinVersion" }
-koin-coroutines = { group = "io.insert-koin", name = "koin-core-coroutines", version.ref = "koinVersion" }
-koin-compose = { group = "io.insert-koin", name = "koin-compose", version.ref = "koinVersion" }
-koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel", version.ref = "koinVersion" }
-
-koin-ksp-compiler = { group = "io.insert-koin", name = "koin-ksp-compiler", version.ref = "koinAnnotationVersion" }
-koin-annotation = { group = "io.insert-koin", name = "koin-annotation", version.ref = "koinAnnotationVersion" }
-
-koin-test-junit4 = { module = "io.insert-koin:koin-test-junit4", version.ref = "koinTestJunit4" }
+koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
+koin-core = { group = "io.insert-koin", name = "koin-core" }
+koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
+koin-android = { group = "io.insert-koin", name = "koin-android" }
+koin-annotations-bom = { module = "io.insert-koin:koin-annotations-bom", version.ref = "koin-annotations-bom" }
+koin-annotations = { group = "io.insert-koin", name = "koin-annotations" }
+koin-ksp-compiler = { group = "io.insert-koin", name = "koin-ksp-compiler", version.ref = "koin-annotations-bom" }
+#koin-android-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinCompose" }
+#koin-android = {group = "io.insert-koin", name = "koin-android", version.ref = "koinVersion" }
+#koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koinVersion" }
+#koin-coroutines = { group = "io.insert-koin", name = "koin-core-coroutines", version.ref = "koinVersion" }
+#koin-compose = { group = "io.insert-koin", name = "koin-compose", version.ref = "koinVersion" }
+#koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel", version.ref = "koinVersion" }
+#koin-ksp-compiler = { group = "io.insert-koin", name = "koin-ksp-compiler", version.ref = "koinAnnotationVersion" }
+#koin-annotation = { group = "io.insert-koin", name = "koin-annotation", version.ref = "koinAnnotationVersion" }
+#koin-test-junit4 = { module = "io.insert-koin:koin-test-junit4", version.ref = "koinTestJunit4" }
 
 # LiveData
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -150,7 +159,6 @@ kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versio
 # Dagger
 dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
-# Room
 ksp = { id = "com.google.devtools.ksp", version.ref = "kspVersion" }
 # Navigation safe
 navigation-safe-args = { id = "androidx.navigation.safeargs.kotlin", version.ref = "safeargsVersion" }

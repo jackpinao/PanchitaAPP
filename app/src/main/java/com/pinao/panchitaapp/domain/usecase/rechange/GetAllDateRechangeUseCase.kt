@@ -5,7 +5,7 @@ import com.pinao.panchitaapp.domain.model.RechangeModel
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetAllDateRechangeUseCase @Inject constructor(
+class GetAllDateRechangeUseCase(
     private val repository: RechangeRepositoryImpl
 ) {
      operator fun invoke() : Flow<List<RechangeModel>> {

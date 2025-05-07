@@ -11,8 +11,7 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
-class RechangeRepositoryImpl @Inject constructor(
+class RechangeRepositoryImpl (
     private val api: RechangeService,
     private val rechangeDao: RechangeDao
 ) : RechangeRepository {

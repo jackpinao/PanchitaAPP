@@ -6,31 +6,29 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
+//import androidx.activity.viewModels
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
 import com.pinao.panchitaapp.presentation.navigation.AppNavGraph
-import com.pinao.panchitaapp.presentation.navigation.AppNavigation
 import com.pinao.panchitaapp.presentation.theme.resource.PanchitaAPPTheme
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaViewModel
 import com.pinao.panchitaapp.presentation.ui.home.HomeViewModel
 import com.pinao.panchitaapp.presentation.ui.login.LoginViewModel
-import dagger.hilt.android.AndroidEntryPoint
+
 //import org.koin.android.ext.android.inject
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
 //    @Inject
 //    lateinit var utilsAdmob: UtilsAdmob
 
-    private val homeViewModel: HomeViewModel by viewModels()
-    private val loginViewModel: LoginViewModel by viewModels()
-    private val claroRecargaViewModel: ClaroRecargaViewModel by viewModels()
+    private val homeViewModel: HomeViewModel by viewModel()
+    private val loginViewModel: LoginViewModel by viewModel()
+    private val claroRecargaViewModel: ClaroRecargaViewModel by viewModel()
     //private val useCase: SaveRechangeUseCase by inject()
 
     @RequiresApi(Build.VERSION_CODES.O)
