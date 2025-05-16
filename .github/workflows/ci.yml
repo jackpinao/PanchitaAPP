@@ -2,9 +2,9 @@ name: Android CI
 
 on:
   push:
-    branches: [ "test", "master2" ]
+    branches: [ "test", "master2", "koin" ]
   pull_request:
-    branches: [ "test", "master2" ]
+    branches: [ "test", "master2", "koin" ]
 jobs:
   build:
     runs-on: ubuntu-latest
