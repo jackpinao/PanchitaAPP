@@ -2,23 +2,24 @@ package com.pinao.panchitaapp.presentation.ui.clarorecarga
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.SnackbarHost
@@ -27,6 +28,7 @@ import androidx.compose.material.TabRow
 import androidx.compose.material.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ElevatedButton
@@ -44,6 +46,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -59,11 +62,14 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.pinao.panchitaapp.R
-import com.pinao.panchitaapp.domain.model.Rechange
+import com.pinao.panchitaapp.domain.model.RechangeModel
 import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import com.pinao.panchitaapp.presentation.ui.Screen
-import org.w3c.dom.Text
+import androidx.core.net.toUri
 
 //import org.koin.androidx.compose.koinViewModel
 //import org.koin.androidx.viewmodel
@@ -75,28 +81,56 @@ fun ClaroRecargaScreen(
     claroRecargaViewModel: ClaroRecargaViewModel
 ) {
 
-    val state by claroRecargaViewModel.state.collectAsState()
+//    val state by claroRecargaViewModel.state.collectAsState()
     var isEnabled by rememberSaveable { mutableStateOf(false) }
     var isValRechargeAmount by rememberSaveable { mutableStateOf("") }
     var isNumPhone by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
 
-    state.rechange?.let {
-        isEnabled = it.amount != 0
-        isValRechargeAmount = it.amount.toString()
-        isNumPhone = it.numPhone
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+
+    val uiState by produceState<RechangeUiState>(
+        initialValue = RechangeUiState.Loading,
+        key1 = lifecycle,
+        key2 = claroRecargaViewModel
+    ) {
+        lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
+            claroRecargaViewModel.uiState.collect {
+                value = it
+            }
+        }
     }
 
-    ClaroRecargaScreenContent(
-        isEnabled,
-        onEnable = { isEnabled = it },
-        isValRechargeAmount,
-        onValRechargeAmount = { isValRechargeAmount = it },
-        claroRecargaViewModel,
-        isNumPhone,
-        onNumPhone = { isNumPhone = it },
-        context,
-    )
+    when (uiState) {
+        is RechangeUiState.Error -> {
+
+        }
+
+        RechangeUiState.Loading -> {
+            CircularProgressIndicator()
+        }
+
+        is RechangeUiState.Success -> {
+            ClaroRecargaScreenContent(
+                isEnabled,
+                onEnable = { isEnabled = it },
+                isValRechargeAmount,
+                onValRechargeAmount = { isValRechargeAmount = it },
+                claroRecargaViewModel,
+                isNumPhone,
+                onNumPhone = { isNumPhone = it },
+                context,
+                (uiState as RechangeUiState.Success).rechangeModelList
+            )
+        }
+    }
+
+//    state.rechange?.let {
+//        isEnabled = it.amount != 0
+//        isValRechargeAmount = it.amount.toString()
+//        isNumPhone = it.numPhone
+//    }
+
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -110,11 +144,12 @@ fun ClaroRecargaScreenContent(
     isNumPhone: String,
     onNumPhone: (String) -> Unit,
     context: Context,
+    listRechangeModel: List<RechangeModel>
 ) {
 
     Screen {
         TopBar(
-            PaddingValues(0.dp),
+            PaddingValues(10.dp),
             isEnabled,
             onEnable,
             isValRechargeAmount,
@@ -122,50 +157,10 @@ fun ClaroRecargaScreenContent(
             claroRecargaViewModel,
             isNumPhone,
             onNumPhone,
-            context
+            context,
+            listRechangeModel
         )
-//        Scaffold(
-//            topBar = {
-//                TopBar(
-//                    PaddingValues(0.dp),
-//                    isEnabled,
-//                    onEnable,
-//                    isValRechargeAmount,
-//                    onValRechargeAmount,
-//                    claroRecargaViewModel,
-//                    isNumPhone,
-//                    onNumPhone,
-//                    context
-//                )
-//            },
-//            bottomBar = {
-//
-//                BottomBar(navController)
-//            }
-//        ) { padding ->
-//            TopBar(
-//                padding,
-//                isEnabled,
-//                onEnable,
-//                isValRechargeAmount,
-//                onValRechargeAmount,
-//                claroRecargaViewModel,
-//                isNumPhone,
-//                onNumPhone,
-//                context
-//            )
-////            CenterApp(
-////                padding,
-////                isEnabled,
-////                onEnable,
-////                isValRechargeAmount,
-////                onValRechargeAmount,
-////                isNumPhone,
-////                onNumPhone,
-////                claroRecargaViewModel,
-////                context
-////            )
-//        }
+
     }
 }
 
@@ -182,6 +177,7 @@ private fun TopBar(
     isNumPhone: String,
     onNumPhone: (String) -> Unit,
     context: Context,
+    listRechangeModel: List<RechangeModel>
 ) {
 
     val tabs = listOf(
@@ -206,9 +202,7 @@ private fun TopBar(
                 )
             }
         }
-        when (
-            selectedTab.value
-        ) {
+        when (selectedTab.value) {
             0 -> {
                 CenterApp(
                     padding,
@@ -225,7 +219,9 @@ private fun TopBar(
 
             1 -> {
                 CenterApp2(
-                    padding
+                    padding,
+                    claroRecargaViewModel,
+                    listRechangeModel = listRechangeModel
                 )
             }
         }
@@ -311,7 +307,9 @@ private fun CenterApp(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CenterApp2(
-    padding: PaddingValues
+    padding: PaddingValues,
+    claroRecargaViewModel: ClaroRecargaViewModel,
+    listRechangeModel: List<RechangeModel>
 ) {
     val datePickerState = rememberDatePickerState()
     val snackState = remember { SnackbarHostState() }
@@ -321,115 +319,171 @@ private fun CenterApp2(
     val dateTime = GetCurrentDateTime().getCurrentDateTime2()
     var isDate by rememberSaveable { mutableStateOf(dateTime) }
     val onDate: (String) -> Unit = { isDate = it }
+    val coroutineScope = rememberCoroutineScope()
+    val rechanges by claroRecargaViewModel.dateFilterRechanges.collectAsState()
+//    var filterDate: String? = null
+    var filterDate by rememberSaveable { mutableStateOf("") }
+    val amountTotal: Int = listRechangeModel.sumOf { it.amount }
+    val amountTotal2: Int = rechanges.sumOf { it.amount }
 
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(padding)
     ) {
-        item {
-            Text(text = "Historial de recargas")
-        }
-        item {
-            //DatePicker(state = datePickerState)
-            Text(text = "Fecha de recarga")
-            Row {
 
-                Text(isDate)
-                IconButton(
-                    onClick = {
-                        openDialog.value = true
+//        var filterDate by rememberSaveable { mutableStateOf("") }
+        Text(text = "Historial de recargas")
+        //DatePicker(state = datePickerState)
+        Text(text = "Fecha de recarga")
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            Text(isDate)
+            IconButton(
+                onClick = {
+                    openDialog.value = true
+
+                },
+                modifier = Modifier.padding(end = 10.dp, start = 10.dp),
+                enabled = true
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.baseline_calendar_month_24),
+                    contentDescription = null
+                )
+            }
+            if (openDialog.value) {
+                val confirmEnabled = remember {
+                    derivedStateOf {
+                        //datePickerState.selectedDateMillis != null
+                        true
+                    }
+                }
+                DatePickerDialog(
+                    onDismissRequest = {
+                        openDialog.value = false
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                openDialog.value = false
+
+                                filterDate = datePickerState.selectedDateMillis?.let {
+                                    GetCurrentDateTime().getCurrentDateTime3(
+                                        it
+                                    )
+                                }.toString()
+                                println(filterDate)
+                                onDate(filterDate)
+                                claroRecargaViewModel.getForDateRechange(filterDate)
+                            },
+                            enabled = confirmEnabled.value
+                        ) {
+                            Text("OK")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                openDialog.value = false
+                            }
+                        ) {
+                            Text("Cancel")
+                        }
                     }
                 ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.baseline_calendar_month_24),
-                        contentDescription = null
+                    DatePicker(
+                        state = datePickerState,
+                        modifier = Modifier.verticalScroll(rememberScrollState())
                     )
                 }
-                if (openDialog.value) {
-                    val confirmEnabled = remember {
-                        derivedStateOf {
-                            //datePickerState.selectedDateMillis != null
-                            true
-                        }
+            }
+            if (filterDate == "") {
+                Text(
+                    text = "Total: $amountTotal"
+                )
+
+            }else {
+                Text(
+                    text = "Total: $amountTotal2"
+                )
+            }
+        }
+
+
+        LazyColumn {
+            if (filterDate == "") {
+                if (listRechangeModel.isEmpty()) {
+                    item {
+                        Text("No hay recargas")
                     }
-                    DatePickerDialog(
-                        onDismissRequest = {
-                            openDialog.value = false
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    openDialog.value = false
-//                                    snackScope.launch {
-//                                        snackState.showSnackbar(
-//                                            "Selected date: ${datePickerState.selectedDateMillis}"
-//                                        )
-//                                    }
-                                    val date = datePickerState.selectedDateMillis?.let {
-                                        GetCurrentDateTime().getCurrentDateTime3(
-                                            it
-                                        )
-                                    }
-                                    println(date)
-                                    onDate(date ?: isDate)
-                                    //onDate(datePickerState.selectedDateMillis.toString())
-                                },
-                                enabled = confirmEnabled.value
-                            ) {
-                                Text("OK")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = {
-                                    openDialog.value = false
-                                }
-                            ) {
-                                Text("Cancel")
-                            }
-                        }
-                    ) {
-                        DatePicker(
-                            state = datePickerState,
-                            modifier = Modifier.verticalScroll(rememberScrollState())
-                        )
+                } else {
+                    items(listRechangeModel, key = { it.id }) { rechange ->
+                        ItemRechange(rechange, claroRecargaViewModel)
+                         rechange.amount
+                    }
+                }
+            } else {
+                if (rechanges.isEmpty()) {
+                    item {
+                        Text("No hay recargas")
+                    }
+                } else {
+                    items(rechanges) { rechange ->
+                        ItemRechange(rechange, claroRecargaViewModel)
                     }
                 }
             }
-
         }
+    }
+}
 
-        item{
-            OutlinedCard(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colors.surface,
-                ),
-                border = BorderStroke(1.dp,
-                    MaterialTheme.colors.primary),
+@Composable
+fun ItemRechange(rechangeModel: RechangeModel, claroRecargaViewModel: ClaroRecargaViewModel) {
+    OutlinedCard(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colors.surface,
+        ),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colors.primary
+        ),
+        modifier = Modifier
+            //.size(width = 240.dp, height = 100.dp)
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Número telefónico: " + rechangeModel.numPhone,
                 modifier = Modifier
-                    .size(width = 240.dp, height = 100.dp)
-            ) {
-                androidx.compose.material.Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.baseline_history_24),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-                Text(
-                    text = "Historial de recargas",
-                    modifier = Modifier.padding(
-                        start = 8.dp, top = 8.dp
-                    ),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "Ver historial de recargas",
-                    modifier = Modifier.padding(
-                        start = 8.dp, top = 8.dp
-                    ),
-                    textAlign = TextAlign.Center
-                )
-            }
+                    .padding(start = 8.dp, top = 8.dp),
+                textAlign = TextAlign.Center
+            )
+
+            Text(
+                text = "Monto: " + rechangeModel.amount,
+                modifier = Modifier
+                    .padding(start = 8.dp, top = 8.dp),
+                textAlign = TextAlign.Center
+            )
+
+            Text(
+                text = "Fecha: " + rechangeModel.date,
+                modifier = Modifier
+                    .padding(start = 8.dp, top = 8.dp),
+                textAlign = TextAlign.Center
+            )
+
         }
     }
 }
@@ -544,16 +598,17 @@ private fun AddButtonElevate(
         onClick = {
 
             val date = GetCurrentDateTime().getCurrentDateTime()
-            val rechange = Rechange(
+            val rechangeModel = RechangeModel(
                 numPhone = isNumPhone,
                 date = date,
                 amount = isValRechargeAmount.toInt()
             )
 
-            claroRecargaViewModel.updateRechange(rechange)
+            claroRecargaViewModel.updateRechange(rechangeModel)
+            //claroRecargaViewModel.updateRechange2(isNumPhone, isValRechargeAmount.toInt(), date)
 
             val intent = Intent(Intent.ACTION_DIAL).apply {
-                data = Uri.parse("tel:*789*1*$isNumPhone*$isValRechargeAmount*1*1357#")
+                data = "tel:*789*1*$isNumPhone*$isValRechargeAmount*1*1357#".toUri()
             }
             context.startActivity(intent)
         },
@@ -561,7 +616,7 @@ private fun AddButtonElevate(
             .fillMaxWidth()
             .padding(end = 16.dp)
             .wrapContentWidth(align = Alignment.End),
-        enabled = isNumPhone.isNotEmpty() && isValRechargeAmount.isNotEmpty()
+        enabled = isValRechargeAmount.isNotEmpty() && isNumPhone.length == 9
     ) {
         Text(
             text = "RECARGAR",

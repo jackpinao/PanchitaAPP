@@ -1,71 +1,96 @@
 package com.pinao.panchitaapp.test.viewModel
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.pinao.panchitaapp.domain.model.Rechange
+import com.pinao.panchitaapp.domain.model.RechangeModel
+import com.pinao.panchitaapp.domain.usecase.rechange.GetAllDateRechangeUseCase
+import com.pinao.panchitaapp.domain.usecase.rechange.GetListForDateRechangeUC
 import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaViewModel
-import io.mockk.MockKAnnotations
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.impl.annotations.RelaxedMockK
-import io.mockk.verify
-import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
-
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.mockito.Mockito.doAnswer
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
+import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ClaroRecargaViewModelTest {
 
-    @RelaxedMockK
+    private lateinit var getListForDateRechangeUC: GetListForDateRechangeUC
     private lateinit var saveRechangeUseCase: SaveRechangeUseCase
-
+    private lateinit var getAllDateRechangeUseCase: GetAllDateRechangeUseCase
     private lateinit var claroRecargaViewModel: ClaroRecargaViewModel
 
-    @get:Rule
-    var rule: InstantTaskExecutorRule = InstantTaskExecutorRule()
-
     @Before
-    fun onBefore() {
-        MockKAnnotations.init(this)
-        claroRecargaViewModel = ClaroRecargaViewModel(saveRechangeUseCase)
-        Dispatchers.setMain(Dispatchers.Unconfined)
-    }
+    fun setUp() {
+        MockitoAnnotations.openMocks(this)
+        getListForDateRechangeUC = mock(GetListForDateRechangeUC::class.java)
+        saveRechangeUseCase = mock(SaveRechangeUseCase::class.java)
+        getAllDateRechangeUseCase = mock(GetAllDateRechangeUseCase::class.java)
 
-    @After
-    fun onAfter() {
-        Dispatchers.resetMain()
-    }
-
-    @Test
-    fun updateRechange_updatesStateWithNewRechange() = runTest {
-        val rechange = Rechange(id = 1, amount = 100)
-        claroRecargaViewModel.updateRechange(rechange)
-        assertEquals(rechange, claroRecargaViewModel.state.value.rechange)
+        claroRecargaViewModel = ClaroRecargaViewModel(
+            getListForDateRechangeUC = getListForDateRechangeUC,
+            saveRechangeUseCase = saveRechangeUseCase,
+            getAllDateRechangeUseCase = getAllDateRechangeUseCase
+        )
     }
 
     @Test
-    fun updateRechange_callsSaveRechangeUseCase() = runTest {
-        val rechange = Rechange(id = 1, amount = 100)
-        coEvery { saveRechangeUseCase(rechange) } returns Unit
-        claroRecargaViewModel.updateRechange(rechange)
-        coVerify { saveRechangeUseCase.invoke(rechange) }
+    fun getForDateRechange_returnsFilteredRechanges() = runTest {
+        val date = "2023-10-01"
+        val rechangeList = listOf(
+            RechangeModel(date = "2023-10-01", amount = 100, numPhone = "123456789"),
+            RechangeModel(date = "2023-10-01", amount = 200, numPhone = "987654321")
+        )
+        `when`(getListForDateRechangeUC(date)).thenReturn(flowOf(rechangeList))
 
+        claroRecargaViewModel.getForDateRechange(date)
+
+        val result = mutableListOf<List<RechangeModel>>()
+        //assertEquals(rechangeList, result)
+        claroRecargaViewModel.dateFilterRechanges
+            .take(1)
+            .collect { emittedValue ->
+            result.add(emittedValue)
+        }
+        assertEquals(rechangeList, result.first())
     }
 
     @Test
-    fun updateRechange_withNullRechange_doesNotUpdateState() = runTest {
-        claroRecargaViewModel.updateRechange(Rechange(id = 1, amount = 100))
-        claroRecargaViewModel.updateRechange(Rechange(id = 2, amount = 200))
-        assertEquals(200, claroRecargaViewModel.state.value.rechange?.amount)
+    fun getForDateRechange_withNoRechanges_returnsEmptyList() = runTest {
+        val date = "2023-10-01"
+        `when`(getListForDateRechangeUC(date)).thenReturn(flowOf(emptyList()))
+
+        claroRecargaViewModel.getForDateRechange(date)
+
+        val result = claroRecargaViewModel.dateFilterRechanges.value
+        assertTrue(result.isEmpty())
     }
 
+    @Test
+    fun getForDateRechange_withError_returnsEmptyList() = runTest {
+        val date = "2023-10-01"
+        `when`(getListForDateRechangeUC(date)).thenReturn(flow { throw Exception("Error") })
 
+        claroRecargaViewModel.getForDateRechange(date)
+
+        assertTrue(claroRecargaViewModel.dateFilterRechanges.value.isEmpty())
+    }
+
+    @Test
+    fun updateRechange_savesRechangeSuccessfully() = runTest {
+        val rechangeModel = RechangeModel(date = "2023-10-10", amount = 100, numPhone = "123456789")
+        doAnswer {}.`when`(saveRechangeUseCase).invoke(rechangeModel)
+
+        claroRecargaViewModel.updateRechange(rechangeModel)
+
+        verify(saveRechangeUseCase).invoke(rechangeModel)
+    }
 }

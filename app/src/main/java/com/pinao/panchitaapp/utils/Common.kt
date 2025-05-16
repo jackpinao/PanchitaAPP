@@ -1,4 +1,4 @@
-package com.pinao.panchitaapp.util
+package com.pinao.panchitaapp.utils
 
 class Common {
     fun String.sinAcento(): String {

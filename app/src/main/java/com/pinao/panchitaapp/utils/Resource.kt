@@ -1,4 +1,4 @@
-package com.pinao.panchitaapp.util
+package com.pinao.panchitaapp.utils
 
 sealed class Resource<T>(
     val data: T? = null,

@@ -12,4 +12,6 @@ plugins {
     alias(libs.plugins.ksp) apply false
     //navigation safe args
     alias(libs.plugins.navigation.safe.args) apply false
+    alias(libs.plugins.gms) apply false
+    alias(libs.plugins.crashlytics) apply false
 }
