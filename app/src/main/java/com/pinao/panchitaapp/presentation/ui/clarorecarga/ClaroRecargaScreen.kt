@@ -16,10 +16,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.SnackbarHost
@@ -62,6 +62,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
@@ -69,11 +70,6 @@ import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.domain.model.RechangeModel
 import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import com.pinao.panchitaapp.presentation.ui.Screen
-import androidx.core.net.toUri
-
-//import org.koin.androidx.compose.koinViewModel
-//import org.koin.androidx.viewmodel
-//import org.koin.compose.viewmodel.koinViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -133,7 +129,6 @@ fun ClaroRecargaScreen(
 
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ClaroRecargaScreenContent(
     isEnabled: Boolean,
@@ -164,8 +159,6 @@ fun ClaroRecargaScreenContent(
     }
 }
 
-
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun TopBar(
     padding: PaddingValues,
@@ -231,7 +224,6 @@ private fun TopBar(
 
 data class TabData(val title: String, val icon: ImageVector)
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun CenterApp(
     padding: PaddingValues,
@@ -303,7 +295,6 @@ private fun CenterApp(
 }
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CenterApp2(
@@ -408,7 +399,7 @@ private fun CenterApp2(
                     text = "Total: $amountTotal"
                 )
 
-            }else {
+            } else {
                 Text(
                     text = "Total: $amountTotal2"
                 )
@@ -425,7 +416,7 @@ private fun CenterApp2(
                 } else {
                     items(listRechangeModel, key = { it.id }) { rechange ->
                         ItemRechange(rechange, claroRecargaViewModel)
-                         rechange.amount
+                        rechange.amount
                     }
                 }
             } else {
