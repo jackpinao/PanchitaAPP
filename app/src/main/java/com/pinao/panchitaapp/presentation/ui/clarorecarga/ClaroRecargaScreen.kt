@@ -2,8 +2,7 @@ package com.pinao.panchitaapp.presentation.ui.clarorecarga
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,12 +19,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.TabRow
-import androidx.compose.material.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -34,10 +27,16 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -48,7 +47,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -71,7 +69,6 @@ import com.pinao.panchitaapp.domain.model.RechangeModel
 import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import com.pinao.panchitaapp.presentation.ui.Screen
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ClaroRecargaScreen(
     claroRecargaViewModel: ClaroRecargaViewModel
@@ -99,7 +96,7 @@ fun ClaroRecargaScreen(
 
     when (uiState) {
         is RechangeUiState.Error -> {
-
+            Log.e("ClaroRecargaScreen","Error loading recargas: ${(uiState as RechangeUiState.Error).throwable}")
         }
 
         RechangeUiState.Loading -> {
@@ -180,11 +177,11 @@ private fun TopBar(
     val selectedTab = remember { mutableIntStateOf(0) }
 
     Column {
-        TabRow(selectedTabIndex = selectedTab.value) {
+        TabRow(selectedTabIndex = selectedTab.intValue) {
             tabs.forEachIndexed { index, tab ->
                 Tab(
-                    selected = selectedTab.value == index,
-                    onClick = { selectedTab.value = index },
+                    selected = selectedTab.intValue == index,
+                    onClick = { selectedTab.intValue = index },
                     text = { Text(text = tab.title) },
                     icon = {
                         Icon(
@@ -195,7 +192,7 @@ private fun TopBar(
                 )
             }
         }
-        when (selectedTab.value) {
+        when (selectedTab.intValue) {
             0 -> {
                 CenterApp(
                     padding,
@@ -242,10 +239,8 @@ private fun CenterApp(
             .padding(padding)
     ) {
         item {
-            val text = "telefono"
-            val num = 9
+
             AddTextFieldPhone(
-                text, num,
                 isNumPhone,
                 onNumPhone,
             )
@@ -253,11 +248,10 @@ private fun CenterApp(
         item {
             LazyRow {
                 val numRec = listOf(3, 5, 7, 10, 15, 20)
-                val text = "Soles"
                 items(numRec.size) { it ->
                     var isClick by rememberSaveable { mutableStateOf(false) }
                     AddButtonOutlined(
-                        numRec[it].toString(), text,
+                        numRec[it].toString(),
                         isClick,
                         onClick = { isClick = it },
                         isValRechargeAmount,
@@ -267,8 +261,6 @@ private fun CenterApp(
                 }
                 item {
                     AddButtonOutlinedOther(
-                        "Otros",
-                        "",
                         isEnabled,
                         onEnable,
                         onValRechargeAmount,
@@ -276,8 +268,6 @@ private fun CenterApp(
                 }
             }
             AddTextFieldAmount(
-                "monto",
-                2,
                 isEnabled,
                 isValRechargeAmount,
                 onValRechargeAmount
@@ -304,13 +294,12 @@ private fun CenterApp2(
 ) {
     val datePickerState = rememberDatePickerState()
     val snackState = remember { SnackbarHostState() }
-    val snackScope = rememberCoroutineScope()
     SnackbarHost(hostState = snackState, Modifier)
     val openDialog = remember { mutableStateOf(false) }
     val dateTime = GetCurrentDateTime().getCurrentDateTime2()
     var isDate by rememberSaveable { mutableStateOf(dateTime) }
     val onDate: (String) -> Unit = { isDate = it }
-    val coroutineScope = rememberCoroutineScope()
+
     val rechanges by claroRecargaViewModel.dateFilterRechanges.collectAsState()
 //    var filterDate: String? = null
     var filterDate by rememberSaveable { mutableStateOf("") }
@@ -415,7 +404,7 @@ private fun CenterApp2(
                     }
                 } else {
                     items(listRechangeModel, key = { it.id }) { rechange ->
-                        ItemRechange(rechange, claroRecargaViewModel)
+                        ItemRechange(rechange)
                         rechange.amount
                     }
                 }
@@ -426,7 +415,7 @@ private fun CenterApp2(
                     }
                 } else {
                     items(rechanges) { rechange ->
-                        ItemRechange(rechange, claroRecargaViewModel)
+                        ItemRechange(rechange)
                     }
                 }
             }
@@ -435,14 +424,15 @@ private fun CenterApp2(
 }
 
 @Composable
-fun ItemRechange(rechangeModel: RechangeModel, claroRecargaViewModel: ClaroRecargaViewModel) {
+fun ItemRechange(rechangeModel: RechangeModel) {
     OutlinedCard(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colors.surface,
+            //containerColor = MaterialTheme.colors.surface,
+            containerColor = MaterialTheme.colorScheme.surface,
         ),
         border = BorderStroke(
             1.dp,
-            MaterialTheme.colors.primary
+            MaterialTheme.colorScheme.primary
         ),
         modifier = Modifier
             //.size(width = 240.dp, height = 100.dp)
@@ -481,11 +471,11 @@ fun ItemRechange(rechangeModel: RechangeModel, claroRecargaViewModel: ClaroRecar
 
 @Composable
 private fun AddTextFieldPhone(
-    text: String,
-    num: Int,
     isNumPhone: String,
     onNumPhone: (String) -> Unit
 ) {
+    val text = "telefono"
+    val num = 9
     LimitedTextField(
         value = isNumPhone,
         onValueChange = { onNumPhone(it) },
@@ -499,11 +489,12 @@ private fun AddTextFieldPhone(
 
 @Composable
 private fun AddTextFieldAmount(
-    text: String, num: Int,
     isEnabled: Boolean,
     isValRechargeAmount: String,
     onValRechargeAmount: (String) -> Unit
 ) {
+    val text = "monto"
+    val num = 2
     LimitedTextField(
         value = isValRechargeAmount,
         onValueChange = { onValRechargeAmount(it) },
@@ -519,13 +510,13 @@ private fun AddTextFieldAmount(
 @Composable
 private fun AddButtonOutlined(
     num: String,
-    text: String,
     isClick: Boolean,
     onClick: (Boolean) -> Unit,
     isValRechargeAmount: String,
     onValRechargeAmount: (String) -> Unit,
     isEnabled: Boolean
 ) {
+    val text = "Soles"
     OutlinedButton(
         onClick = {
 
@@ -553,12 +544,12 @@ private fun AddButtonOutlined(
 
 @Composable
 private fun AddButtonOutlinedOther(
-    num: String,
-    text: String,
     isTextFieldEnabled: Boolean,
     onEnableTextField: (Boolean) -> Unit,
     onValRechargeAmount: (String) -> Unit,
 ) {
+    val num = "Otros"
+    val text = ""
     OutlinedButton(
         onClick = {
             if (!isTextFieldEnabled) {
@@ -576,8 +567,6 @@ private fun AddButtonOutlinedOther(
     }
 }
 
-
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun AddButtonElevate(
     isNumPhone: String,
@@ -623,7 +612,7 @@ fun LimitedTextField(
     onValueChange: (String) -> Unit,
     label: @Composable (() -> Unit)? = null,
     maxLength: Int,
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
     placeholder: @Composable (() -> Unit)? = null,
     enable: Boolean
 ) {

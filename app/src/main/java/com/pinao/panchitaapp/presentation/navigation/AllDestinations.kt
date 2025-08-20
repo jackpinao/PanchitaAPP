@@ -6,7 +6,8 @@ object AllDestinations {
     const val HOME_ROUTE = "home"
     const val LOGIN_ROUTE = "login"
     const val RECARGA = "recarga"
-    const val DETAIL_RECARGA = "detail_recarga"
+    const val GUIA_REMISION = "guiaRemision"
+    const val PREVIEW_TICKET = "previewTicket"
 }
 
 class AppNavigationActions(
@@ -26,6 +27,18 @@ class AppNavigationActions(
 
     fun navigateToRecarga() {
         navController.navigate(AllDestinations.RECARGA){
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    fun navigateToGuiaRemision() {
+        navController.navigate(AllDestinations.GUIA_REMISION) {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    fun navigateToPreviewTicket() {
+        navController.navigate(AllDestinations.PREVIEW_TICKET) {
             launchSingleTop = true
             restoreState = true
         }

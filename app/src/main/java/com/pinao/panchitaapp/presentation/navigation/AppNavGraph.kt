@@ -30,6 +30,10 @@ import androidx.navigation.compose.rememberNavController
 import com.pinao.panchitaapp.presentation.ui.AppDrawer
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaScreen
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaViewModel
+import com.pinao.panchitaapp.presentation.ui.guiaremision.GuiaRemisionScreen
+import com.pinao.panchitaapp.presentation.ui.guiaremision.GuiaRemisionViewModel
+import com.pinao.panchitaapp.presentation.ui.guiaremision.PreviewTicketContent
+import com.pinao.panchitaapp.presentation.ui.guiaremision.PreviewTicketScreen
 import com.pinao.panchitaapp.presentation.ui.home.HomeScreen
 import com.pinao.panchitaapp.presentation.ui.home.HomeViewModel
 import com.pinao.panchitaapp.presentation.ui.login.LoginViewModel
@@ -47,6 +51,7 @@ fun AppNavGraph(
     rechargeViewModel: ClaroRecargaViewModel = koinViewModel(),
     homeViewModel: HomeViewModel = koinViewModel(),
     loginViewModel: LoginViewModel = koinViewModel(),
+    guiaRemisionViewModel: GuiaRemisionViewModel = koinViewModel(),
 ) {
     //val scope = rememberCoroutineScope()
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
@@ -61,6 +66,7 @@ fun AppNavGraph(
                 route = currentRoute,
                 navigationToHome = { navigationActions.navigateToHome() },
                 navigationToRecarga = { navigationActions.navigateToRecarga() },
+                navigationToGuiaRemision = { navigationActions.navigateToGuiaRemision() },
                 closeDrawer = { coroutineScope.launch { drawerState.close() } },
                 modifier = Modifier
             )
@@ -117,6 +123,16 @@ fun AppNavGraph(
                     ClaroRecargaScreen(
                         claroRecargaViewModel = rechargeViewModel
                     )
+                }
+                composable(route = AppScreens.GuiaRemision.route) {
+                    // Add your GuiaRemisionScreen here
+                    GuiaRemisionScreen(
+                        guiaRemisionViewModel = guiaRemisionViewModel,
+                        navController = navController
+                    )
+                }
+                composable( route = AppScreens.PreviewTicket.route) {
+                    PreviewTicketScreen()
                 }
             }
         }

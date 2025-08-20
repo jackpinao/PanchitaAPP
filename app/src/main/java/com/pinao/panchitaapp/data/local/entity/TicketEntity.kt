@@ -8,22 +8,22 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "ticket",
-    foreignKeys = [
-        ForeignKey(
-            entity = UserEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["idUser"],
-            onDelete = ForeignKey.NO_ACTION
-        ),
-        ForeignKey(
-            entity = ClientEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["idClient"],
-            onDelete = ForeignKey.NO_ACTION
-        )
-    ],
+//    foreignKeys = [
+//        ForeignKey(
+//            entity = UserEntity::class,
+//            parentColumns = ["id"],
+//            childColumns = ["idUser"],
+//            onDelete = ForeignKey.NO_ACTION
+//        ),
+//        ForeignKey(
+//            entity = ClientEntity::class,
+//            parentColumns = ["id"],
+//            childColumns = ["idClient"],
+//            onDelete = ForeignKey.NO_ACTION
+//        )
+//    ],
     indices = [Index(value = ["idUser"]), Index(value = ["idClient"])],
-    ignoredColumns = ["details"]
+    //ignoredColumns = ["details"]
 )
 data class TicketEntity(
     @PrimaryKey(autoGenerate = true)
@@ -38,6 +38,7 @@ data class TicketEntity(
     val idUser: Int,
     @ColumnInfo(name = "idClient")
     val idClient: Int
-) {
-    var details: List<DetailTicketEntity> = emptyList()
-}
+)
+//{
+//    var details: List<DetailTicketEntity> = emptyList()
+//}

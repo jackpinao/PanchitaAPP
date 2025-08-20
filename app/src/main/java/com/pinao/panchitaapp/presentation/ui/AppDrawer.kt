@@ -38,6 +38,7 @@ fun AppDrawer(
     modifier: Modifier = Modifier,
     navigationToHome: () -> Unit = {},
     navigationToRecarga: () -> Unit = {},
+    navigationToGuiaRemision: () -> Unit = {},
     closeDrawer: () -> Unit = {},
 ) {
     ModalDrawerSheet(
@@ -81,6 +82,26 @@ fun AppDrawer(
                 Icon(
                     imageVector = Icons.Default.Share,
                     contentDescription = stringResource(id = R.string.recarga)
+                )
+            },
+            shape = MaterialTheme.shapes.small
+        )
+        NavigationDrawerItem(
+            label = {
+                Text(
+                    text = stringResource(id = R.string.guia_remision),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            },
+            selected = route == AppScreens.GuiaRemision.route,
+            onClick = {
+                closeDrawer()
+                 navigationToGuiaRemision() // Uncomment when navigation function is implemented
+            },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_sticky_note_2_24),
+                    contentDescription = stringResource(id = R.string.guia_remision)
                 )
             },
             shape = MaterialTheme.shapes.small

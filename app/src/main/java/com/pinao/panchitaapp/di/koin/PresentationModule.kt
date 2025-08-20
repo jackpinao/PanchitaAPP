@@ -2,10 +2,15 @@ package com.pinao.panchitaapp.di.koin
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.pinao.panchitaapp.domain.usecase.products.DeleteProductUseCase
+import com.pinao.panchitaapp.domain.usecase.products.FindCodeProductUseCase
+import com.pinao.panchitaapp.domain.usecase.products.GetAllProductsUseCase
+import com.pinao.panchitaapp.domain.usecase.products.SaveProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.rechange.GetAllDateRechangeUseCase
 import com.pinao.panchitaapp.domain.usecase.rechange.GetListForDateRechangeUC
 import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaViewModel
+import com.pinao.panchitaapp.presentation.ui.guiaremision.GuiaRemisionViewModel
 import com.pinao.panchitaapp.presentation.ui.home.HomeViewModel
 import com.pinao.panchitaapp.presentation.ui.login.LoginViewModel
 import org.koin.android.annotation.KoinViewModel
@@ -14,7 +19,7 @@ import org.koin.core.annotation.Module
 @Module
 class PresentationModule {
 
-    //@RequiresApi(Build.VERSION_CODES.O)
+    // ViewModel for Claro Recarga
     @KoinViewModel
     fun provideClaroRecargaViewModel(
         saveRechangeUseCase: SaveRechangeUseCase,
@@ -32,4 +37,19 @@ class PresentationModule {
 
     @KoinViewModel
     fun provideLoginViewModel(): LoginViewModel = LoginViewModel()
+
+    // ViewModel for Guia Remision
+    @KoinViewModel
+    fun provideGuiaRemisionViewModel(
+        getAllProductsUseCase: GetAllProductsUseCase,
+        findCodeProductUseCase: FindCodeProductUseCase,
+        saveProductsUseCase: SaveProductsUseCase,
+        deleteProductUseCase: DeleteProductUseCase
+    ): GuiaRemisionViewModel =
+        GuiaRemisionViewModel(
+            getAllProductsUseCase,
+            findCodeProductUseCase,
+            saveProductsUseCase,
+            deleteProductUseCase
+        )
 }

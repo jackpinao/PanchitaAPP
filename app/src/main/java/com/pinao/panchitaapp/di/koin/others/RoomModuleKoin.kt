@@ -1,12 +1,5 @@
-package com.pinao.panchitaapp.di.koin
+package com.pinao.panchitaapp.di.koin.others
 
-import android.content.Context
-import androidx.room.Room
-import com.pinao.panchitaapp.data.local.database.AppDatabase
-import com.pinao.panchitaapp.data.repository.RechangeRepositoryImpl
-import com.pinao.panchitaapp.data.repository.UserRepositoryImpl
-import com.pinao.panchitaapp.domain.repository.RechangeRepository
-import com.pinao.panchitaapp.domain.repository.UserRepository
 //import org.koin.core.module.dsl.factoryOf
 //import org.koin.core.qualifier.named
 //import org.koin.dsl.module

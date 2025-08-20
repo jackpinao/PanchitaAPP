@@ -6,5 +6,6 @@
     <string name="home">Home</string>
     <string name="settings">Settings</string>
     <string name="recarga">Recarga</string>
+    <string name="guia_remision">Guia Remision</string>
     <string name="detalles">Detalles</string>
 </resources>

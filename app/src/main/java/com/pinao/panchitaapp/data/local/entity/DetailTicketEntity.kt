@@ -8,20 +8,20 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "detail_ticket",
-    foreignKeys = [
-        ForeignKey(
-            entity = TicketEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["idTicket"],
-            onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = ProductEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["idProduct"],
-            onDelete = ForeignKey.NO_ACTION
-        )
-    ],
+//    foreignKeys = [
+//        ForeignKey(
+//            entity = TicketEntity::class,
+//            parentColumns = ["id"],
+//            childColumns = ["idTicket"],
+//            onDelete = ForeignKey.CASCADE
+//        ),
+//        ForeignKey(
+//            entity = ProductsEntity::class,
+//            parentColumns = ["id"],
+//            childColumns = ["idProduct"],
+//            onDelete = ForeignKey.NO_ACTION
+//        )
+//    ],
     indices = [Index(value = ["idTicket"]), Index(value = ["idProduct"])]
 )
 data class DetailTicketEntity(

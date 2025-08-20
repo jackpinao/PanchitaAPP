@@ -1,6 +1,5 @@
-package com.pinao.panchitaapp.di.koin
+package com.pinao.panchitaapp.di.koin.others
 
-import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaViewModel
 //import org.koin.core.module.dsl.viewModel
 //import org.koin.dsl.module
 

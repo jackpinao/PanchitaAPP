@@ -1,10 +1,7 @@
-package com.pinao.panchitaapp.di.koin
+package com.pinao.panchitaapp.di.koin.others
 
-import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
 //import org.koin.core.qualifier.named
 // import org.koin.dsl.module
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 //val appModule = module {
 //    single(named(Qualifier.ProvideRetrofit)) {

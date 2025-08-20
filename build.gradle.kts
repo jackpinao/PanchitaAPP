@@ -4,7 +4,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath("io.kotzilla:kotzilla-plugin:1.0.1")
+        classpath(libs.kotzilla.plugin)
     }
 }
 
@@ -24,4 +24,6 @@ plugins {
     alias(libs.plugins.navigation.safe.args) apply false
     alias(libs.plugins.gms) apply false
     alias(libs.plugins.crashlytics) apply false
+    alias(libs.plugins.room) apply false
+    alias(libs.plugins.kotzilla) apply false
 }

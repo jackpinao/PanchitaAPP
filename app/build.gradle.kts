@@ -13,6 +13,8 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.gms)
     alias(libs.plugins.crashlytics)
+    alias(libs.plugins.room)
+    alias(libs.plugins.kotzilla)
 }
 
 android {
@@ -21,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "com.pinao.panchitaapp"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -33,6 +35,10 @@ android {
 //                arguments += ["room.schemaLocation:" "$projectDir/schemas".toString()]
 //            }
 //        }
+    }
+
+    room {
+        schemaDirectory("$projectDir/schemas")
     }
 
     buildTypes {
@@ -92,6 +98,7 @@ tasks.withType<JavaCompile> {
 //}
 
 dependencies {
+    implementation(libs.kotzilla.sdk)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -108,6 +115,7 @@ dependencies {
 
     //Room
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.runtime.saveable)
     //implementation(libs.play.services.ads.lite)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)

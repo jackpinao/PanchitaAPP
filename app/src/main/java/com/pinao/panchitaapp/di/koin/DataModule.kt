@@ -2,11 +2,14 @@ package com.pinao.panchitaapp.di.koin
 
 import android.content.Context
 import androidx.room.Room
+import com.pinao.panchitaapp.data.local.dao.ProductDao
 import com.pinao.panchitaapp.data.local.dao.RechangeDao
 import com.pinao.panchitaapp.data.local.database.AppDatabase
 import com.pinao.panchitaapp.data.network.rechange.RechangeApiClient
 import com.pinao.panchitaapp.data.network.rechange.RechangeService
+import com.pinao.panchitaapp.data.repository.ProductsRepositoryImpl
 import com.pinao.panchitaapp.data.repository.RechangeRepositoryImpl
+import com.pinao.panchitaapp.domain.repository.ProductRepository
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import retrofit2.Retrofit
@@ -42,6 +45,11 @@ class DataModule {
     }
 
     @Single
+    fun provideProductDao(database: AppDatabase): ProductDao {
+        return database.productDao() // Assuming you meant to provide the same Dao for recharges
+    }
+
+    @Single
     fun provideRechangeService(api: RechangeApiClient): RechangeService {
         return RechangeService(api)
     }
@@ -49,5 +57,10 @@ class DataModule {
     @Single
     fun provideRechangeRepository(api: RechangeService, rechangeDao: RechangeDao): RechangeRepositoryImpl {
         return RechangeRepositoryImpl(api, rechangeDao)
+    }
+
+    @Single
+    fun provideProductRepository(productDao: ProductDao): ProductsRepositoryImpl {
+        return ProductsRepositoryImpl(productDao) // Assuming you meant to provide the same repository for products
     }
 }
