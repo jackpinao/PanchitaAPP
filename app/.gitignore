@@ -1,1 +1,3 @@
 /build
+# Ignorar la configuración de servicios de Google
+/app/google-services.json
