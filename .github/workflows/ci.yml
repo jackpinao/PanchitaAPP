@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: set up JDK 17
+      - name: set up JDK 11
         uses: actions/setup-java@v3
         with:
           java-version: '17'
@@ -21,6 +21,6 @@ jobs:
         uses: gradle/gradle-build-action@v2
       # Nuevo paso para crear el archivo google-services.json
       - name: Crear el archivo google-services.json
-        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > app/google-services.json
+        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > /app/google-services.json
       - name: Build app
         run: ./gradlew assemble
