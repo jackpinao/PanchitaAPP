@@ -21,6 +21,6 @@ jobs:
         uses: gradle/gradle-build-action@v2
       # Nuevo paso para crear el archivo google-services.json
       - name: Crear el archivo google-services.json
-        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > /app/google-services.json
+        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > app/google-services.json
       - name: Build app
         run: ./gradlew assemble
