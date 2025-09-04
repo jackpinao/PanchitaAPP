@@ -19,5 +19,7 @@ data class ClientEntity(
     @ColumnInfo(name = "numDoc")
     val numDoc: String,
     @ColumnInfo(name = "active")
-    val active: Boolean
+    val active: Boolean,
+    @ColumnInfo(name = "dateCreate", defaultValue = "CURRENT_TIMESTAMP")
+    val dateCreate: String,
 )

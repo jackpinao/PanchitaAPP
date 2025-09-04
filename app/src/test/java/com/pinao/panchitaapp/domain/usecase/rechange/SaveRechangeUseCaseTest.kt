@@ -63,6 +63,6 @@ class SaveRechangeUseCaseTest {
         saveRechangeUseCase(rechangeModel)
 
         // Then
-        //verify(repository, times(1)).save(rechangeModel)
+        verify(repository, times(1)).save(rechangeModel)
     }
 }

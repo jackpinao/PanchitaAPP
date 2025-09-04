@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pinao.panchitaapp.domain.model.ProductModel
+import com.pinao.panchitaapp.domain.usecase.client.SaveClientUseCase
 import com.pinao.panchitaapp.domain.usecase.products.DeleteProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.FindCodeProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.GetAllProductsUseCase
@@ -19,7 +20,8 @@ class GuiaRemisionViewModel(
     private val getAllProductsUseCase: GetAllProductsUseCase,
     private val findCodeProductUseCase: FindCodeProductUseCase,
     private val saveProductsUseCase: SaveProductsUseCase,
-    private val deleteProductUseCase: DeleteProductUseCase
+    private val deleteProductUseCase: DeleteProductUseCase,
+    private val saveClientUseCase: SaveClientUseCase,
 ) : ViewModel() {
 
     private val _guiaRemisionUiState =
@@ -42,6 +44,8 @@ class GuiaRemisionViewModel(
     //Datos de los clientes
     private val _nameClient = MutableStateFlow<String>("")
     val nameClient: StateFlow<String> = _nameClient.asStateFlow()
+    private val _numDocClient = MutableStateFlow<String>("")
+    val numDocClient: StateFlow<String> = _numDocClient.asStateFlow()
 
     private val _showDialog = MutableStateFlow<Boolean>(false)
     val showDialog: StateFlow<Boolean> = _showDialog.asStateFlow()
@@ -74,6 +78,9 @@ class GuiaRemisionViewModel(
 
     fun onNameClientChange(newValue: String) {
         _nameClient.value = newValue
+    }
+    fun onNumDocClientChange(newValue: String) {
+        _numDocClient.value = newValue
     }
 
     fun onNameProductChange(newValue: String) {

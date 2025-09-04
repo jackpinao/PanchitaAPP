@@ -170,6 +170,7 @@ private fun CenterAppGuiaRemision(
 
 ) {
     val nameClient by guiaRemisionViewModel.nameClient.collectAsState()
+    val numDocClient by guiaRemisionViewModel.nameClient.collectAsState()
     Column {
         Text(
             text = "Guia de Remision",
@@ -180,6 +181,9 @@ private fun CenterAppGuiaRemision(
         NameClientTextField(
             nameClient = nameClient,
         ) { guiaRemisionViewModel.onNameClientChange(it) }
+        NumDocClientTextField(
+        numDocClient = numDocClient
+        ) { guiaRemisionViewModel.onNumDocClientChange(it) }
         ProductList(
             products = productsModelList,
             guiaRemisionViewModel = guiaRemisionViewModel
@@ -239,9 +243,11 @@ fun ProductList(products: List<ProductModel>, guiaRemisionViewModel: GuiaRemisio
                 items(items = products, key = { it.id }) { product ->
                     // Display each product in the list
                     Text(
-                        text = "${product.code} " +
-                                "\n ${product.name} " +
-                                "\n ${product.price} - ${product.stock}",
+                        text = "Codigo Producto: " +
+                                "\n ${product.code} " +
+                                "\n Nombre Producto: ${product.name} " +
+                                "\n Precio: ${product.price} " +
+                                "\n Cantidad: ${product.stock}",
                         modifier = Modifier.padding(8.dp)
                     )
                     ElevatedButton(
@@ -279,6 +285,27 @@ fun NameClientTextField(
             .padding(8.dp)
     )
 }
+@Composable
+fun NumDocClientTextField(
+    numDocClient: String,
+    onValueChange: (String) -> Unit,
+){
+    TextField(
+        value = numDocClient,
+        onValueChange = onValueChange,
+        label = {
+            Text(
+                text = "Numero de Documento",
+                color = Color.Gray
+            )
+        },
+        singleLine = true,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+    )
+}
 
 @Composable
 fun AddProductDialog(
@@ -286,7 +313,6 @@ fun AddProductDialog(
     showDialog: Boolean?,
     onDismiss: () -> Unit,
     productsModelList: List<ProductModel>,
-
 ) {
 
     val isCodeProduct by guiaRemisionViewModel.codeProduct.collectAsState()
@@ -335,7 +361,7 @@ fun AddProductDialog(
                 }
                 Spacer(modifier = Modifier.padding(8.dp))
                 AddProductButton(
-//                    isCodeProduct,
+                    isCodeProduct,
                     isValNameProduct,
                     isValPriceProduct,
                     isValQuantityProduct,
@@ -350,7 +376,7 @@ fun AddProductDialog(
 
 @Composable
 fun AddProductButton(
-    //isCodeProduct: String,
+    isCodeProduct: String,
     isValNameProduct: String,
     isValPriceProduct: String,
     isValQuantityProduct: String,
@@ -387,10 +413,11 @@ fun AddProductButton(
                     name = isValNameProduct,
                     price = isValPriceProduct.toDouble(),
                     stock = isValQuantityProduct.toDouble(),
-                    //code = isCodeProduct
+                    code = isCodeProduct
                 )
             )
-            guiaRemisionViewModel.onCodeProductChange("")
+            val code = System.currentTimeMillis().toString()
+            guiaRemisionViewModel.onCodeProductChange(code)
             guiaRemisionViewModel.onNameProductChange("")
             guiaRemisionViewModel.onPriceProductChange("")
             guiaRemisionViewModel.onQuantityProductChange("")
@@ -475,6 +502,7 @@ fun CodeProductTextField(codeProduct: String, onValueChange: (String) -> Unit) {
             )
         },
         singleLine = true,
+        readOnly = true,
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)

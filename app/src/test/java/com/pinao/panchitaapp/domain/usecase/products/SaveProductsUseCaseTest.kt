@@ -1,14 +1,49 @@
 package com.pinao.panchitaapp.domain.usecase.products
 
+import com.pinao.panchitaapp.data.repository.ProductsRepositoryImpl
+import com.pinao.panchitaapp.domain.model.ProductModel
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertThrows
+import org.junit.Before
 import org.junit.Test
+import org.mockito.Mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
+import org.mockito.MockitoAnnotations
 
 class SaveProductsUseCaseTest {
 
+    @Mock
+    private lateinit var repository: ProductsRepositoryImpl
+    private lateinit var saveProductsUseCase: SaveProductsUseCase
+
+    @Before
+    fun setUp() {
+        MockitoAnnotations.openMocks(this)
+        saveProductsUseCase = SaveProductsUseCase(repository)
+    }
+
     @Test
-    fun `invoke method successfully saves a product`() {
+    fun `invoke method successfully saves a product`() = runBlocking{
         // Verify that when 'invoke' is called with a valid ProductModel, 
         // the 'saveProduct' method of the repository is called with the same ProductModel.
         // TODO implement test
+        // Given
+        val productModel = ProductModel(
+            id = 1,
+            idCategory = 1,
+            idDetailTicketEntity = 1,
+            name = "Test Product",
+            description = "Test Description",
+            price = 10.0,
+            stock = 100.0,
+            code = System.currentTimeMillis().toString(),
+        )
+        // When
+        saveProductsUseCase(productModel)
+        // Then
+        verify(repository, times(1)).saveProduct(productModel)
 
     }
 
@@ -23,7 +58,27 @@ class SaveProductsUseCaseTest {
     fun `invoke method propagates repository exceptions`() {
         // If the repository's 'saveProduct' method throws an exception (e.g., IOException, DatabaseException), 
         // verify that the 'invoke' method correctly propagates this exception.
-        // TODO implement test
+        // Given
+        val productModel = ProductModel(
+            id = 1,
+            idCategory = 1,
+            idDetailTicketEntity = 1,
+            name = "Test Product",
+            description = "Test Description",
+            price = 10.0,
+            stock = 100.0,
+            code = System.currentTimeMillis().toString(),
+        )
+        val exception = RuntimeException("Database error")
+        runBlocking {
+            `when`(repository.saveProduct(productModel)).thenThrow(exception)
+        }
+        // When / Then
+        assertThrows(RuntimeException::class.java) {
+            runBlocking {
+                saveProductsUseCase(productModel)
+            }
+        }
     }
 
     @Test

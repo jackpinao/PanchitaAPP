@@ -2,6 +2,7 @@ package com.pinao.panchitaapp.di.koin
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.pinao.panchitaapp.domain.usecase.client.SaveClientUseCase
 import com.pinao.panchitaapp.domain.usecase.products.DeleteProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.FindCodeProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.GetAllProductsUseCase
@@ -44,12 +45,14 @@ class PresentationModule {
         getAllProductsUseCase: GetAllProductsUseCase,
         findCodeProductUseCase: FindCodeProductUseCase,
         saveProductsUseCase: SaveProductsUseCase,
-        deleteProductUseCase: DeleteProductUseCase
+        deleteProductUseCase: DeleteProductUseCase,
+        saveClientUseCase: SaveClientUseCase
     ): GuiaRemisionViewModel =
         GuiaRemisionViewModel(
             getAllProductsUseCase,
             findCodeProductUseCase,
             saveProductsUseCase,
-            deleteProductUseCase
+            deleteProductUseCase,
+            saveClientUseCase
         )
 }

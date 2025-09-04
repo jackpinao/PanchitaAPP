@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -19,7 +20,7 @@ plugins {
 
 android {
     namespace = "com.pinao.panchitaapp"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.pinao.panchitaapp"
@@ -79,10 +80,17 @@ android {
     }
 }
 
+//val mockitoAgent = configurations.create("mockitoAgent")
 
 tasks.withType<JavaCompile> {
     options.compilerArgs.add("-Xlint:deprecation")
+    
 }
+
+//tasks.withType<Test> {
+//    jvmArgs("-javaagent:${mockitoAgent.asPath}")
+//}
+
 //kapt {
 //    correctErrorTypes = true
 //    arguments {
@@ -116,6 +124,7 @@ dependencies {
     //Room
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.runtime.saveable)
+    implementation(libs.androidx.junit.ktx)
     //implementation(libs.play.services.ads.lite)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
@@ -189,13 +198,14 @@ dependencies {
     testImplementation(libs.junit)
     //testImplementation(libs.koin.test.junit4)
     testImplementation(libs.mockito)
+//    mockitoAgent(libs.mockito) { isTransitive = false }
     //testImplementation(libs.mockk)
     testImplementation(libs.androidx.core.testing)
     testImplementation(libs.hamcrest)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.truth)
 }
-
 
 ksp {
     arg("KOIN_CONFIG_CHECK", "true")

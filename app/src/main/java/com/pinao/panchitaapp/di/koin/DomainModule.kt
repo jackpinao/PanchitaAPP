@@ -1,7 +1,12 @@
 package com.pinao.panchitaapp.di.koin
 
+import com.pinao.panchitaapp.data.repository.ClientRepositoryImpl
 import com.pinao.panchitaapp.data.repository.ProductsRepositoryImpl
 import com.pinao.panchitaapp.data.repository.RechangeRepositoryImpl
+import com.pinao.panchitaapp.domain.usecase.client.DeleteClientUseCase
+import com.pinao.panchitaapp.domain.usecase.client.FindClientUseCase
+import com.pinao.panchitaapp.domain.usecase.client.GetAllClientsUseCase
+import com.pinao.panchitaapp.domain.usecase.client.SaveClientUseCase
 import com.pinao.panchitaapp.domain.usecase.products.DeleteProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.FindCodeProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.GetAllProductsUseCase
@@ -14,6 +19,9 @@ import org.koin.core.annotation.Module
 
 @Module
 class DomainModule {
+    /*
+    RECHANGE USE CASES
+    */
     @Factory
     fun provideGetAllDateRechangeUseCase(
         repositoryImpl: RechangeRepositoryImpl
@@ -29,7 +37,9 @@ class DomainModule {
         repositoryImpl: RechangeRepositoryImpl
     ) = SaveRechangeUseCase(repositoryImpl)
 
-    //add products use cases here if needed
+    /*
+    PRODUCTS USE CASES
+     */
     @Factory
     fun provideDeleteProductUseCase(
         repositoryImpl: ProductsRepositoryImpl
@@ -49,4 +59,24 @@ class DomainModule {
     fun provideFindProductUseCase(
         repositoryImpl: ProductsRepositoryImpl
     ) = FindCodeProductUseCase(repositoryImpl)
+    /*
+    CLIENTS USE CASES
+     */
+    @Factory
+    fun provideGetAllClientsUseCase(
+        repositoryImpl: ClientRepositoryImpl
+    ) = GetAllClientsUseCase(repositoryImpl)
+    @Factory
+    fun provideSaveClientUseCase(
+        repositoryImpl: ClientRepositoryImpl
+    ) = SaveClientUseCase(repositoryImpl)
+    @Factory
+    fun provideDeleteClientUseCase(
+        repositoryImpl: ClientRepositoryImpl
+    ) = DeleteClientUseCase(repositoryImpl)
+    @Factory
+    fun provideFindClientUseCase(
+        repositoryImpl: ClientRepositoryImpl
+    ) = FindClientUseCase(repositoryImpl)
+
 }

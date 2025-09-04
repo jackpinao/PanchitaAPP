@@ -27,4 +27,7 @@ interface ProductDao {
 
     @Delete
     suspend fun deleteProduct(product: ProductsEntity)
+
+    @Query("SELECT * FROM product WHERE code = :string")
+    fun getProductForCode(string: String) : ProductsEntity?
 }

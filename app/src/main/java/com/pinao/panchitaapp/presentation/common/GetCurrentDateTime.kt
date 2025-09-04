@@ -8,7 +8,6 @@ import java.time.format.DateTimeFormatter
 
 class GetCurrentDateTime {
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getCurrentDateTime(): String {
         val currentTimeMillis = System.currentTimeMillis()
         val instant = Instant.ofEpochMilli(currentTimeMillis)
@@ -17,7 +16,6 @@ class GetCurrentDateTime {
         return formatter.format(instant)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getCurrentDateTime2(): String {
         val currentTimeMillis = System.currentTimeMillis()
         val instant = Instant.ofEpochMilli(currentTimeMillis)
@@ -27,7 +25,6 @@ class GetCurrentDateTime {
 
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getCurrentDateTime3(dateTime: Long): String {
         println(dateTime)
         val dt = addOneDay(dateTime)
