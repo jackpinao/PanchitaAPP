@@ -3,6 +3,7 @@ package com.pinao.panchitaapp.presentation.ui.guiaremision
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pinao.panchitaapp.domain.model.ClientModel
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.usecase.client.SaveClientUseCase
 import com.pinao.panchitaapp.domain.usecase.products.DeleteProductUseCase
@@ -128,6 +129,16 @@ class GuiaRemisionViewModel(
                 _productsUiState.value = ProductsUiState.Error(e)
             }
 
+        }
+    }
+
+    fun saveClient(clientModel: ClientModel){
+        viewModelScope.launch {
+            try {
+                saveClientUseCase(clientModel)
+            } catch (e: Exception) {
+                Log.e("GuiaRemisionViewModel", "Error al guardar el cliente", e)
+            }
         }
     }
 

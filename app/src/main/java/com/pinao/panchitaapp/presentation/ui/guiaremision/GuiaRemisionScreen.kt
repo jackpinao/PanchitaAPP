@@ -14,6 +14,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -35,6 +36,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
+import com.pinao.panchitaapp.domain.model.ClientModel
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.presentation.navigation.AppScreens
 import com.pinao.panchitaapp.presentation.ui.Screen
@@ -170,7 +172,7 @@ private fun CenterAppGuiaRemision(
 
 ) {
     val nameClient by guiaRemisionViewModel.nameClient.collectAsState()
-    val numDocClient by guiaRemisionViewModel.nameClient.collectAsState()
+    val numDocClient by guiaRemisionViewModel.numDocClient.collectAsState()
     Column {
         Text(
             text = "Guia de Remision",
@@ -204,11 +206,19 @@ fun PreviewTicketButton(
     guiaRemisionViewModel: GuiaRemisionViewModel,
     productsModelList: List<ProductModel>
 ) {
+    val nameClient by guiaRemisionViewModel.nameClient.collectAsState()
+    val numDocClient by guiaRemisionViewModel.numDocClient.collectAsState()
     ElevatedButton(
         onClick = {
             // Handle the preview ticket logic here
             // For example, you can call a function in the ViewModel to generate the ticket
             //guiaRemisionViewModel.previewTicket(productsModelList)
+            guiaRemisionViewModel.saveClient(
+                clientModel = ClientModel(
+                    name = nameClient,
+                    numDoc = numDocClient
+                )
+            )
             navController.navigate(route = AppScreens.PreviewTicket.route) // Navigate to the preview ticket screen
         },
         modifier = Modifier
@@ -247,13 +257,18 @@ fun ProductList(products: List<ProductModel>, guiaRemisionViewModel: GuiaRemisio
                                 "\n ${product.code} " +
                                 "\n Nombre Producto: ${product.name} " +
                                 "\n Precio: ${product.price} " +
-                                "\n Cantidad: ${product.stock}",
+                                "\n Cantidad: ${product.stock} " +
+                                "\n Total: ${product.price * product.stock}",
                         modifier = Modifier.padding(8.dp)
                     )
                     ElevatedButton(
                         onClick = {
                             guiaRemisionViewModel.onItemRemove(product)
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Red,
+                            contentColor = Color.White
+                        )
                     ) {
                         Text(text = "Remove")
                     }

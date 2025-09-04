@@ -8,5 +8,5 @@ data class ClientModel(
     val name: String = "",
     val numDoc: String = "",
     val active: Boolean = true,
-    val dateCreate: String = "",
+    val dateCreate: String = GetCurrentDateTime().getCurrentDateTime(),
 )
