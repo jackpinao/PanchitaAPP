@@ -132,7 +132,9 @@ fun AppNavGraph(
                     )
                 }
                 composable( route = AppScreens.PreviewTicket.route) {
-                    PreviewTicketScreen()
+                    PreviewTicketScreen(
+                        viewModel = guiaRemisionViewModel
+                    )
                 }
             }
         }

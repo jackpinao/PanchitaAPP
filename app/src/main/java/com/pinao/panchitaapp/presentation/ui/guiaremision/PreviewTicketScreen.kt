@@ -7,29 +7,72 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+// Remove LazyColumn and items imports if no longer used elsewhere, but for now, keep them
+// import androidx.compose.foundation.lazy.LazyColumn
+// import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
+import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.presentation.ui.Screen
 
 @Composable
-fun PreviewTicketScreen() {
+fun PreviewTicketScreen(
+    viewModel: GuiaRemisionViewModel,
+) {
     // This function is a placeholder for the preview of the Ticket Screen.
     // It can be used to display a static preview of the UI without needing to run the app.
     // You can implement your preview logic here.
-    PreviewTicketContent()
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val productsUiState by produceState<ProductsUiState>(
+        initialValue = ProductsUiState.Loading,
+        key1 = viewModel,
+        key2 = lifecycle
+    ) {
+        lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
+            viewModel.productsUiState.collect {
+                value = it
+            }
+        }
+    }
+    when (productsUiState) {
+        is ProductsUiState.Loading -> {
+            CircularProgressIndicator()
+        }
+
+        is ProductsUiState.Error -> {
+            // Handle error state
+        }
+
+        is ProductsUiState.Success -> {
+            PreviewTicketContent(
+                products = (productsUiState as ProductsUiState.Success).productsModelList,
+                viewModel = viewModel
+            )
+        }
+    }
 }
 
 @Composable
-fun PreviewTicketContent() {
+fun PreviewTicketContent(
+    products: List<ProductModel>,
+    viewModel: GuiaRemisionViewModel
+) {
     Screen {
         Scaffold(
             bottomBar = {
@@ -43,7 +86,10 @@ fun PreviewTicketContent() {
             Column(
                 modifier = Modifier.padding(innerPadding)
             ) {
-                CenterAppPreviewTicket()
+                CenterAppPreviewTicket(
+                    products = products,
+                    viewModel = viewModel
+                )
             }
         }
     }
@@ -78,11 +124,17 @@ private fun BottomBar() {
 }
 
 @Composable
-private fun CenterAppPreviewTicket() {
+private fun CenterAppPreviewTicket(
+    products: List<ProductModel>,
+    viewModel: GuiaRemisionViewModel
+) {
     // This function can be used to display the main content of the Ticket Screen.
     // You can implement your UI components here.
     // For example, you can show a preview of a ticket layout or any other relevant information.
     // This is just a placeholder for the actual content.
+    val nameClient by viewModel.nameClient.collectAsState()
+    val numDocClient by viewModel.numDocClient.collectAsState()
+
     Text(
         text = "Preview of Ticket Screen",
         modifier = Modifier.padding(16.dp)
@@ -109,64 +161,86 @@ private fun CenterAppPreviewTicket() {
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
             Text(text = "Date: 2023-10-01")
             Text(text = "Time: 10:00 AM")
-            Text(text = "Cliente: Juan Pérez")
-            Text(text = "Documento: 123456789")
+            Text(text = "Cliente: $nameClient")
+            Text(text = "Documento: $numDocClient")
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-        }
-        //Encabezados de la tabla
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Cant.",
-                modifier = Modifier.weight(1f)
+            //Encabezados de la tabla
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Cant.",
+                    modifier = Modifier.weight(1f)
+                )
+                VerticalDivider(thickness = 1.dp)
+                Text(
+                    text = "Producto",
+                    modifier = Modifier.weight(2f)
+                )
+                VerticalDivider(thickness = 1.dp)
+                Text(
+                    text = "Precio",
+                    modifier = Modifier.weight(1f)
+                )
+                VerticalDivider(thickness = 1.dp)
+                Text(
+                    text = "Total",
+                    modifier = Modifier.weight(1f)
+                )
+                VerticalDivider(thickness = 1.dp)
+            }
+            HorizontalDivider(thickness = 1.dp)
+            ListProducts(
+                products = products
             )
-            VerticalDivider(thickness = 1.dp)
+            Row(modifier = Modifier.fillMaxWidth()
+                .padding(vertical = 8.dp),) {
+                Text(
+                    text = "Total a Pagar:",
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text(
+                    text = "70.00",
+                    modifier = Modifier.weight(1f)
+                )
+            }
             Text(
-                text = "Producto",
-                modifier = Modifier.weight(1f)
-            )
-            VerticalDivider(thickness = 1.dp)
-            Text(
-                text = "Precio",
-                modifier = Modifier.weight(1f)
-            )
-            VerticalDivider(thickness = 1.dp)
-            Text(
-                text = "Total",
-                modifier = Modifier.weight(1f)
-            )
-            VerticalDivider(thickness = 1.dp)
-        }
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Text(text = "1 |")
-            Text(text = "Producto 1 |")
-            Text(text = "10.00 |")
-            Text(text = "10.00 |")
-        }
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Text(text = "2 |")
-            Text(text = "Producto 2 |")
-            Text(text = "20.00 |")
-            Text(text = "40.00 |")
-        }
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = "Total a Pagar:",
-                modifier = Modifier.padding(end = 8.dp)
-            )
-            Text(
-                text = "70.00",
-                modifier = Modifier.weight(1f)
+                text = "¡¡GRACIAS POR SU COMPRA!!",
+                modifier = Modifier.padding(top = 15.dp)
             )
         }
-        Text(
-            text = "¡¡GRACIAS POR SU COMPRA!!",
-            modifier = Modifier.padding(top = 8.dp)
-        )
 
+    }
+}
+
+@Composable
+private fun ListProducts(
+    products: List<ProductModel>
+) {
+    Column { // Changed from LazyColumn
+        products.forEach { product -> // Changed from items block
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(text = "${product.stock}",
+                    modifier = Modifier.weight(1f))
+                VerticalDivider(thickness = 1.dp)
+                Text(text = product.name,
+                    modifier = Modifier.weight(2f))
+                VerticalDivider(thickness = 1.dp)
+                Text(text = "${product.price}",
+                    modifier = Modifier.weight(1f))
+                VerticalDivider(thickness = 1.dp)
+                Text(text = "${product.price * product.stock}",
+                    modifier = Modifier.weight(1f))
+            }
+            HorizontalDivider(thickness = 1.dp)
+        }
     }
 }

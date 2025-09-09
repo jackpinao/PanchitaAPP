@@ -29,12 +29,14 @@ data class DetailTicketEntity(
     val id: Int,
     @ColumnInfo(name = "date")
     val date: String,
+    @ColumnInfo(name = "description")
+    val description: String,
     @ColumnInfo(name = "price")
     val price: Double,
-    @ColumnInfo(name = "import")
-    val import: Double,
     @ColumnInfo(name = "amount")
     val amount: Int,
+    @ColumnInfo(name = "import")
+    val import: Double,
     @ColumnInfo(name = "idTicket")
     val idTicket: Int,
     @ColumnInfo(name = "idProduct")
