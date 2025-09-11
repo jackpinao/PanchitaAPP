@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-// Remove LazyColumn and items imports if no longer used elsewhere, but for now, keep them
-// import androidx.compose.foundation.lazy.LazyColumn
-// import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -19,10 +16,15 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -30,14 +32,12 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.presentation.ui.Screen
+import kotlinx.coroutines.launch
 
 @Composable
 fun PreviewTicketScreen(
     viewModel: GuiaRemisionViewModel,
 ) {
-    // This function is a placeholder for the preview of the Ticket Screen.
-    // It can be used to display a static preview of the UI without needing to run the app.
-    // You can implement your preview logic here.
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val productsUiState by produceState<ProductsUiState>(
         initialValue = ProductsUiState.Loading,
@@ -73,16 +73,36 @@ fun PreviewTicketContent(
     products: List<ProductModel>,
     viewModel: GuiaRemisionViewModel
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    val printingStatus by viewModel.printingStatus.collectAsState()
+    printingStatus?.let { status ->
+        LaunchedEffect(key1 = "print_status_$status") { // Unique key for re-launch if status changes
+            scope.launch {
+                snackbarHostState.showSnackbar(status)
+                // viewModel.clearPrintingStatus() // Optional: if you add this to ViewModel
+            }
+        }
+    }
+
+    val downloadStatus by viewModel.downloadStatus.collectAsState()
+    downloadStatus?.let { status ->
+        LaunchedEffect(key1 = "download_status_$status") { // Unique key
+            scope.launch {
+                snackbarHostState.showSnackbar(status)
+                viewModel.clearDownloadStatus() // Clear the message after showing
+            }
+        }
+    }
+
     Screen {
         Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
-                BottomBar()
+                BottomBar(viewModel = viewModel)
             }
         ) { innerPadding ->
-            // Here you can add the content of the Ticket Screen.
-            // For example, you can display a preview of a ticket layout.
-            // This is just a placeholder for the actual content.
-            // Replace with your actual UI components.
             Column(
                 modifier = Modifier.padding(innerPadding)
             ) {
@@ -96,12 +116,14 @@ fun PreviewTicketContent(
 }
 
 @Composable
-private fun BottomBar() {
+private fun BottomBar(viewModel: GuiaRemisionViewModel) {
     Column {
         Button(
-            onClick = { /* Handle button click */ },
+            onClick = {
+                viewModel.initiatePrintTicket()
+            },
             modifier = Modifier
-                .padding(16.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
                 .fillMaxWidth()
         ) {
             Text(
@@ -110,9 +132,11 @@ private fun BottomBar() {
             )
         }
         Button(
-            onClick = { /* Handle button click */ },
+            onClick = {
+                viewModel.downloadTicketAsPdf()
+            },
             modifier = Modifier
-                .padding(16.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp)
                 .fillMaxWidth()
         ) {
             Text(
@@ -128,10 +152,6 @@ private fun CenterAppPreviewTicket(
     products: List<ProductModel>,
     viewModel: GuiaRemisionViewModel
 ) {
-    // This function can be used to display the main content of the Ticket Screen.
-    // You can implement your UI components here.
-    // For example, you can show a preview of a ticket layout or any other relevant information.
-    // This is just a placeholder for the actual content.
     val nameClient by viewModel.nameClient.collectAsState()
     val numDocClient by viewModel.numDocClient.collectAsState()
 
@@ -153,18 +173,15 @@ private fun CenterAppPreviewTicket(
                 text = "Bodega 'El Chasqui'",
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-            // Add more details about the ticket here
             Text(text = "Av. Antigua Panamericana Nª451, Mala, Cañete, Lima")
             Text(text = "Telefono: 12345678")
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-            Text(text = "Ticket #123456")
+            Text(text = "Ticket #123456") // Should be dynamic
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-            Text(text = "Date: 2023-10-01")
-            Text(text = "Time: 10:00 AM")
+            Text(text = "Date: 2023-10-01 Time: 10:00 AM") // Should be dynamic
             Text(text = "Cliente: $nameClient")
             Text(text = "Documento: $numDocClient")
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-            //Encabezados de la tabla
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -196,14 +213,19 @@ private fun CenterAppPreviewTicket(
             ListProducts(
                 products = products
             )
-            Row(modifier = Modifier.fillMaxWidth()
-                .padding(vertical = 8.dp),) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+            ) {
                 Text(
                     text = "Total a Pagar:",
                     modifier = Modifier.padding(end = 8.dp)
                 )
+                // This should be dynamically calculated in the ViewModel or here
+                val totalAmount = products.sumOf { it.price * it.stock }
                 Text(
-                    text = "70.00",
+                    text = String.format("%.2f", totalAmount),
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -212,7 +234,6 @@ private fun CenterAppPreviewTicket(
                 modifier = Modifier.padding(top = 15.dp)
             )
         }
-
     }
 }
 
@@ -228,17 +249,13 @@ private fun ListProducts(
                     .height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text(text = "${product.stock}",
-                    modifier = Modifier.weight(1f))
+                Text(text = "${product.stock}", modifier = Modifier.weight(1f))
                 VerticalDivider(thickness = 1.dp)
-                Text(text = product.name,
-                    modifier = Modifier.weight(2f))
+                Text(text = product.name, modifier = Modifier.weight(2f))
                 VerticalDivider(thickness = 1.dp)
-                Text(text = "${product.price}",
-                    modifier = Modifier.weight(1f))
+                Text(text = "${product.price}", modifier = Modifier.weight(1f))
                 VerticalDivider(thickness = 1.dp)
-                Text(text = "${product.price * product.stock}",
-                    modifier = Modifier.weight(1f))
+                Text(text = "${product.price * product.stock}", modifier = Modifier.weight(1f))
             }
             HorizontalDivider(thickness = 1.dp)
         }

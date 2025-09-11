@@ -29,7 +29,7 @@ data class DetailTicketEntity(
     val id: Int,
     @ColumnInfo(name = "date")
     val date: String,
-    @ColumnInfo(name = "description")
+    @ColumnInfo(name = "description", defaultValue = "")
     val description: String,
     @ColumnInfo(name = "price")
     val price: Double,

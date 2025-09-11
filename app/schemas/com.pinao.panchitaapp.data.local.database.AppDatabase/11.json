@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 11,
-    "identityHash": "e9bee4e0329096e3369706431f562754",
+    "identityHash": "5415dda563903c58fe13bc6a2d885bc8",
     "entities": [
       {
         "tableName": "user",
@@ -181,7 +181,7 @@
       },
       {
         "tableName": "detail_ticket",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `description` TEXT NOT NULL, `price` REAL NOT NULL, `amount` INTEGER NOT NULL, `import` REAL NOT NULL, `idTicket` INTEGER NOT NULL, `idProduct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `description` TEXT NOT NULL DEFAULT '', `price` REAL NOT NULL, `amount` INTEGER NOT NULL, `import` REAL NOT NULL, `idTicket` INTEGER NOT NULL, `idProduct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -199,7 +199,8 @@
             "fieldPath": "description",
             "columnName": "description",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "''"
           },
           {
             "fieldPath": "price",
@@ -421,7 +422,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e9bee4e0329096e3369706431f562754')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5415dda563903c58fe13bc6a2d885bc8')"
     ]
   }
 }

@@ -1,5 +1,6 @@
 package com.pinao.panchitaapp.di.koin
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.pinao.panchitaapp.domain.usecase.client.SaveClientUseCase
@@ -42,6 +43,7 @@ class PresentationModule {
     // ViewModel for Guia Remision
     @KoinViewModel
     fun provideGuiaRemisionViewModel(
+        context: Context,
         getAllProductsUseCase: GetAllProductsUseCase,
         findCodeProductUseCase: FindCodeProductUseCase,
         saveProductsUseCase: SaveProductsUseCase,
@@ -49,6 +51,7 @@ class PresentationModule {
         saveClientUseCase: SaveClientUseCase
     ): GuiaRemisionViewModel =
         GuiaRemisionViewModel(
+            context,
             getAllProductsUseCase,
             findCodeProductUseCase,
             saveProductsUseCase,
