@@ -1,30 +1,33 @@
 package com.pinao.panchitaapp.presentation.ui.guiaremision
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -71,7 +74,10 @@ fun GuiaRemisionScreen(
 
         is ProductsUiState.Error -> {
             // Handle error state
-            Log.w("GuiaRemisionScreen","Error loading products: ${(productsUiState as ProductsUiState.Error).throwable}")
+            Log.w(
+                "GuiaRemisionScreen",
+                "Error loading products: ${(productsUiState as ProductsUiState.Error).throwable}"
+            )
         }
 
         is ProductsUiState.Success -> {
@@ -170,22 +176,54 @@ private fun CenterAppGuiaRemision(
     showDialog: Boolean,
     productsModelList: List<ProductModel>,
 
-) {
+    ) {
     val nameClient by guiaRemisionViewModel.nameClient.collectAsState()
     val numDocClient by guiaRemisionViewModel.numDocClient.collectAsState()
-    Column {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
             text = "Guia de Remision",
             modifier = Modifier.padding(16.dp),
             fontSize = 24.sp,
             color = Color.Black
         )
-        NameClientTextField(
-            nameClient = nameClient,
-        ) { guiaRemisionViewModel.onNameClientChange(it) }
-        NumDocClientTextField(
-        numDocClient = numDocClient
-        ) { guiaRemisionViewModel.onNumDocClientChange(it) }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            NameClientTextField(
+                nameClient = nameClient,
+                modifier = Modifier
+                    .weight(4f)
+                    .padding(8.dp),
+                onValueChange = { guiaRemisionViewModel.onNameClientChange(it) }
+            )
+            EraserTextClient(
+                guiaRemisionViewModel = guiaRemisionViewModel,
+                modifier = Modifier
+                    .padding(5.dp)
+                    .weight(1f)
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            NumDocClientTextField(
+                numDocClient = numDocClient,
+                modifier = Modifier
+                    .weight(4f)
+                    .padding(8.dp),
+                onValueChange = { guiaRemisionViewModel.onNumDocClientChange(it) }
+            )
+            EraserTextDocClient(
+                guiaRemisionViewModel = guiaRemisionViewModel,
+                modifier = Modifier
+                    .padding(5.dp)
+                    .weight(1f)
+            )
+        }
         ProductList(
             products = productsModelList,
             guiaRemisionViewModel = guiaRemisionViewModel
@@ -197,7 +235,7 @@ private fun CenterAppGuiaRemision(
         onDismiss = { guiaRemisionViewModel.onDialogClose() }, // Close the dialog when dismissed
         productsModelList,
 
-    )
+        )
 }
 
 @Composable
@@ -279,11 +317,11 @@ fun ProductList(products: List<ProductModel>, guiaRemisionViewModel: GuiaRemisio
     }
 }
 
-
 @Composable
 fun NameClientTextField(
     nameClient: String,
     onValueChange: (String) -> Unit,
+    modifier: Modifier
 ) {
     TextField(
         value = nameClient,
@@ -295,16 +333,16 @@ fun NameClientTextField(
             )
         },
         singleLine = true,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
+        modifier = modifier
     )
 }
+
 @Composable
 fun NumDocClientTextField(
     numDocClient: String,
     onValueChange: (String) -> Unit,
-){
+    modifier: Modifier,
+) {
     TextField(
         value = numDocClient,
         onValueChange = onValueChange,
@@ -315,9 +353,7 @@ fun NumDocClientTextField(
             )
         },
         singleLine = true,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
+        modifier = modifier,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
 }
@@ -352,12 +388,12 @@ fun AddProductDialog(
                 Spacer(modifier = Modifier.padding(8.dp))
                 CodeProductTextField(
                     codeProduct = isCodeProduct,
-                ){
+                ) {
                     guiaRemisionViewModel.onCodeProductChange(it)
                 }
                 Spacer(modifier = Modifier.padding(8.dp))
                 NameProductTextField(
-                    nameProduct =  isValNameProduct,
+                    nameProduct = isValNameProduct,
                 )
                 {
                     guiaRemisionViewModel.onNameProductChange(it)
@@ -365,13 +401,13 @@ fun AddProductDialog(
                 Spacer(modifier = Modifier.padding(8.dp))
                 PriceProductTextField(
                     priceProduct = isValPriceProduct.toString(),
-                ){
+                ) {
                     guiaRemisionViewModel.onPriceProductChange(it)
                 }
                 Spacer(modifier = Modifier.padding(8.dp))
                 QualityProductTextField(
                     quantityProduct = isValQuantityProduct.toString(),
-                ){
+                ) {
                     guiaRemisionViewModel.onQuantityProductChange(it)
                 }
                 Spacer(modifier = Modifier.padding(8.dp))
@@ -492,7 +528,7 @@ fun PriceProductTextField(priceProduct: String, onValueChange: (String) -> Unit)
 fun NameProductTextField(nameProduct: String, onValueChange: (String) -> Unit) {
     TextField(
         value = nameProduct,
-        onValueChange = {onValueChange(it)},
+        onValueChange = { onValueChange(it) },
         label = {
             Text(
                 text = "Product Name",
@@ -505,11 +541,12 @@ fun NameProductTextField(nameProduct: String, onValueChange: (String) -> Unit) {
             .padding(8.dp)
     )
 }
+
 @Composable
 fun CodeProductTextField(codeProduct: String, onValueChange: (String) -> Unit) {
     TextField(
         value = codeProduct,
-        onValueChange = {onValueChange(it)},
+        onValueChange = { onValueChange(it) },
         label = {
             Text(
                 text = "Product Code",
@@ -522,4 +559,44 @@ fun CodeProductTextField(codeProduct: String, onValueChange: (String) -> Unit) {
             .fillMaxWidth()
             .padding(8.dp)
     )
+}
+
+@Composable
+private fun EraserTextClient(
+    guiaRemisionViewModel: GuiaRemisionViewModel,
+    modifier: Modifier
+) {
+    IconButton(
+        onClick = {
+            guiaRemisionViewModel.onNameClientChange("")
+        },
+        //modifier = Modifier.padding(5.dp),
+        modifier = modifier,
+        enabled = true
+    ) {
+        Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Delete"
+        )
+    }
+}
+
+@Composable
+private fun EraserTextDocClient(
+    guiaRemisionViewModel: GuiaRemisionViewModel,
+    modifier: Modifier
+) {
+    IconButton(
+        onClick = {
+            guiaRemisionViewModel.onNumDocClientChange("")
+        },
+        //modifier = Modifier.padding(5.dp),
+        modifier = modifier,
+        enabled = true
+    ) {
+        Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Delete"
+        )
+    }
 }

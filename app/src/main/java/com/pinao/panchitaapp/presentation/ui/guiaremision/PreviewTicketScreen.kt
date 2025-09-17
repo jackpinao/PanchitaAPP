@@ -26,13 +26,17 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.domain.model.ProductModel
+import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import com.pinao.panchitaapp.presentation.ui.Screen
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @Composable
 fun PreviewTicketScreen(
@@ -170,17 +174,17 @@ private fun CenterAppPreviewTicket(
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
-                text = "Bodega 'El Chasqui'",
+                text = stringResource(R.string.bussines_name),
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-            Text(text = "Av. Antigua Panamericana Nª451, Mala, Cañete, Lima")
-            Text(text = "Telefono: 12345678")
+            Text(text = stringResource(R.string.bussines_address))
+            Text(text = stringResource(R.string.bussines_phone))
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-            Text(text = "Ticket #123456") // Should be dynamic
+            Text(text = stringResource(R.string.ticket_title) + viewModel.code) // Should be dynamic
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-            Text(text = "Date: 2023-10-01 Time: 10:00 AM") // Should be dynamic
-            Text(text = "Cliente: $nameClient")
-            Text(text = "Documento: $numDocClient")
+            Text(text = stringResource(R.string.ticket_date) + GetCurrentDateTime().getCurrentDateTime()) // Should be dynamic
+            Text(text = stringResource(R.string.ticket_client)+ nameClient)
+            Text(text = stringResource(R.string.ticket_document) + numDocClient)
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
             Row(
                 modifier = Modifier
@@ -189,22 +193,22 @@ private fun CenterAppPreviewTicket(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Cant.",
+                    text = stringResource(R.string.ticket_quantity),
                     modifier = Modifier.weight(1f)
                 )
                 VerticalDivider(thickness = 1.dp)
                 Text(
-                    text = "Producto",
+                    text = stringResource(R.string.ticket_product),
                     modifier = Modifier.weight(2f)
                 )
                 VerticalDivider(thickness = 1.dp)
                 Text(
-                    text = "Precio",
+                    text = stringResource(R.string.ticket_price),
                     modifier = Modifier.weight(1f)
                 )
                 VerticalDivider(thickness = 1.dp)
                 Text(
-                    text = "Total",
+                    text = stringResource(R.string.ticket_total),
                     modifier = Modifier.weight(1f)
                 )
                 VerticalDivider(thickness = 1.dp)
@@ -219,18 +223,18 @@ private fun CenterAppPreviewTicket(
                     .padding(vertical = 8.dp),
             ) {
                 Text(
-                    text = "Total a Pagar:",
+                    text = stringResource(R.string.ticket_total_title),
                     modifier = Modifier.padding(end = 8.dp)
                 )
                 // This should be dynamically calculated in the ViewModel or here
                 val totalAmount = products.sumOf { it.price * it.stock }
                 Text(
-                    text = String.format("%.2f", totalAmount),
+                    text = String.format(Locale.US,"%.2f", totalAmount),
                     modifier = Modifier.weight(1f)
                 )
             }
             Text(
-                text = "¡¡GRACIAS POR SU COMPRA!!",
+                text = stringResource(R.string.ticket_thanks),
                 modifier = Modifier.padding(top = 15.dp)
             )
         }

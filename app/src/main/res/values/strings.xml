@@ -8,4 +8,19 @@
     <string name="recarga">Recarga</string>
     <string name="guia_remision">Guia Remision</string>
     <string name="detalles">Detalles</string>
+
+    <string name="bussines_name">Bodega El Chasqui</string>
+    <string name="bussines_address">Av. Antigua Panamericana Nª451, Mala, Cañete, Lima</string>
+    <string name="bussines_phone">Telefono: 123456789</string>
+    <string name="ticket_title">Ticket Nº </string>
+    <string name="ticket_date">Fecha: </string>
+    <string name="ticket_client">Cliente: </string>
+    <string name="ticket_document">Documento: </string>
+    <string name="ticket_product">Producto</string>
+    <string name="ticket_price">Precio</string>
+    <string name="ticket_quantity">Cant</string>
+    <string name="ticket_total">Total</string>
+    <string name="ticket_total_title">Total a Pagar:</string>
+    <string name="ticket_thanks">¡¡GRACIAS POR SU COMPRA!!</string>
+    <string name="ticket_line">--------------------------------</string>
 </resources>

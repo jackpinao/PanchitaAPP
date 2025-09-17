@@ -19,6 +19,7 @@ import com.pinao.panchitaapp.domain.usecase.products.DeleteProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.FindCodeProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.GetAllProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.SaveProductsUseCase
+import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -200,10 +201,10 @@ class GuiaRemisionViewModel(
         builder.append(string2).append("\n")
         builder.append(string3).append("\n")
         builder.append(string4).append("\n")
-        builder.append(string5).append("\n")
-        builder.append(string6).append("\n")
-        builder.append(string7).append("\n")
-        builder.append(string8).append("\n")
+        builder.append(string5).append(code).append("\n")
+        builder.append(string6).append(GetCurrentDateTime().getCurrentDateTime()).append("\n")
+        builder.append(string7).append(nameClient.value).append("\n")
+        builder.append(string8).append(numDocClient.value).append("\n")
         builder.append(string9).append("\n")
         builder.append(string10).append("\n")
         builder.append(string9).append("\n")
@@ -290,9 +291,6 @@ class GuiaRemisionViewModel(
                         resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
                     uri?.let {
                         resolver.openOutputStream(it)?.use { outputStream ->
-                            if (outputStream == null) {
-                                throw IOException("Failed to open output stream")
-                            }
                             pdfDocument.writeTo(outputStream)
                             _downloadStatus.value = "Ticket downloaded successfully"
                         }

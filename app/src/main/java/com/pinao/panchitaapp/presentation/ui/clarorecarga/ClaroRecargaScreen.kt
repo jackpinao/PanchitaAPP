@@ -19,6 +19,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -239,11 +241,22 @@ private fun CenterApp(
             .padding(padding)
     ) {
         item {
-
-            AddTextFieldPhone(
-                isNumPhone,
-                onNumPhone,
-            )
+            LazyRow(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                item {
+                    AddTextFieldPhone(
+                        isNumPhone,
+                        onNumPhone,
+                    )
+                }
+                //item { Spacer(modifier = Modifier.padding(end = 16.dp)) }
+                item {
+                    EraserText(
+                        onText = onNumPhone,
+                        modifier = Modifier.padding(5.dp))
+                }
+            }
         }
         item {
             LazyRow {
@@ -283,7 +296,6 @@ private fun CenterApp(
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -485,6 +497,26 @@ private fun AddTextFieldPhone(
         maxLength = num,
         enable = true
     )
+}
+
+@Composable
+private fun EraserText(
+    onText: (String) -> Unit,
+    modifier: Modifier
+) {
+    IconButton(
+        onClick = {
+            onText("")
+        },
+        //modifier = Modifier.padding(5.dp),
+        modifier = modifier,
+        enabled = true
+    ) {
+        Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Delete"
+        )
+    }
 }
 
 @Composable
