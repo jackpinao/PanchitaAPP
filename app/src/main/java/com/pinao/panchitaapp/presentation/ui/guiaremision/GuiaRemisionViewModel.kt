@@ -199,6 +199,7 @@ class GuiaRemisionViewModel(
         val builder = StringBuilder()
         builder.append(string1).append("\n")
         builder.append(string2).append("\n")
+        builder.append(string2_1).append("\n")
         builder.append(string3).append("\n")
         builder.append(string4).append("\n")
         builder.append(string5).append(code).append("\n")
@@ -324,7 +325,8 @@ class GuiaRemisionViewModel(
     FORMAT TICKET STRING
      */
     var string1 = "Bodega 'El Chasqui'"
-    var string2 = "Av. Antigua Panamericana Nª451, Mala, Cañete, Lima"
+    var string2 = "Av. Antigua Panamericana Nª451,"
+    var string2_1 = "Mala, Cañete, Lima"
     var string3 = "Telefono: 12345678"
     var string4 = "--------------------------------"
     var string5 = "Ticket #"
@@ -332,7 +334,7 @@ class GuiaRemisionViewModel(
     var string7 = "Cliente: "
     var string8 = "Documento: "
     var string9 = "--------------------------------"
-    var string10 = "Cant. Producto Precio Total"
+    var string10 = "Cant. Producto     Precio Total"
     var string11 = "Total a Pagar:"
     var string12 = "¡¡GRACIAS POR SU COMPRA!!"
 }

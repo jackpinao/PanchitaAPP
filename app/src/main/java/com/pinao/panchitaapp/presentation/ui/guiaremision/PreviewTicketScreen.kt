@@ -183,7 +183,7 @@ private fun CenterAppPreviewTicket(
             Text(text = stringResource(R.string.ticket_title) + viewModel.code) // Should be dynamic
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
             Text(text = stringResource(R.string.ticket_date) + GetCurrentDateTime().getCurrentDateTime()) // Should be dynamic
-            Text(text = stringResource(R.string.ticket_client)+ nameClient)
+            Text(text = stringResource(R.string.ticket_client) + nameClient)
             Text(text = stringResource(R.string.ticket_document) + numDocClient)
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
             Row(
@@ -229,7 +229,7 @@ private fun CenterAppPreviewTicket(
                 // This should be dynamically calculated in the ViewModel or here
                 val totalAmount = products.sumOf { it.price * it.stock }
                 Text(
-                    text = String.format(Locale.US,"%.2f", totalAmount),
+                    text = String.format(Locale.US, "%.2f", totalAmount),
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -259,7 +259,14 @@ private fun ListProducts(
                 VerticalDivider(thickness = 1.dp)
                 Text(text = "${product.price}", modifier = Modifier.weight(1f))
                 VerticalDivider(thickness = 1.dp)
-                Text(text = "${product.price * product.stock}", modifier = Modifier.weight(1f))
+                Text(
+                    text = String.format(
+                        Locale.US,
+                        "%.2f",
+                        product.price * product.stock
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
             }
             HorizontalDivider(thickness = 1.dp)
         }

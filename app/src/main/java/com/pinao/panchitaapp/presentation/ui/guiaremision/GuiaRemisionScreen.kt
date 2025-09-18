@@ -296,7 +296,8 @@ fun ProductList(products: List<ProductModel>, guiaRemisionViewModel: GuiaRemisio
                                 "\n Nombre Producto: ${product.name} " +
                                 "\n Precio: ${product.price} " +
                                 "\n Cantidad: ${product.stock} " +
-                                "\n Total: ${product.price * product.stock}",
+                                "\n Total: " +
+                                "%.2f".format(product.price * product.stock),
                         modifier = Modifier.padding(8.dp)
                     )
                     ElevatedButton(

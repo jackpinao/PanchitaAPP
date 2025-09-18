@@ -16,13 +16,15 @@ import com.pinao.panchitaapp.domain.usecase.rechange.GetListForDateRechangeUC
 import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 
 @Module
 class DomainModule {
     /*
     RECHANGE USE CASES
     */
-    @Factory
+    //@Factory
+    @Single
     fun provideGetAllDateRechangeUseCase(
         repositoryImpl: RechangeRepositoryImpl
     ) = GetAllDateRechangeUseCase(repositoryImpl)
