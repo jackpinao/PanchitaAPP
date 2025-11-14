@@ -150,7 +150,7 @@ private fun BottomApp(
 }
 
 @Composable
-fun FabDialog(guiaRemisionViewModel: GuiaRemisionViewModel) {
+private fun FabDialog(guiaRemisionViewModel: GuiaRemisionViewModel) {
     FloatingActionButton(
         onClick = {
             guiaRemisionViewModel.onShowDialogClick() // Show the dialog when the FAB is clicked
@@ -161,7 +161,7 @@ fun FabDialog(guiaRemisionViewModel: GuiaRemisionViewModel) {
 }
 
 @Composable
-fun TopBar(
+private fun TopBar(
     guiaRemisionViewModel: GuiaRemisionViewModel,
     showDialog: Boolean
 ) {
@@ -463,8 +463,8 @@ fun AddProductButton(
             guiaRemisionViewModel.updateProduct(
                 ProductModel(
                     name = isValNameProduct,
-                    price = isValPriceProduct.toDouble(),
-                    stock = isValQuantityProduct.toDouble(),
+                    price = if (isValPriceProduct.isEmpty()) 0.0 else isValPriceProduct.toDouble(),
+                    stock = if (isValQuantityProduct.isEmpty()) 0.0 else isValQuantityProduct.toDouble() ,
                     code = isCodeProduct
                 )
             )
