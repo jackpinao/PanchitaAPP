@@ -2,9 +2,8 @@ package com.pinao.panchitaapp.domain.model
 
 import java.util.UUID
 
-data class RechangeModel(
+class CategoryModel (
     val id: String = UUID.randomUUID().toString(),
-    val date: String = "",
-    val amount: Int = 0,
-    val numPhone: String = "",
+    val name: String = "",
+    val revenue: Double = 0.0,
 )

@@ -1,8 +1,10 @@
 package com.pinao.panchitaapp.di.koin
 
 import com.pinao.panchitaapp.data.repository.ClientRepositoryImpl
-import com.pinao.panchitaapp.data.repository.ProductsRepositoryImpl
 import com.pinao.panchitaapp.data.repository.RechangeRepositoryImpl
+import com.pinao.panchitaapp.domain.repository.ClientRepository
+import com.pinao.panchitaapp.domain.repository.ProductRepository
+import com.pinao.panchitaapp.domain.repository.RechangeRepository
 import com.pinao.panchitaapp.domain.usecase.client.DeleteClientUseCase
 import com.pinao.panchitaapp.domain.usecase.client.FindClientUseCase
 import com.pinao.panchitaapp.domain.usecase.client.GetAllClientsUseCase
@@ -26,59 +28,59 @@ class DomainModule {
     //@Factory
     @Single
     fun provideGetAllDateRechangeUseCase(
-        repositoryImpl: RechangeRepositoryImpl
-    ) = GetAllDateRechangeUseCase(repositoryImpl)
+        repository: RechangeRepository
+    ) = GetAllDateRechangeUseCase(repository)
 
     @Factory
     fun provideGetListForDateRechangeUC(
-        repositoryImpl: RechangeRepositoryImpl
-    ) = GetListForDateRechangeUC(repositoryImpl)
+        repository: RechangeRepository
+    ) = GetListForDateRechangeUC(repository)
 
     @Factory
     fun provideSaveRechangeUseCase(
-        repositoryImpl: RechangeRepositoryImpl
-    ) = SaveRechangeUseCase(repositoryImpl)
+        repository: RechangeRepository
+    ) = SaveRechangeUseCase(repository)
 
     /*
     PRODUCTS USE CASES
      */
     @Factory
     fun provideDeleteProductUseCase(
-        repositoryImpl: ProductsRepositoryImpl
-    ) = DeleteProductUseCase(repositoryImpl)
+        productRepository: ProductRepository
+    ) = DeleteProductUseCase(productRepository)
 
     @Factory
     fun provideGetAllProductsUseCase(
-        repositoryImpl: ProductsRepositoryImpl
-    ) = GetAllProductsUseCase(repositoryImpl)
+        productRepository: ProductRepository
+    ) = GetAllProductsUseCase(productRepository)
 
     @Factory
     fun provideSaveProductUseCase(
-        repositoryImpl: ProductsRepositoryImpl
-    ) = SaveProductsUseCase(repositoryImpl)
+        productRepository: ProductRepository
+    ) = SaveProductsUseCase(productRepository)
 
     @Factory
     fun provideFindProductUseCase(
-        repositoryImpl: ProductsRepositoryImpl
-    ) = FindCodeProductUseCase(repositoryImpl)
+        productRepository: ProductRepository
+    ) = FindCodeProductUseCase(productRepository)
     /*
     CLIENTS USE CASES
      */
     @Factory
     fun provideGetAllClientsUseCase(
-        repositoryImpl: ClientRepositoryImpl
-    ) = GetAllClientsUseCase(repositoryImpl)
+        repository: ClientRepository
+    ) = GetAllClientsUseCase(repository)
     @Factory
     fun provideSaveClientUseCase(
-        repositoryImpl: ClientRepositoryImpl
-    ) = SaveClientUseCase(repositoryImpl)
+        repository: ClientRepository
+    ) = SaveClientUseCase(repository)
     @Factory
     fun provideDeleteClientUseCase(
-        repositoryImpl: ClientRepositoryImpl
-    ) = DeleteClientUseCase(repositoryImpl)
+        repository: ClientRepository
+    ) = DeleteClientUseCase(repository)
     @Factory
     fun provideFindClientUseCase(
-        repositoryImpl: ClientRepositoryImpl
-    ) = FindClientUseCase(repositoryImpl)
+        repository: ClientRepository
+    ) = FindClientUseCase(repository)
 
 }

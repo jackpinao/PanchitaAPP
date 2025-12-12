@@ -1,9 +1,9 @@
 package com.pinao.panchitaapp.domain.usecase.client
 
-import com.pinao.panchitaapp.data.repository.ClientRepositoryImpl
+import com.pinao.panchitaapp.domain.repository.ClientRepository
 
 class FindClientUseCase(
-    private val repository: ClientRepositoryImpl
+    private val repository: ClientRepository
 ) {
 
 }

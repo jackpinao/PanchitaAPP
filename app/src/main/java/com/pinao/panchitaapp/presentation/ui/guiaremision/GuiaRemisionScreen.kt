@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -156,7 +157,10 @@ private fun FabDialog(guiaRemisionViewModel: GuiaRemisionViewModel) {
             guiaRemisionViewModel.onShowDialogClick() // Show the dialog when the FAB is clicked
         }
     ) {
-        Icon(Icons.Filled.Add, contentDescription = "Add Product")
+        Icon(
+            imageVector = Icons.Filled.Add,
+            contentDescription = "Add Product"
+        )
     }
 }
 
@@ -464,7 +468,7 @@ fun AddProductButton(
                 ProductModel(
                     name = isValNameProduct,
                     price = if (isValPriceProduct.isEmpty()) 0.0 else isValPriceProduct.toDouble(),
-                    stock = if (isValQuantityProduct.isEmpty()) 0.0 else isValQuantityProduct.toDouble() ,
+                    stock = if (isValQuantityProduct.isEmpty()) 0.0 else isValQuantityProduct.toDouble(),
                     code = isCodeProduct
                 )
             )

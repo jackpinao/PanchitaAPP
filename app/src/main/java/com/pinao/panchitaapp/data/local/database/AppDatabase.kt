@@ -3,6 +3,7 @@ package com.pinao.panchitaapp.data.local.database
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.pinao.panchitaapp.data.local.dao.CategoryDao
 import com.pinao.panchitaapp.data.local.dao.ClientDao
 import com.pinao.panchitaapp.data.local.dao.DetailTicketDao
 import com.pinao.panchitaapp.data.local.dao.ProductDao
@@ -28,7 +29,7 @@ import com.pinao.panchitaapp.data.local.entity.UserEntity
         CategoryEntity::class
     ],
     exportSchema = true,
-    version = 11,
+    version = 12,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
@@ -40,6 +41,7 @@ import com.pinao.panchitaapp.data.local.entity.UserEntity
         AutoMigration(from = 8, to = 9),
         AutoMigration(from = 9, to = 10),
         AutoMigration(from = 10, to = 11),
+        AutoMigration(from = 11, to = 12),
     ],
 )
   abstract class AppDatabase : RoomDatabase() {
@@ -48,5 +50,6 @@ import com.pinao.panchitaapp.data.local.entity.UserEntity
     abstract fun ticketDao(): TicketDao
     abstract fun detailTicketDao(): DetailTicketDao
     abstract fun productDao(): ProductDao
+    abstract fun categoryDao(): CategoryDao
     abstract fun rechangeDao(): RechangeDao
 }

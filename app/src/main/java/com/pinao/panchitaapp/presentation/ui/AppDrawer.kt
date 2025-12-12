@@ -10,8 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,10 +21,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.pinao.panchitaapp.R
@@ -39,7 +40,9 @@ fun AppDrawer(
     navigationToHome: () -> Unit = {},
     navigationToRecarga: () -> Unit = {},
     navigationToGuiaRemision: () -> Unit = {},
+    navigationToAddProduct: () -> Unit = {},
     closeDrawer: () -> Unit = {},
+    //navigationToAddCategory: () -> Unit,
 ) {
     ModalDrawerSheet(
         modifier = Modifier
@@ -60,7 +63,7 @@ fun AppDrawer(
             },
             icon = {
                 Icon(
-                    imageVector = Icons.Default.Home,
+                    imageVector = ImageVector.vectorResource(id = R.drawable.outline_add_home_24),
                     contentDescription = stringResource(id = R.string.home)
                 )
             },
@@ -80,7 +83,7 @@ fun AppDrawer(
             },
             icon = {
                 Icon(
-                    imageVector = Icons.Default.Share,
+                    imageVector = ImageVector.vectorResource(id = R.drawable.baseline_sticky_note_2_24),
                     contentDescription = stringResource(id = R.string.recarga)
                 )
             },
@@ -102,6 +105,27 @@ fun AppDrawer(
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_sticky_note_2_24),
                     contentDescription = stringResource(id = R.string.guia_remision)
+                )
+            },
+            shape = MaterialTheme.shapes.small
+        )
+        NavigationDrawerItem(
+            label = {
+                Text(
+                    text = stringResource(id = R.string.add_produdct),
+                    style = MaterialTheme.typography.labelSmall
+                )
+
+            },
+            selected = route == AppScreens.AddProduct.route,
+            onClick = {
+                closeDrawer()
+                navigationToAddProduct()
+            },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.AddShoppingCart,
+                    contentDescription = stringResource(id = R.string.add_produdct)
                 )
             },
             shape = MaterialTheme.shapes.small
@@ -141,7 +165,6 @@ fun DrawerHeader(modifier: Modifier) {
 @Composable
 fun PreviewDrawerHeader() {
     AppDrawer(
-        modifier = Modifier,
-        route = AppScreens.Home.route
+        route = AppScreens.Home.route,
     )
 }

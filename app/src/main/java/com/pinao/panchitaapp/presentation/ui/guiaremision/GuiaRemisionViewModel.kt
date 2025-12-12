@@ -15,10 +15,7 @@ import androidx.lifecycle.viewModelScope
 import com.pinao.panchitaapp.domain.model.ClientModel
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.usecase.client.SaveClientUseCase
-import com.pinao.panchitaapp.domain.usecase.products.DeleteProductUseCase
-import com.pinao.panchitaapp.domain.usecase.products.FindCodeProductUseCase
-import com.pinao.panchitaapp.domain.usecase.products.GetAllProductsUseCase
-import com.pinao.panchitaapp.domain.usecase.products.SaveProductsUseCase
+import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
 import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,10 +30,7 @@ import java.util.Locale
 
 class GuiaRemisionViewModel(
     private val applicationContext: Context,
-    private val getAllProductsUseCase: GetAllProductsUseCase,
-    private val findCodeProductUseCase: FindCodeProductUseCase,
-    private val saveProductsUseCase: SaveProductsUseCase,
-    private val deleteProductUseCase: DeleteProductUseCase,
+    private val productUseCases: ProductUseCases,
     private val saveClientUseCase: SaveClientUseCase,
 ) : ViewModel() {
 
@@ -81,7 +75,7 @@ class GuiaRemisionViewModel(
 
     private fun downLoadProducts() {
         viewModelScope.launch {
-            getAllProductsUseCase()
+            productUseCases.getAll()
                 .onStart { _productsUiState.value = ProductsUiState.Loading }
                 .catch { exception -> _productsUiState.value = ProductsUiState.Error(exception) }
                 .collect { products ->
@@ -124,7 +118,7 @@ class GuiaRemisionViewModel(
         Log.d("GuiaRemisionViewModel", "checkCodeProduct: $codeProduct")
         var isProduct = false
         viewModelScope.launch {
-            findCodeProductUseCase(codeProduct)
+            productUseCases.findByCode(codeProduct)
                 .onStart { _productsUiState.value = ProductsUiState.Loading }
                 .catch { exception -> _productsUiState.value = ProductsUiState.Error(exception) }
                 .collect { product ->
@@ -145,7 +139,7 @@ class GuiaRemisionViewModel(
         viewModelScope.launch {
             try {
                 _productsUiState.value = ProductsUiState.Loading
-                saveProductsUseCase(productModel)
+                productUseCases.save(productModel)
                 _productsUiState.value = ProductsUiState.Success(listOf(productModel))
                 //downLoadProducts()
             } catch (e: Exception) {
@@ -168,7 +162,7 @@ class GuiaRemisionViewModel(
 
     fun onItemRemove(productModel: ProductModel) {
         viewModelScope.launch {
-            deleteProductUseCase(productModel)
+            productUseCases.delete(productModel)
             downLoadProducts()
         }
     }

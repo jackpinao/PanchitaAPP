@@ -26,31 +26,11 @@ class ClaroRecargaViewModel(
     getAllDateRechangeUseCase: GetAllDateRechangeUseCase
 ) : ViewModel() {
 
-    //private val dateToday = GetCurrentDateTime().getCurrentDateTime2()
-
-//    val uiState: StateFlow<RechangeUiState> = getAllDateRechangeUseCase().map(::Success)
-//        .catch { Error(it) }
-//        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Loading)
-
-
-//    val uiState: StateFlow<RechangeUiState> = getAllDateRechangeUseCase().map(::Success)
-//        .catch { Error(it) }
-//        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Loading)
-
     private val _dateFilterRechanges = MutableStateFlow<List<RechangeModel>>(emptyList())
     val dateFilterRechanges: StateFlow<List<RechangeModel>> = _dateFilterRechanges.asStateFlow()
 
     private val _uiState = MutableStateFlow<RechangeUiState>(Loading)
     val uiState: StateFlow<RechangeUiState> = _uiState.asStateFlow()
-
-//    private val _uiState2 = MutableStateFlow<RechangeUiState>(Loading)
-//    val uiState2: StateFlow<RechangeUiState> = _uiState2.asStateFlow()
-
-    //private val _state = MutableStateFlow(UiState())
-    //val state: StateFlow<UiState> = _state.asStateFlow()
-
-//    var state by mutableStateOf(UiState())
-//        private set
 
     init {
         viewModelScope.launch {

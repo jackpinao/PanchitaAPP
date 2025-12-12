@@ -8,31 +8,32 @@ import androidx.room.Index
 
 @Entity(
     tableName = "product",
-//    foreignKeys = [
-//        ForeignKey(
-//            entity = CategoryEntity::class,
-//            parentColumns = ["id"],
-//            childColumns = ["idCategory"],
-//            onDelete = ForeignKey.NO_ACTION,
-//        ),
+    foreignKeys = [
+        ForeignKey(
+            entity = CategoryEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["idCategory"],
+            onDelete = ForeignKey.CASCADE,
+        ),
 //        ForeignKey(
 //            entity = DetailTicketEntity::class,
 //            parentColumns = ["id"],
 //            childColumns = ["idDetailTicketEntity"],
 //            onDelete = ForeignKey.NO_ACTION,
 //        )
-//    ],
+    ],
     indices = [
-        Index(value = ["code"], unique = true)
+        Index(value = ["code"], unique = true),
+        Index(value = ["idCategory"])
     ]
 )
 data class ProductsEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    @PrimaryKey
+    val id: String,
     @ColumnInfo(name = "idCategory")
-    val idCategory: Int,
+    val idCategory: String,
     @ColumnInfo(name = "idDetailTicketEntity")
-    val idDetailTicketEntity : Int,
+    val idDetailTicketEntity: Int,
     @ColumnInfo(name = "name")
     val name: String,
     @ColumnInfo(name = "description")

@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.pinao.panchitaapp.data.local.entity.ProductWithCategory
 import com.pinao.panchitaapp.data.local.entity.ProductsEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -15,6 +16,10 @@ interface ProductDao {
 
     @Query("SELECT * FROM product ORDER BY name ASC")
     fun getAllProducts(): Flow<List<ProductsEntity>>
+
+    @Transaction
+    @Query("SELECT * FROM product")
+    fun getProductsWithCategory(): Flow<List<ProductWithCategory>>
 
     @Query("SELECT * FROM product WHERE code = :codeProduct")
     fun findCodeProduct(codeProduct: String): Flow<ProductsEntity?>

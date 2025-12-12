@@ -25,8 +25,8 @@ import androidx.room.PrimaryKey
     indices = [Index(value = ["idTicket"]), Index(value = ["idProduct"])]
 )
 data class DetailTicketEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    @PrimaryKey
+    val id: String,
     @ColumnInfo(name = "date")
     val date: String,
     @ColumnInfo(name = "description", defaultValue = "")

@@ -126,6 +126,7 @@ dependencies {
     implementation(libs.androidx.runtime.saveable)
     implementation(libs.androidx.junit.ktx)
     implementation(libs.androidx.compose.ui)
+    implementation(libs.google.firebase.firestore)
     //implementation(libs.play.services.ads.lite)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
@@ -157,8 +158,9 @@ dependencies {
     implementation(libs.runtime.livedata)
 
     // QR
-    implementation(libs.zxing.android.embedded)
-    implementation(libs.core)
+    implementation(libs.play.services.code.scanner)
+    //implementation(libs.zxing.android.embedded)
+    //implementation(libs.core)
 
     //Grafic report
     //implementation(libs.mpandroidchart)
@@ -177,13 +179,20 @@ dependencies {
     implementation(libs.splash.screen)
     //Corrutinas
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     implementation(libs.kotlin.coroutines.core)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.serialization.json)
+    //FIREBASE
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
+    //implementation(libs.firebase.firestore)
+    //implementation(libs.firebase.firestore.ktx)
+
+    //Compose
+    implementation(libs.androidx.compose.material.icons.extended)
 
     //Test
     androidTestImplementation(libs.androidx.junit)

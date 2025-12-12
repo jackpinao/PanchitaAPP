@@ -31,8 +31,8 @@ class SaveProductsUseCaseTest {
         // TODO implement test
         // Given
         val productModel = ProductModel(
-            id = 1,
-            idCategory = 1,
+            id = "1",
+            idCategory = "1",
             idDetailTicketEntity = 1,
             name = "Test Product",
             description = "Test Description",
@@ -60,8 +60,8 @@ class SaveProductsUseCaseTest {
         // verify that the 'invoke' method correctly propagates this exception.
         // Given
         val productModel = ProductModel(
-            id = 1,
-            idCategory = 1,
+            id = "1",
+            idCategory = "1",
             idDetailTicketEntity = 1,
             name = "Test Product",
             description = "Test Description",

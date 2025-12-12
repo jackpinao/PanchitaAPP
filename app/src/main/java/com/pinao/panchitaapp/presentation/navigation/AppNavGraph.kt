@@ -2,8 +2,6 @@ package com.pinao.panchitaapp.presentation.navigation
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,6 +20,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,7 +32,6 @@ import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaScreen
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaViewModel
 import com.pinao.panchitaapp.presentation.ui.guiaremision.GuiaRemisionScreen
 import com.pinao.panchitaapp.presentation.ui.guiaremision.GuiaRemisionViewModel
-import com.pinao.panchitaapp.presentation.ui.guiaremision.PreviewTicketContent
 import com.pinao.panchitaapp.presentation.ui.guiaremision.PreviewTicketScreen
 import com.pinao.panchitaapp.presentation.ui.home.HomeScreen
 import com.pinao.panchitaapp.presentation.ui.home.HomeViewModel
@@ -40,6 +39,10 @@ import com.pinao.panchitaapp.presentation.ui.login.LoginViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import com.pinao.panchitaapp.R
+import com.pinao.panchitaapp.presentation.ui.addCategory.AddCategoryScreen
+import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductScreen
+import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,6 +55,7 @@ fun AppNavGraph(
     homeViewModel: HomeViewModel = koinViewModel(),
     loginViewModel: LoginViewModel = koinViewModel(),
     guiaRemisionViewModel: GuiaRemisionViewModel = koinViewModel(),
+    addProductsViewModel: AddProductViewModel = koinViewModel()
 ) {
     //val scope = rememberCoroutineScope()
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
@@ -67,6 +71,8 @@ fun AppNavGraph(
                 navigationToHome = { navigationActions.navigateToHome() },
                 navigationToRecarga = { navigationActions.navigateToRecarga() },
                 navigationToGuiaRemision = { navigationActions.navigateToGuiaRemision() },
+                navigationToAddProduct = { navigationActions.navigateToAddProduct()},
+                //navigationToAddCategory = { navigationActions.navigateToAddCategory() },
                 closeDrawer = { coroutineScope.launch { drawerState.close() } },
                 modifier = Modifier
             )
@@ -91,7 +97,7 @@ fun AppNavGraph(
                             },
                             content = {
                                 Icon(
-                                    imageVector = Icons.Default.Menu,
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.outline_add_home_24),                             //imageVector = Icons.Default.Menu,
                                     contentDescription = "Menu"
                                 )
                             },
@@ -134,6 +140,18 @@ fun AppNavGraph(
                 composable( route = AppScreens.PreviewTicket.route) {
                     PreviewTicketScreen(
                         viewModel = guiaRemisionViewModel
+                    )
+                }
+                composable(route = AppScreens.AddProduct.route) {
+                    AddProductScreen(
+                        navController = navController,
+                        viewModel = addProductsViewModel
+                    )
+                }
+                composable(route = AppScreens.AddCategory.route) {
+                    // Add your AddCategoryScreen here
+                    AddCategoryScreen(
+                        navController = navController
                     )
                 }
             }

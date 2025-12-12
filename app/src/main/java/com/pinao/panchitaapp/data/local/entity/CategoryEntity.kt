@@ -8,23 +8,15 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "category",
-//    foreignKeys = [
-//        ForeignKey(
-//            entity = ProductsEntity::class,
-//            parentColumns = ["id"],
-//            childColumns = ["idProduct"],
-//            onDelete = ForeignKey.NO_ACTION
-//        )
-//    ],
     indices = [
         Index(value = ["id"], unique = true)
     ]
 )
 data class CategoryEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int,
-//    @ColumnInfo(name = "idProduct")
-//    val idProduct: Int,
+    @PrimaryKey
+    val id: String,
     @ColumnInfo(name = "name")
     val name: String,
+    @ColumnInfo(name = "revenue", defaultValue = "0.0")
+    val revenue: Double
 )

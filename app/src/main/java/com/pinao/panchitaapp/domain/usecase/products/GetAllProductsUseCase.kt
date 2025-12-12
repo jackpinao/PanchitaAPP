@@ -1,9 +1,9 @@
 package com.pinao.panchitaapp.domain.usecase.products
 
-import com.pinao.panchitaapp.data.repository.ProductsRepositoryImpl
+import com.pinao.panchitaapp.domain.repository.ProductRepository
 
 class GetAllProductsUseCase(
-    private val repository: ProductsRepositoryImpl
+    private val repository: ProductRepository
 ) {
 
     operator fun invoke() = repository.getAllProductsFromDataBase()

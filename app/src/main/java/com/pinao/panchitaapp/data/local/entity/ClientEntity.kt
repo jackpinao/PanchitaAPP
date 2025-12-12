@@ -12,8 +12,8 @@ import androidx.room.PrimaryKey
     ]
 )
 data class ClientEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    @PrimaryKey
+    val id: String,
     @ColumnInfo(name = "name")
     val name: String,
     @ColumnInfo(name = "numDoc")

@@ -12,7 +12,7 @@ class UserRepositoryImpl(
 ) : UserRepository {
 
     override suspend fun save(userModel: UserModel): Int {
-        return if (userModel.id == 0) {
+        return if (userModel.id == "") {
             userDao.insert(UserMapper.toDatabase(userModel)).toInt()
         } else {
             userDao.update(UserMapper.toDatabase(userModel))

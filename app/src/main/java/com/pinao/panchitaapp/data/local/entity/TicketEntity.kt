@@ -26,8 +26,8 @@ import androidx.room.PrimaryKey
     //ignoredColumns = ["details"]
 )
 data class TicketEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    @PrimaryKey
+    val id: String,
     @ColumnInfo(name = "date")
     val date: String,
     @ColumnInfo(name = "total")

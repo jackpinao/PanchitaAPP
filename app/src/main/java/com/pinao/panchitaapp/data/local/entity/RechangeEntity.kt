@@ -12,8 +12,8 @@ import androidx.room.Index
     ]
 )
 data class RechangeEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    @PrimaryKey
+    val id: String,
     @ColumnInfo(name = "date")
     val date: String,
     @ColumnInfo(name = "amount")

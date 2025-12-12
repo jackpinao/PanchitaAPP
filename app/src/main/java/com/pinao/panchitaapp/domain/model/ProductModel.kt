@@ -1,8 +1,10 @@
 package com.pinao.panchitaapp.domain.model
 
+import java.util.UUID
+
 data class ProductModel(
-    val id: Int = System.currentTimeMillis().hashCode(),
-    val idCategory: Int = 0,
+    val id: String = UUID.randomUUID().toString(),
+    val idCategory: String = "",
     val idDetailTicketEntity : Int = 0,
     val name: String = "",
     val description: String = "",

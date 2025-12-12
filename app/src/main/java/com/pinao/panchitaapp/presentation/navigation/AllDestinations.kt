@@ -8,6 +8,8 @@ object AllDestinations {
     const val RECARGA = "recarga"
     const val GUIA_REMISION = "guiaRemision"
     const val PREVIEW_TICKET = "previewTicket"
+    const val ADD_PRODUCT = "addProduct"
+    const val ADD_CATEGORY = "addCategory"
 }
 
 class AppNavigationActions(
@@ -43,5 +45,16 @@ class AppNavigationActions(
             restoreState = true
         }
     }
-
+    fun navigateToAddProduct(){
+        navController.navigate(AllDestinations.ADD_PRODUCT) {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    fun navigateToAddCategory() {
+        navController.navigate(AllDestinations.ADD_CATEGORY) {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
 }
