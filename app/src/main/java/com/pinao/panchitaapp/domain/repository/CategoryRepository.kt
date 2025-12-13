@@ -15,6 +15,7 @@ interface CategoryRepository {
      * Busca las categorías más recientes desde Firestore y las guarda en la base de datos local.
      */
     suspend fun refreshCategoriesFromRemote()
+    fun findCodeCategory(codeCategory: String): Flow<CategoryModel?>
 
     /**
      * Guarda una nueva categoría tanto en Firestore como en la base de datos local.

@@ -6,10 +6,13 @@ import androidx.lifecycle.ViewModel
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
+import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class AddProductViewModel() : ViewModel() {
+class AddProductViewModel(
+    private val productUseCases: ProductUseCases
+) : ViewModel() {
 
     private val _scannedText = MutableStateFlow("")
     val scannedText = _scannedText.asStateFlow()

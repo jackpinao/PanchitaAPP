@@ -29,7 +29,7 @@ class ProductsRepositoryImpl(
         }
     }
 
-    override suspend fun getAllProductsRemote() {
+    override suspend fun refreshProductsFromRemote() {
         withContext(Dispatchers.IO) {
             try {
                 Log.d("ProductsRepositoryImpl", "Fetching products from Firestore")

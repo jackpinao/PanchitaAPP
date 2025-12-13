@@ -1,10 +1,10 @@
 package com.pinao.panchitaapp.di.koin
 
-import com.pinao.panchitaapp.data.repository.ClientRepositoryImpl
-import com.pinao.panchitaapp.data.repository.RechangeRepositoryImpl
+import com.pinao.panchitaapp.domain.repository.CategoryRepository
 import com.pinao.panchitaapp.domain.repository.ClientRepository
 import com.pinao.panchitaapp.domain.repository.ProductRepository
 import com.pinao.panchitaapp.domain.repository.RechangeRepository
+import com.pinao.panchitaapp.domain.usecase.category.CheckCategoryNameUseCase
 import com.pinao.panchitaapp.domain.usecase.client.DeleteClientUseCase
 import com.pinao.panchitaapp.domain.usecase.client.FindClientUseCase
 import com.pinao.panchitaapp.domain.usecase.client.GetAllClientsUseCase
@@ -18,28 +18,26 @@ import com.pinao.panchitaapp.domain.usecase.rechange.GetListForDateRechangeUC
 import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
-import org.koin.core.annotation.Single
 
 @Module
 class DomainModule {
     /*
     RECHANGE USE CASES
     */
-    //@Factory
-    @Single
+    @Factory
     fun provideGetAllDateRechangeUseCase(
-        repository: RechangeRepository
-    ) = GetAllDateRechangeUseCase(repository)
+        rechangeRepository: RechangeRepository
+    ) = GetAllDateRechangeUseCase(rechangeRepository)
 
     @Factory
     fun provideGetListForDateRechangeUC(
-        repository: RechangeRepository
-    ) = GetListForDateRechangeUC(repository)
+        rechangeRepository: RechangeRepository
+    ) = GetListForDateRechangeUC(rechangeRepository)
 
     @Factory
     fun provideSaveRechangeUseCase(
-        repository: RechangeRepository
-    ) = SaveRechangeUseCase(repository)
+        rechangeRepository: RechangeRepository
+    ) = SaveRechangeUseCase(rechangeRepository)
 
     /*
     PRODUCTS USE CASES
@@ -63,24 +61,35 @@ class DomainModule {
     fun provideFindProductUseCase(
         productRepository: ProductRepository
     ) = FindCodeProductUseCase(productRepository)
+
+    /*
+    CATEGORY USE CASES
+     */
+    @Factory
+    fun provideCheckCategoryNameUseCase(
+        categoryRepository: CategoryRepository
+    ) = CheckCategoryNameUseCase(categoryRepository)
+
     /*
     CLIENTS USE CASES
      */
     @Factory
     fun provideGetAllClientsUseCase(
-        repository: ClientRepository
-    ) = GetAllClientsUseCase(repository)
+        clientRepository: ClientRepository
+    ) = GetAllClientsUseCase(clientRepository)
+
     @Factory
     fun provideSaveClientUseCase(
-        repository: ClientRepository
-    ) = SaveClientUseCase(repository)
+        clientRepository: ClientRepository
+    ) = SaveClientUseCase(clientRepository)
+
     @Factory
     fun provideDeleteClientUseCase(
-        repository: ClientRepository
-    ) = DeleteClientUseCase(repository)
+        clientRepository: ClientRepository
+    ) = DeleteClientUseCase(clientRepository)
+
     @Factory
     fun provideFindClientUseCase(
-        repository: ClientRepository
-    ) = FindClientUseCase(repository)
-
+        clientRepository: ClientRepository
+    ) = FindClientUseCase(clientRepository)
 }

@@ -16,6 +16,9 @@ interface CategoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertCategory(toDatabase: CategoryEntity): Long
 
+    @Query("SELECT * FROM category WHERE name = :codeCategory")
+    fun findCodeCategory(codeCategory: String): Flow<CategoryEntity?>
+
     @Delete
     fun deleteCategory(toDatabase: CategoryEntity)
 }

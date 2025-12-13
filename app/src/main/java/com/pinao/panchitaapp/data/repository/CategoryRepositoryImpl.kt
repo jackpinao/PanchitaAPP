@@ -47,6 +47,13 @@ class CategoryRepositoryImpl(
         }
     }
 
+    override fun findCodeCategory(codeCategory: String): Flow<CategoryModel?> {
+        Log.d("CategoryRepositoryImpl", "Finding category with code: $codeCategory")
+        return categoryDao.findCodeCategory(codeCategory).map { categoryEntity ->
+            categoryEntity?.let { CategoryMapper.toDomain(it) }
+        }
+    }
+
     override suspend fun saveCategory(categoryModel: CategoryModel) {
         withContext(Dispatchers.IO) {
             try {
