@@ -5,6 +5,11 @@ import com.pinao.panchitaapp.domain.repository.ClientRepository
 import com.pinao.panchitaapp.domain.repository.ProductRepository
 import com.pinao.panchitaapp.domain.repository.RechangeRepository
 import com.pinao.panchitaapp.domain.usecase.category.CheckCategoryNameUseCase
+import com.pinao.panchitaapp.domain.usecase.category.DeleteCategoryUseCase
+import com.pinao.panchitaapp.domain.usecase.category.FindCategoryUseCase
+import com.pinao.panchitaapp.domain.usecase.category.GetAllCategoriesUseCase
+import com.pinao.panchitaapp.domain.usecase.category.RefreshCategoriesUseCase
+import com.pinao.panchitaapp.domain.usecase.category.SaveCategoryUseCase
 import com.pinao.panchitaapp.domain.usecase.client.DeleteClientUseCase
 import com.pinao.panchitaapp.domain.usecase.client.FindClientUseCase
 import com.pinao.panchitaapp.domain.usecase.client.GetAllClientsUseCase
@@ -69,6 +74,32 @@ class DomainModule {
     fun provideCheckCategoryNameUseCase(
         categoryRepository: CategoryRepository
     ) = CheckCategoryNameUseCase(categoryRepository)
+
+    @Factory
+    fun provideSaveCategoryUseCase(
+        categoryRepository: CategoryRepository
+    ) = SaveCategoryUseCase(categoryRepository)
+
+    @Factory
+    fun provideDeleteCategoryUseCase(
+        categoryRepository: CategoryRepository
+    ) = DeleteCategoryUseCase(categoryRepository)
+
+    @Factory
+    fun provideGetAllCategoriesUseCase(
+        categoryRepository: CategoryRepository
+    ) = GetAllCategoriesUseCase(categoryRepository)
+
+    @Factory
+    fun provideFindCategoryUseCase(
+        categoryRepository: CategoryRepository
+    ) = FindCategoryUseCase(categoryRepository)
+
+    @Factory
+    fun provideRefreshCategoriesUseCase(
+        categoryRepository: CategoryRepository
+    ) = RefreshCategoriesUseCase(categoryRepository)
+
 
     /*
     CLIENTS USE CASES

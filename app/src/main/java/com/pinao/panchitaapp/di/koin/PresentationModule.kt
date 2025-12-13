@@ -1,7 +1,8 @@
 package com.pinao.panchitaapp.di.koin
 
 import android.content.Context
-import com.pinao.panchitaapp.domain.usecase.category.CategoryUseCases
+import com.pinao.panchitaapp.domain.usecase.category.SaveCategoryUseCase
+import com.pinao.panchitaapp.domain.usecase.category.CheckCategoryNameUseCase
 import com.pinao.panchitaapp.domain.usecase.client.SaveClientUseCase
 import com.pinao.panchitaapp.domain.usecase.products.DeleteProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.FindCodeProductUseCase
@@ -78,8 +79,10 @@ class PresentationModule {
 
     @KoinViewModel
     fun provideAddCategoryViewModel(
-        categoryUseCases: CategoryUseCases
+        saveCategoryUseCase: SaveCategoryUseCase,
+        checkCategoryNameUseCase: CheckCategoryNameUseCase
     ): AddCategoryViewModel = AddCategoryViewModel(
-        categoryUseCases
+        saveCategoryUseCase,
+        checkCategoryNameUseCase
     )
 }
