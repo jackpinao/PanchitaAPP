@@ -1,9 +1,11 @@
 package com.pinao.panchitaapp.di.koin
 
+import com.pinao.panchitaapp.domain.repository.BarcodeScanner
 import com.pinao.panchitaapp.domain.repository.CategoryRepository
 import com.pinao.panchitaapp.domain.repository.ClientRepository
 import com.pinao.panchitaapp.domain.repository.ProductRepository
 import com.pinao.panchitaapp.domain.repository.RechangeRepository
+import com.pinao.panchitaapp.domain.usecase.category.CategoryUseCases
 import com.pinao.panchitaapp.domain.usecase.category.CheckCategoryNameUseCase
 import com.pinao.panchitaapp.domain.usecase.category.DeleteCategoryUseCase
 import com.pinao.panchitaapp.domain.usecase.category.FindCategoryUseCase
@@ -18,18 +20,21 @@ import com.pinao.panchitaapp.domain.usecase.products.DeleteProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.FindCodeProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.GetAllProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.SaveProductsUseCase
+import com.pinao.panchitaapp.domain.usecase.products.ScanBarcodeUseCase
 import com.pinao.panchitaapp.domain.usecase.rechange.GetAllDateRechangeUseCase
 import com.pinao.panchitaapp.domain.usecase.rechange.GetListForDateRechangeUC
 import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 
 @Module
 class DomainModule {
     /*
     RECHANGE USE CASES
     */
-    @Factory
+    //@Factory
+    @Single
     fun provideGetAllDateRechangeUseCase(
         rechangeRepository: RechangeRepository
     ) = GetAllDateRechangeUseCase(rechangeRepository)
@@ -67,6 +72,11 @@ class DomainModule {
         productRepository: ProductRepository
     ) = FindCodeProductUseCase(productRepository)
 
+    @Factory
+    fun provideScanBarcodeUseCase(
+        barcodeScanner: BarcodeScanner
+    ) = ScanBarcodeUseCase(barcodeScanner)
+
     /*
     CATEGORY USE CASES
      */
@@ -100,6 +110,20 @@ class DomainModule {
         categoryRepository: CategoryRepository
     ) = RefreshCategoriesUseCase(categoryRepository)
 
+    @Factory
+    fun provideCategoryUseCases(
+        getAllCategoriesUseCase: GetAllCategoriesUseCase,
+        findCategoryUseCase: FindCategoryUseCase,
+        saveCategoryUseCase: SaveCategoryUseCase,
+        deleteCategoryUseCase: DeleteCategoryUseCase,
+        refreshCategoriesUseCase: RefreshCategoriesUseCase
+    ) = CategoryUseCases(
+        getAll = getAllCategoriesUseCase,
+        findByCode = findCategoryUseCase,
+        save = saveCategoryUseCase,
+        delete = deleteCategoryUseCase,
+        refreshCategories = refreshCategoriesUseCase
+    )
 
     /*
     CLIENTS USE CASES

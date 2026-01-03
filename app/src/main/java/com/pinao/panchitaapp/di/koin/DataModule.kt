@@ -15,8 +15,10 @@ import com.pinao.panchitaapp.data.network.rechange.RechangeApiClient
 import com.pinao.panchitaapp.data.network.rechange.RechangeService
 import com.pinao.panchitaapp.data.repository.CategoryRepositoryImpl
 import com.pinao.panchitaapp.data.repository.ClientRepositoryImpl
+import com.pinao.panchitaapp.data.repository.GmsBarcodeScannerImpl
 import com.pinao.panchitaapp.data.repository.ProductsRepositoryImpl
 import com.pinao.panchitaapp.data.repository.RechangeRepositoryImpl
+import com.pinao.panchitaapp.domain.repository.BarcodeScanner
 import com.pinao.panchitaapp.domain.repository.CategoryRepository
 import com.pinao.panchitaapp.domain.repository.ClientRepository
 import com.pinao.panchitaapp.domain.repository.ProductRepository
@@ -32,7 +34,7 @@ class DataModule {
     @Single(createdAtStart = true)
     fun provideDatabase(context: Context): AppDatabase {
         return Room.databaseBuilder(
-            context,
+            context.applicationContext,
             AppDatabase::class.java,
             DATABASE_NAME
         )
@@ -109,5 +111,10 @@ class DataModule {
         firestore: FirebaseFirestore
     ): CategoryRepository {
         return CategoryRepositoryImpl(categoryDao, firestore)
+    }
+
+    @Single
+    fun provideBarcodeScanner(context: Context): BarcodeScanner {
+        return GmsBarcodeScannerImpl(context)
     }
 }
