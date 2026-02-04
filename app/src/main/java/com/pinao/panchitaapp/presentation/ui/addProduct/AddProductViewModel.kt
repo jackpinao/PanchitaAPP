@@ -9,17 +9,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import android.util.Log
+import com.pinao.panchitaapp.domain.model.ProductModel
 
 data class AddProductUiState(
     val productCode: String = "",
     val productName: String = "",
-    val productPrice: String = "",
+    val productPurchasePrice: String = "",
     val productCategory: String = "",
+    val productCategoryId: String = "",
     val productStock: String = "",
-    val listOfCategories: List<String> = emptyList(),
+    val productRevenueCategory: Double = 0.0,
+    val listOfCategoriesName: List<String> = emptyList(),
+    val listOfCategoriesId: List<String> = emptyList(),
+    val listOfCategoriesRevenue: List<Double> = emptyList(),
     val expanded: Boolean = false,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val navigateBack: Boolean = false
 )
 
 class AddProductViewModel(
@@ -37,12 +44,23 @@ class AddProductViewModel(
 
     fun onPriceChange(newPrice: String) {
         if (newPrice.isEmpty() || newPrice.matches(Regex("^\\d*\\.?\\d*$"))) {
-            _uiState.update { it.copy(productPrice = newPrice) }
+            _uiState.update { it.copy(productPurchasePrice = newPrice) }
         }
     }
 
-    fun onCategoryChange(newCategory: String) {
-        _uiState.update { it.copy(productCategory = newCategory) }
+    fun onCategoryChange(newCategoryName: String) {
+        // Buscamos la posición del nombre para obtener el ID en la misma posición
+        val index = _uiState.value.listOfCategoriesName.indexOf(newCategoryName)
+        val categoryId = if (index != -1) _uiState.value.listOfCategoriesId[index] else ""
+        val categoryRevenue = if (index != -1) _uiState.value.listOfCategoriesRevenue[index] else 0.0
+
+        _uiState.update {
+            it.copy(
+                productCategory = newCategoryName,
+                productCategoryId = categoryId,
+                productRevenueCategory = categoryRevenue
+            )
+        }
     }
 
     fun onStockChange(newStock: String) {
@@ -86,13 +104,18 @@ class AddProductViewModel(
     fun listCategories() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
+            categoryUseCases.refreshCategories()
             try {
                 categoryUseCases.getAll()
                     .collect { categories ->
                         val categoryNames = categories.map { it.name }
+                        val categoryIds = categories.map { it.id }
+                        val categoryRevenue = categories.map { it.revenue }
                         _uiState.update {
                             it.copy(
-                                listOfCategories = categoryNames,
+                                listOfCategoriesName = categoryNames,
+                                listOfCategoriesId = categoryIds,
+                                listOfCategoriesRevenue = categoryRevenue,
                                 isLoading = false
                             )
                         }
@@ -104,6 +127,54 @@ class AddProductViewModel(
                         isLoading = false
                     )
                 }
+                Log.e("AddProductViewModel", "Error al obtener las categorías", e)
+            }
+        }
+    }
+
+    fun saveProduct() {
+        viewModelScope.launch {
+            val state = _uiState.value
+
+            // 1. Validaciones básicas
+            if (state.productName.isBlank() || state.productPurchasePrice.isBlank() ||
+                state.productCode.isBlank() || state.productCategoryId.isBlank()) {
+                _uiState.update { it.copy(error = "Por favor, completa los campos obligatorios") }
+                return@launch
+            }
+
+            _uiState.update { it.copy(isLoading = true) }
+
+            val purchasePrice = state.productPurchasePrice.toDoubleOrNull() ?: 0.0
+            val revenueCategory = state.productRevenueCategory
+            val sellingPrice = purchasePrice + (purchasePrice * (revenueCategory / 100))
+
+            try {
+                // 2. Crear el objeto ProductModel
+                val product = ProductModel(
+                    name = state.productName,
+                    code = state.productCode,
+                    purchasePrice = state.productPurchasePrice.toDoubleOrNull() ?: 0.0,
+                    sellingPrice = sellingPrice,
+                    priceExcludingIGV = sellingPrice - (sellingPrice * 0.18),
+                    stock = state.productStock.toDoubleOrNull() ?: 0.0,
+                    idCategory = state.productCategoryId // Aquí asumo que guardas el nombre o ID seleccionado
+                )
+
+                // 3. Llamar al caso de uso
+                productUseCases.save(product)
+
+                // 4. Éxito: Detener carga y señalar navegación de regreso
+                _uiState.update { it.copy(isLoading = false, navigateBack = true) }
+
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        error = "Error al guardar producto: ${e.message}",
+                        isLoading = false
+                    )
+                }
+                Log.e("AddProductViewModel", "Error al guardar", e)
             }
         }
     }

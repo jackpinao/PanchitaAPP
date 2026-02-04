@@ -1,607 +1,343 @@
 package com.pinao.panchitaapp.presentation.ui.guiaremision
 
-import android.util.Log
-import androidx.compose.foundation.background
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedButton
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.pinao.panchitaapp.domain.model.ClientModel
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.presentation.navigation.AppScreens
 import com.pinao.panchitaapp.presentation.ui.Screen
+import org.koin.androidx.compose.koinViewModel
 
-
+/**
+ * Pantalla principal de Guía de Remisión refactorizada con Clean Code.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GuiaRemisionScreen(
-    guiaRemisionViewModel: GuiaRemisionViewModel,
+    viewModel: GuiaRemisionViewModel = koinViewModel(),
     navController: NavController
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val sheetState = rememberModalBottomSheetState()
 
-    val showDialog by guiaRemisionViewModel.showDialog.collectAsState()
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    // Manejo de retorno de búsqueda manual
+    val selectedProductCode = navController.currentBackStackEntry
+        ?.savedStateHandle
+        ?.get<String>("selected_product_code")
 
-    val productsUiState by produceState<ProductsUiState>(
-        initialValue = ProductsUiState.Loading,
-        key1 = guiaRemisionViewModel,
-        key2 = lifecycle
-    ) {
-        lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-            guiaRemisionViewModel.productsUiState.collect {
-                value = it
+    LaunchedEffect(selectedProductCode) {
+        selectedProductCode?.let { code ->
+            viewModel.handleProductByCode(code)
+            navController.currentBackStackEntry?.savedStateHandle?.remove<String>("selected_product_code")
+        }
+    }
+
+    // Escuchamos el estado de error y lo "consumimos" tras mostrarlo
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message = message, actionLabel = "OK")
+            viewModel.clearErrorMessage()
+        }
+    }
+
+    // Modal para elegir Escáner o Búsqueda Manual
+    if (uiState.showSelectionSheet) {
+        ModalBottomSheet(
+            onDismissRequest = viewModel::closeDialogs,
+            sheetState = sheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp, top = 16.dp)
+            ) {
+                Text(
+                    text = "Añadir Producto",
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                ListItem(
+                    modifier = Modifier.clickable {
+                        viewModel.startScanningProduct()
+                    },
+                    headlineContent = { Text("Escanear Código") },
+                    leadingContent = { Icon(Icons.Default.QrCodeScanner, contentDescription = null, modifier = Modifier.size(24.dp)) }
+                )
+                ListItem(
+                    modifier = Modifier.clickable {
+                        viewModel.closeDialogs()
+                        navController.navigate(AppScreens.ProductSearch.route)
+                    },
+                    headlineContent = { Text("Búsqueda Manual") },
+                    leadingContent = { Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(24.dp)) }
+                )
             }
         }
     }
 
-    when (productsUiState) {
-        is ProductsUiState.Loading -> {
-            // Show loading state
-            CircularProgressIndicator()
-        }
-
-        is ProductsUiState.Error -> {
-            // Handle error state
-            Log.w(
-                "GuiaRemisionScreen",
-                "Error loading products: ${(productsUiState as ProductsUiState.Error).throwable}"
-            )
-        }
-
-        is ProductsUiState.Success -> {
-            // Handle success state
-            GuiaRemisionContent(
-                guiaRemisionViewModel = guiaRemisionViewModel,
-                showDialog,
-                (productsUiState as ProductsUiState.Success).productsModelList,
-                navController,
-            )
-        }
+    // Manejo de Diálogos mediante el Estado Único
+    if (uiState.showNotFoundError) {
+        NotFoundErrorDialog(
+            code = uiState.lastScannedCode,
+            onConfirm = {
+                viewModel.closeDialogs()
+                navController.navigate("${AppScreens.AddProduct.route}?barcode=${uiState.lastScannedCode}")
+            },
+            onDismiss = viewModel::closeDialogs
+        )
     }
 
+    if (uiState.showAddDialog) {
+        AddProductQuantityDialog(
+            product = uiState.scannedProduct,
+            quantity = uiState.quantity,
+            isEditing = uiState.isEditing,
+            onQuantityChange = viewModel::onQuantityChange,
+            onConfirm = viewModel::onConfirmQuantity,
+            onDismiss = viewModel::closeDialogs
+        )
+    }
+
+    GuiaRemisionContent(
+        uiState = uiState,
+        snackbarHostState = snackbarHostState,
+        onClientNameChange = viewModel::onClientNameChange,
+        onClientDocChange = viewModel::onClientDocChange,
+        onScanClick = viewModel::onScanClick,
+        onRemoveProduct = viewModel::removeItem,
+        onProductLongClick = viewModel::onProductLongClick,
+        onNavigateToPreview = {
+            //viewModel.finalizeSale()
+            navController.navigate(AppScreens.PreviewTicket.route)
+        }
+    )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GuiaRemisionContent(
-    guiaRemisionViewModel: GuiaRemisionViewModel,
-    showDialog: Boolean,
-    productsModelList: List<ProductModel>,
-    navController: NavController,
+    uiState: GuiaRemisionUiState,
+    snackbarHostState: SnackbarHostState,
+    onClientNameChange: (String) -> Unit,
+    onClientDocChange: (String) -> Unit,
+    onScanClick: () -> Unit,
+    onRemoveProduct: (ProductModel) -> Unit,
+    onProductLongClick: (ProductModel) -> Unit,
+    onNavigateToPreview: () -> Unit
 ) {
     Screen {
         Scaffold(
-            topBar = {
-                TopBar(
-                    guiaRemisionViewModel,
-                    showDialog
-                )
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            floatingActionButton = {
+                FloatingActionButton(onClick = onScanClick) {
+                    Icon(Icons.Default.QrCodeScanner, contentDescription = "Añadir Producto")
+                }
             },
             bottomBar = {
-                BottomApp(
-                    guiaRemisionViewModel = guiaRemisionViewModel,
-                    productsModelList = productsModelList,
-                    navController = navController
-                )
-            },
-            floatingActionButton = {
-                FabDialog(
-                    guiaRemisionViewModel = guiaRemisionViewModel
-                )
+                Button(
+                    onClick = onNavigateToPreview,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    enabled = uiState.products.isNotEmpty() && !uiState.isLoading
+                ) {
+                    Text(if (uiState.isLoading) "Procesando..." else "Preview Ticket")
+                }
             }
+        ) { padding ->
+            Column(modifier = Modifier
+                .padding(padding)
+                .padding(16.dp)) {
+                Text("Guía de Remisión", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier.padding(innerPadding)
-            ) {
-                CenterAppGuiaRemision(
-                    guiaRemisionViewModel,
-                    showDialog,
-                    productsModelList
+                OutlinedTextField(
+                    value = uiState.clientName,
+                    onValueChange = onClientNameChange,
+                    label = { Text("Nombre del Cliente") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
                 )
-            }
 
-        }
-    }
-}
-
-@Composable
-private fun BottomApp(
-    guiaRemisionViewModel: GuiaRemisionViewModel,
-    productsModelList: List<ProductModel>,
-    navController: NavController
-) {
-    PreviewTicketButton(
-        guiaRemisionViewModel = guiaRemisionViewModel,
-        productsModelList = productsModelList,
-        navController = navController
-    )
-}
-
-@Composable
-private fun FabDialog(guiaRemisionViewModel: GuiaRemisionViewModel) {
-    FloatingActionButton(
-        onClick = {
-            guiaRemisionViewModel.onShowDialogClick() // Show the dialog when the FAB is clicked
-        }
-    ) {
-        Icon(
-            imageVector = Icons.Filled.Add,
-            contentDescription = "Add Product"
-        )
-    }
-}
-
-@Composable
-private fun TopBar(
-    guiaRemisionViewModel: GuiaRemisionViewModel,
-    showDialog: Boolean
-) {
-    Column {
-
-    }
-}
-
-@Composable
-private fun CenterAppGuiaRemision(
-    guiaRemisionViewModel: GuiaRemisionViewModel,
-    showDialog: Boolean,
-    productsModelList: List<ProductModel>,
-
-    ) {
-    val nameClient by guiaRemisionViewModel.nameClient.collectAsState()
-    val numDocClient by guiaRemisionViewModel.numDocClient.collectAsState()
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Guia de Remision",
-            modifier = Modifier.padding(16.dp),
-            fontSize = 24.sp,
-            color = Color.Black
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            NameClientTextField(
-                nameClient = nameClient,
-                modifier = Modifier
-                    .weight(4f)
-                    .padding(8.dp),
-                onValueChange = { guiaRemisionViewModel.onNameClientChange(it) }
-            )
-            EraserTextClient(
-                guiaRemisionViewModel = guiaRemisionViewModel,
-                modifier = Modifier
-                    .padding(5.dp)
-                    .weight(1f)
-            )
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            NumDocClientTextField(
-                numDocClient = numDocClient,
-                modifier = Modifier
-                    .weight(4f)
-                    .padding(8.dp),
-                onValueChange = { guiaRemisionViewModel.onNumDocClientChange(it) }
-            )
-            EraserTextDocClient(
-                guiaRemisionViewModel = guiaRemisionViewModel,
-                modifier = Modifier
-                    .padding(5.dp)
-                    .weight(1f)
-            )
-        }
-        ProductList(
-            products = productsModelList,
-            guiaRemisionViewModel = guiaRemisionViewModel
-        )
-    }
-    AddProductDialog(
-        guiaRemisionViewModel,
-        showDialog,
-        onDismiss = { guiaRemisionViewModel.onDialogClose() }, // Close the dialog when dismissed
-        productsModelList,
-
-        )
-}
-
-@Composable
-fun PreviewTicketButton(
-    navController: NavController,
-    guiaRemisionViewModel: GuiaRemisionViewModel,
-    productsModelList: List<ProductModel>
-) {
-    val nameClient by guiaRemisionViewModel.nameClient.collectAsState()
-    val numDocClient by guiaRemisionViewModel.numDocClient.collectAsState()
-    ElevatedButton(
-        onClick = {
-            // Handle the preview ticket logic here
-            // For example, you can call a function in the ViewModel to generate the ticket
-            //guiaRemisionViewModel.previewTicket(productsModelList)
-            guiaRemisionViewModel.saveClient(
-                clientModel = ClientModel(
-                    name = nameClient,
-                    numDoc = numDocClient
+                OutlinedTextField(
+                    value = uiState.clientDoc,
+                    onValueChange = onClientDocChange,
+                    label = { Text("Documento") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
-            )
-            navController.navigate(route = AppScreens.PreviewTicket.route) // Navigate to the preview ticket screen
-        },
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth()
-    ) {
-        Text(
-            text = "Preview Ticket",
-            modifier = Modifier.padding(16.dp),
-            fontSize = 16.sp
-        )
-    }
-}
 
-@Composable
-fun ProductList(products: List<ProductModel>, guiaRemisionViewModel: GuiaRemisionViewModel) {
-    Column {
-        Text(
-            text = "Products",
-            modifier = Modifier.padding(16.dp),
-            fontSize = 20.sp,
-            color = Color.Black
-        )
-        OutlinedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            LazyColumn(
-                //modifier = Modifier.fillMaxHeight()
-            ) {
-                items(items = products, key = { it.id }) { product ->
-                    // Display each product in the list
-                    Text(
-                        text = "Codigo Producto: " +
-                                "\n ${product.code} " +
-                                "\n Nombre Producto: ${product.name} " +
-                                "\n Precio: ${product.price} " +
-                                "\n Cantidad: ${product.stock} " +
-                                "\n Total: " +
-                                "%.2f".format(product.price * product.stock),
-                        modifier = Modifier.padding(8.dp)
-                    )
-                    ElevatedButton(
-                        onClick = {
-                            guiaRemisionViewModel.onItemRemove(product)
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Red,
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Text(text = "Remove")
+                Spacer(modifier = Modifier.padding(16.dp))
+
+                Text("Productos Añadidos", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+
+                OutlinedCard(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)) {
+                    LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
+                        items(uiState.products) { product ->
+                            ListItem(
+                                modifier = Modifier.combinedClickable(
+                                    onClick = { /* Opcional: ver detalle */ },
+                                    onLongClick = { onProductLongClick(product) }
+                                ),
+                                headlineContent = { Text(product.name) },
+                                supportingContent = {
+                                    Text(
+                                        "Precio sin IGV: S/. ${
+                                            String.format(
+                                                "%.2f",
+                                                product.priceExcludingIGV
+                                            )
+                                        }\n" +
+                                                "Cant: ${product.stock} |" +
+                                                "Precio unitario: S/. ${
+                                                    String.format(
+                                                        "%.2f",
+                                                        product.sellingPrice
+                                                    )
+                                                }\n" +
+                                                " Total: S/. ${
+                                                    String.format(
+                                                        "%.2f",
+                                                        product.sellingPrice * product.stock
+                                                    )
+                                                }\n"
+
+                                    )
+                                },
+                                trailingContent = {
+                                    IconButton(onClick = { onRemoveProduct(product) }) {
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            contentDescription = null,
+                                            tint = Color.Red
+                                        )
+                                    }
+                                }
+                            )
+                            HorizontalDivider()
+                        }
                     }
                 }
             }
-
         }
     }
 }
 
 @Composable
-fun NameClientTextField(
-    nameClient: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier
-) {
-    TextField(
-        value = nameClient,
-        onValueChange = onValueChange,
-        label = {
-            Text(
-                text = "Nombre del Cliente",
-                color = Color.Gray
-            )
-        },
-        singleLine = true,
-        modifier = modifier
-    )
-}
-
-@Composable
-fun NumDocClientTextField(
-    numDocClient: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier,
-) {
-    TextField(
-        value = numDocClient,
-        onValueChange = onValueChange,
-        label = {
-            Text(
-                text = "Numero de Documento",
-                color = Color.Gray
-            )
-        },
-        singleLine = true,
-        modifier = modifier,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-    )
-}
-
-@Composable
-fun AddProductDialog(
-    guiaRemisionViewModel: GuiaRemisionViewModel,
-    showDialog: Boolean?,
-    onDismiss: () -> Unit,
-    productsModelList: List<ProductModel>,
-) {
-
-    val isCodeProduct by guiaRemisionViewModel.codeProduct.collectAsState()
-    Log.d("GuiaRemisionScreen", "codeProduct: $isCodeProduct")
-    val isValNameProduct by guiaRemisionViewModel.nameProduct.collectAsState()
-    val isValPriceProduct by guiaRemisionViewModel.priceProduct.collectAsState()
-    val isValQuantityProduct by guiaRemisionViewModel.quantityProduct.collectAsState()
-
-    if (showDialog == true) {
-        // Implement the dialog content here
-        // For example, you can use a TextField to input product details
-        // and a Button to save the product.
-        Dialog(onDismissRequest = { onDismiss() }) {
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-                    .background(Color.White) // Set background color for the dialog
-            ) {
-                // Add your dialog content here
-                // For example, TextField for product name, price, etc.
-                Spacer(modifier = Modifier.padding(8.dp))
-                CodeProductTextField(
-                    codeProduct = isCodeProduct,
-                ) {
-                    guiaRemisionViewModel.onCodeProductChange(it)
-                }
-                Spacer(modifier = Modifier.padding(8.dp))
-                NameProductTextField(
-                    nameProduct = isValNameProduct,
-                )
-                {
-                    guiaRemisionViewModel.onNameProductChange(it)
-                }
-                Spacer(modifier = Modifier.padding(8.dp))
-                PriceProductTextField(
-                    priceProduct = isValPriceProduct.toString(),
-                ) {
-                    guiaRemisionViewModel.onPriceProductChange(it)
-                }
-                Spacer(modifier = Modifier.padding(8.dp))
-                QualityProductTextField(
-                    quantityProduct = isValQuantityProduct.toString(),
-                ) {
-                    guiaRemisionViewModel.onQuantityProductChange(it)
-                }
-                Spacer(modifier = Modifier.padding(8.dp))
-                AddProductButton(
-                    isCodeProduct,
-                    isValNameProduct,
-                    isValPriceProduct,
-                    isValQuantityProduct,
-                    guiaRemisionViewModel = guiaRemisionViewModel,
-                    onDismiss = onDismiss
-                )
-            }
-
-        }
-    }
-}
-
-@Composable
-fun AddProductButton(
-    isCodeProduct: String,
-    isValNameProduct: String,
-    isValPriceProduct: String,
-    isValQuantityProduct: String,
-    guiaRemisionViewModel: GuiaRemisionViewModel,
+fun NotFoundErrorDialog(
+    code: String,
+    onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    val context = LocalContext.current
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Producto no encontrado") },
+        text = { Text("El código [$code] no está registrado. ¿Deseas agregarlo?") },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text("Aceptar") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
+        }
+    )
+}
 
-    ElevatedButton(
-        onClick = {
-            //Comprobar que codeProduct no se repite en la lista de productos
-//            val isValCodeProduct = guiaRemisionViewModel.checkCodeProduct(isCodeProduct)
-//            if (isValCodeProduct) {
-//                Log.d("GuiaRemisionScreen", "El codigo del producto ya existe")
-//                Toast.makeText(context, "El codigo del producto ya existe", Toast.LENGTH_SHORT).show()
-//                return@ElevatedButton
-//            }else{
-//                Log.d("GuiaRemisionScreen", "El codigo del producto no existe")
-//                guiaRemisionViewModel.updateProduct(
-//                    ProductModel(
-//                        name = isValNameProduct,
-//                        price = isValPriceProduct.toDouble(),
-//                        stock = isValQuantityProduct.toDouble(),
-//                        //code = isCodeProduct
-//                    )
-//                )
-//                guiaRemisionViewModel.onCodeProductChange("")
-//                guiaRemisionViewModel.onNameProductChange("")
-//                guiaRemisionViewModel.onPriceProductChange("")
-//                guiaRemisionViewModel.onQuantityProductChange("")
-//            }
-            guiaRemisionViewModel.updateProduct(
-                ProductModel(
-                    name = isValNameProduct,
-                    price = if (isValPriceProduct.isEmpty()) 0.0 else isValPriceProduct.toDouble(),
-                    stock = if (isValQuantityProduct.isEmpty()) 0.0 else isValQuantityProduct.toDouble(),
-                    code = isCodeProduct
+@Composable
+fun AddProductQuantityDialog(
+    product: ProductModel?,
+    quantity: String,
+    isEditing: Boolean,
+    onQuantityChange: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (product == null) return
+    Dialog(onDismissRequest = onDismiss) {
+        Card(modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    if (isEditing) "Actualizar Cantidad" else "Añadir Cantidad",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
                 )
-            )
-            val code = System.currentTimeMillis().toString()
-            guiaRemisionViewModel.onCodeProductChange(code)
-            guiaRemisionViewModel.onNameProductChange("")
-            guiaRemisionViewModel.onPriceProductChange("")
-            guiaRemisionViewModel.onQuantityProductChange("")
-            onDismiss() // Close the dialog after adding the product
-        },
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth()
-    ) {
-        Text(
-            text = "Add Product",
-            modifier = Modifier.padding(16.dp),
-            fontSize = 16.sp
-        )
-    }
-}
-
-@Composable
-fun QualityProductTextField(quantityProduct: String, onValueChange: (String) -> Unit) {
-    TextField(
-        value = quantityProduct,
-        onValueChange = { onValueChange(it) },
-        label = {
-            Text(
-                text = "Quantity",
-                color = Color.Gray
-            )
-        },
-        singleLine = true,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-    )
-}
-
-@Composable
-fun PriceProductTextField(priceProduct: String, onValueChange: (String) -> Unit) {
-    TextField(
-        value = priceProduct,
-        onValueChange = { onValueChange(it) },
-        label = {
-            Text(
-                text = "Price",
-                color = Color.Gray
-            )
-        },
-        singleLine = true,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-    )
-}
-
-@Composable
-fun NameProductTextField(nameProduct: String, onValueChange: (String) -> Unit) {
-    TextField(
-        value = nameProduct,
-        onValueChange = { onValueChange(it) },
-        label = {
-            Text(
-                text = "Product Name",
-                color = Color.Gray
-            )
-        },
-        singleLine = true,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    )
-}
-
-@Composable
-fun CodeProductTextField(codeProduct: String, onValueChange: (String) -> Unit) {
-    TextField(
-        value = codeProduct,
-        onValueChange = { onValueChange(it) },
-        label = {
-            Text(
-                text = "Product Code",
-                color = Color.Gray
-            )
-        },
-        singleLine = true,
-        readOnly = true,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    )
-}
-
-@Composable
-private fun EraserTextClient(
-    guiaRemisionViewModel: GuiaRemisionViewModel,
-    modifier: Modifier
-) {
-    IconButton(
-        onClick = {
-            guiaRemisionViewModel.onNameClientChange("")
-        },
-        //modifier = Modifier.padding(5.dp),
-        modifier = modifier,
-        enabled = true
-    ) {
-        Icon(
-            imageVector = Icons.Default.Delete,
-            contentDescription = "Delete"
-        )
-    }
-}
-
-@Composable
-private fun EraserTextDocClient(
-    guiaRemisionViewModel: GuiaRemisionViewModel,
-    modifier: Modifier
-) {
-    IconButton(
-        onClick = {
-            guiaRemisionViewModel.onNumDocClientChange("")
-        },
-        //modifier = Modifier.padding(5.dp),
-        modifier = modifier,
-        enabled = true
-    ) {
-        Icon(
-            imageVector = Icons.Default.Delete,
-            contentDescription = "Delete"
-        )
+                Text("Producto: ${product.name}")
+                TextField(
+                    value = quantity,
+                    onValueChange = onQuantityChange,
+                    label = { Text("Cantidad") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = onDismiss) { Text("Cancelar") }
+                    Button(onClick = onConfirm, enabled = quantity.isNotEmpty()) {
+                        Text(if (isEditing) "Actualizar" else "Añadir")
+                    }
+                }
+            }
+        }
     }
 }

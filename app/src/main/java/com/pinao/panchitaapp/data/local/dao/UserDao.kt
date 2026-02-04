@@ -28,18 +28,17 @@ interface UserDao {
     suspend fun getUser(email: String, password: String): UserEntity?
 
     @Query("SELECT * FROM user WHERE id = :id")
-    suspend fun getUserForId(id: Int): UserEntity?
+    suspend fun getUserForId(id: String): UserEntity?
 
     @Query("SELECT ifnull(count(id),0) FROM user")
     suspend fun accountExists(): Int
 
     @Query("UPDATE user SET password = :password WHERE id = :id")
-    suspend fun updatePassword(id: Int, password: String): Int
+    suspend fun updatePassword(id: String, password: String): Int
 
     @Transaction
     suspend fun saveAccount(user: UserEntity): UserEntity? {
-        return getUserForId(
-            insert(user).toInt()
-        )
+        val id = insert(user)
+        return getUserForId(user.id)
     }
 }

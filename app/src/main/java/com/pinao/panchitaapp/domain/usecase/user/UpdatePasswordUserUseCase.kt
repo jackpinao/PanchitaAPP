@@ -5,7 +5,7 @@ import com.pinao.panchitaapp.domain.repository.UserRepository
 class UpdatePasswordUserUseCase(
     private val userRepository: UserRepository
 ) {
-    suspend operator fun invoke(id: Int, password: String) =
+    suspend operator fun invoke(id: String, password: String) =
         userRepository.updatePassword(id, password)
 
 }

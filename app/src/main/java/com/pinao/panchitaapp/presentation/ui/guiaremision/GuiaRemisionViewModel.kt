@@ -1,334 +1,340 @@
 package com.pinao.panchitaapp.presentation.ui.guiaremision
 
-import android.content.ContentValues
-import android.content.Context
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Typeface
-import android.graphics.pdf.PdfDocument
-import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pinao.panchitaapp.domain.model.ClientModel
 import com.pinao.panchitaapp.domain.model.ProductModel
+import com.pinao.panchitaapp.domain.model.TemporaryProductModel
+import com.pinao.panchitaapp.domain.model.TicketModel
+import com.pinao.panchitaapp.domain.service.TicketPdfService
 import com.pinao.panchitaapp.domain.usecase.client.SaveClientUseCase
 import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
+import com.pinao.panchitaapp.domain.usecase.products.ScanBarcodeUseCase
+import com.pinao.panchitaapp.domain.usecase.temporary.TemporaryProductUseCases
+import com.pinao.panchitaapp.domain.usecase.ticket.CompleteSaleUseCase
 import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.util.Locale
+import java.util.UUID
 
+/**
+ * Estado único para la pantalla de Guía de Remisión.
+ */
+data class GuiaRemisionUiState(
+    val products: List<ProductModel> = emptyList(),
+    val clientName: String = "",
+    val clientDoc: String = "",
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+    val scannedProduct: ProductModel? = null,
+    val quantity: String = "",
+    val showAddDialog: Boolean = false,
+    val showNotFoundError: Boolean = false,
+    val showSelectionSheet: Boolean = false, // Nuevo estado para el diálogo de selección
+    val lastScannedCode: String = "",
+    val downloadStatus: String? = null,
+    val printingStatus: String? = null,
+    val isEditing: Boolean = false
+)
+
+/**
+ * ViewModel encargado de la lógica de la Guía de Remisión.
+ */
 class GuiaRemisionViewModel(
-    private val applicationContext: Context,
     private val productUseCases: ProductUseCases,
     private val saveClientUseCase: SaveClientUseCase,
+    private val scanBarcodeUseCase: ScanBarcodeUseCase,
+    private val completeSaleUseCase: CompleteSaleUseCase,
+    private val pdfService: TicketPdfService,
+    private val temporaryProductUseCases: TemporaryProductUseCases
 ) : ViewModel() {
 
-    private val _guiaRemisionUiState =
-        MutableStateFlow<GuiaRemisionUiState>(GuiaRemisionUiState.Loading)
-    val guiaRemisionUiState: StateFlow<GuiaRemisionUiState> = _guiaRemisionUiState.asStateFlow()
-    private val _productsUiState = MutableStateFlow<ProductsUiState>(ProductsUiState.Loading)
-    val productsUiState: StateFlow<ProductsUiState> = _productsUiState.asStateFlow()
+    private val _uiState = MutableStateFlow(GuiaRemisionUiState())
+    val uiState: StateFlow<GuiaRemisionUiState> = _uiState.asStateFlow()
 
-    // Datos de los productos
-    val code = System.currentTimeMillis().toString()
-    private val _codeProduct = MutableStateFlow<String>(code)
-    val codeProduct: StateFlow<String> = _codeProduct.asStateFlow()
-    private val _nameProduct = MutableStateFlow<String>("")
-    val nameProduct: StateFlow<String> = _nameProduct.asStateFlow()
-    private val _priceProduct = MutableStateFlow<String>("")
-    val priceProduct: StateFlow<String> = _priceProduct.asStateFlow()
-    private val _quantityProduct = MutableStateFlow<String>("")
-    val quantityProduct: StateFlow<String> = _quantityProduct.asStateFlow()
-
-    //Datos de los clientes
-    private val _nameClient = MutableStateFlow<String>("")
-    val nameClient: StateFlow<String> = _nameClient.asStateFlow()
-    private val _numDocClient = MutableStateFlow<String>("")
-    val numDocClient: StateFlow<String> = _numDocClient.asStateFlow()
-
-    //IMPRESION
-    private val _printingStatus = MutableStateFlow<String?>(null)
-    val printingStatus: StateFlow<String?> = _printingStatus.asStateFlow()
-
-    // DOWNLOAD TICKET
-    private val _downloadStatus = MutableStateFlow<String?>(null)
-    val downloadStatus: StateFlow<String?> = _downloadStatus.asStateFlow()
-
-    private val _showDialog = MutableStateFlow<Boolean>(false)
-    val showDialog: StateFlow<Boolean> = _showDialog.asStateFlow()
+    val sessionTicketId = System.currentTimeMillis().toString()
 
     init {
-        //downLoadGuiaRemision()
-        downLoadProducts()
+        refreshAndObserveProducts()
     }
 
-    private fun downLoadProducts() {
+    private fun refreshAndObserveProducts() {
         viewModelScope.launch {
-            productUseCases.getAll()
-                .onStart { _productsUiState.value = ProductsUiState.Loading }
-                .catch { exception -> _productsUiState.value = ProductsUiState.Error(exception) }
-                .collect { products ->
-                    _productsUiState.value = ProductsUiState.Success(products)
-                    Log.d("GuiaRemisionViewModel", "Productos descargados: $products")
+            _uiState.update { it.copy(isLoading = true) }
+            launch {
+                try {
+                    productUseCases.refreshProducts()
+                } catch (e: Exception) {
+                    Log.e("GuiaRemisionViewModel", "Error refreshing remote products", e)
                 }
-        }
-    }
+            }
 
-//    private fun downLoadGuiaRemision() {
-//        TODO("Not yet implemented")
-//    }
-
-    fun onCodeProductChange(newValue: String) {
-        Log.d("GuiaRemisionViewModel", "onCodeProductChange: $newValue")
-        _codeProduct.value = newValue
-    }
-
-    fun onNameClientChange(newValue: String) {
-        _nameClient.value = newValue
-    }
-
-    fun onNumDocClientChange(newValue: String) {
-        _numDocClient.value = newValue
-    }
-
-    fun onNameProductChange(newValue: String) {
-        _nameProduct.value = newValue
-    }
-
-    fun onPriceProductChange(newValue: String) {
-        _priceProduct.value = newValue
-    }
-
-    fun onQuantityProductChange(newValue: String) {
-        _quantityProduct.value = newValue
-    }
-
-    fun checkCodeProduct(codeProduct: String): Boolean {
-        Log.d("GuiaRemisionViewModel", "checkCodeProduct: $codeProduct")
-        var isProduct = false
-        viewModelScope.launch {
-            productUseCases.findByCode(codeProduct)
-                .onStart { _productsUiState.value = ProductsUiState.Loading }
-                .catch { exception -> _productsUiState.value = ProductsUiState.Error(exception) }
-                .collect { product ->
-                    if (product != null) {
-                        _productsUiState.value = ProductsUiState.Success(listOf(product))
-                        Log.d("GuiaRemisionViewModel", "Producto encontrado: $product")
-                        isProduct = true
-                    } else {
-                        Log.d("GuiaRemisionViewModel", "Producto no encontrado")
-                        isProduct = false
+            temporaryProductUseCases.getAll()
+                .catch { e ->
+                    _uiState.update { it.copy(errorMessage = "Error al obtener productos: ${e.message}") }
+                    Log.e("GuiaRemisionViewModel", "Error al obtener productos", e)
+                }
+                .collect { list ->
+                    val productsForUi = list.map { temp ->
+                        ProductModel(
+                            id = temp.productId,
+                            name = temp.name,
+                            code = temp.code,
+                            sellingPrice = temp.price,
+                            priceExcludingIGV = temp.priceExcludingIGV,
+                            stock = temp.quantity,
+                            idDetailTicketEntity = temp.id
+                        )
                     }
+                    _uiState.update { it.copy(products = productsForUi, isLoading = false) }
                 }
         }
-        return isProduct
     }
 
-    fun updateProduct(productModel: ProductModel) {
+    fun clearErrorMessage() = _uiState.update { it.copy(errorMessage = null) }
+
+    fun onScanClick() {
+        _uiState.update { it.copy(showSelectionSheet = true) }
+    }
+
+    fun startScanningProduct() {
+        _uiState.update { it.copy(showSelectionSheet = false) }
         viewModelScope.launch {
-            try {
-                _productsUiState.value = ProductsUiState.Loading
-                productUseCases.save(productModel)
-                _productsUiState.value = ProductsUiState.Success(listOf(productModel))
-                //downLoadProducts()
-            } catch (e: Exception) {
-                Log.e("GuiaRemisionViewModel", "Error al actualizar el producto", e)
-                _productsUiState.value = ProductsUiState.Error(e)
+            val code = scanBarcodeUseCase() ?: return@launch
+            handleProductByCode(code)
+        }
+    }
+
+    fun handleProductByCode(code: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(lastScannedCode = code) }
+            productUseCases.findByCode(code).firstOrNull()?.let { product ->
+                _uiState.update { it.copy(scannedProduct = product, showAddDialog = true, isEditing = false) }
+            } ?: run {
+                _uiState.update { it.copy(showNotFoundError = true) }
             }
-
         }
     }
 
-    fun saveClient(clientModel: ClientModel) {
-        viewModelScope.launch {
-            try {
-                saveClientUseCase(clientModel)
-            } catch (e: Exception) {
-                Log.e("GuiaRemisionViewModel", "Error al guardar el cliente", e)
-            }
-        }
-    }
-
-    fun onItemRemove(productModel: ProductModel) {
-        viewModelScope.launch {
-            productUseCases.delete(productModel)
-            downLoadProducts()
-        }
-    }
-
-    fun onShowDialogClick() {
-        _showDialog.value = true
-    }
-
-    fun onDialogClose() {
-        _showDialog.value = false
-    }
-
-    /*
-    Impresion de ticket
+    /**
+     * Prepara el diálogo para editar un producto ya existente en la lista.
      */
-    fun initiatePrintTicket() {
-        viewModelScope.launch {
-            _printingStatus.value = "Ticket printing initiated"
-            val ticketDataString = formatTicketData()
-            //kotlin.coroutines.delay(2000) // Simulating printing delay
-            _printingStatus.value = "Ticket printed successfully"
+    fun onProductLongClick(product: ProductModel) {
+        _uiState.update { 
+            it.copy(
+                scannedProduct = product, 
+                quantity = product.stock.toString(), 
+                showAddDialog = true, 
+                isEditing = true 
+            ) 
         }
     }
 
-    fun formatTicketData(): String {
-        val currentProducts =
-            (productsUiState.value as? ProductsUiState.Success)?.productsModelList ?: emptyList()
-        val builder = StringBuilder()
-        builder.append(string1).append("\n")
-        builder.append(string2).append("\n")
-        builder.append(string2_1).append("\n")
-        builder.append(string3).append("\n")
-        builder.append(string4).append("\n")
-        builder.append(string5).append(code).append("\n")
-        builder.append(string6).append(GetCurrentDateTime().getCurrentDateTime()).append("\n")
-        builder.append(string7).append(nameClient.value).append("\n")
-        builder.append(string8).append(numDocClient.value).append("\n")
-        builder.append(string9).append("\n")
-        builder.append(string10).append("\n")
-        builder.append(string9).append("\n")
-        var granTotal = 0.0
-        currentProducts.forEach { product ->
-            val totalProduct = product.price * product.stock
-            granTotal += totalProduct
-            builder.append(
-                String.format(
-                    Locale.US,
-                    "%-5s %-15s %6.2f %6.2f\n",
-                    product.stock.toString(),
-                    product.name.take(15),
-                    product.price,
-                    totalProduct
-                )
-            )
+    fun onQuantityChange(value: String) {
+        if (value.isEmpty() || value.matches(Regex("^\\d*\\.?\\d*$"))) {
+            _uiState.update { it.copy(quantity = value) }
         }
-        builder.append(string9).append("\n")
-        builder.append(string11).append("\n")
-        builder.append(
-            String.format(
-                Locale.US, "%.2f", granTotal
-            )
-        ).append("\n")
-        builder.append(string12).append("\n")
-        return builder.toString()
     }
 
-    /*
-    DOWNLOAD TICKET
+    /**
+     * Decide si guardar nuevo o actualizar según el flag isEditing.
      */
-    fun clearDownloadStatus() {
-        _downloadStatus.value = null
+    fun onConfirmQuantity() {
+        if (_uiState.value.isEditing) {
+            updateProductQuantity()
+        } else {
+            addScannedProductToList()
+        }
     }
 
-    fun downloadTicketAsPdf() {
+    private fun addScannedProductToList() {
+        val product = _uiState.value.scannedProduct ?: return
+        val qty = _uiState.value.quantity.toDoubleOrNull() ?: 0.0
+
+        if (qty <= 0) return
+        if (qty > product.stock) {
+            _uiState.update { it.copy(errorMessage = "Stock insuficiente. Disponible: ${product.stock}") }
+            return
+        }
+
         viewModelScope.launch {
-            _downloadStatus.value = "Generating PDF..."
-            val ticketText = formatTicketData()
-            val pdfDocument = PdfDocument()
-            val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
-            val page = pdfDocument.startPage(pageInfo)
-            val canvas = page.canvas
-
-            val titlePaint = Paint().apply {
-                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-                textSize = 12f
-                color = Color.BLACK
-            }
-            val textPaint = Paint().apply {
-                typeface = Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL)
-                textSize = 10f
-                color = Color.BLACK
-            }
-            var yPosition = 40f
-            var xPosition = 40f
-            val lineSpacing = 12f
-
-            ticketText.split("\n").forEach { line ->
-                canvas.drawText(
-                    line,
-                    xPosition,
-                    yPosition,
-                    if (line.contains("Bodega") ||
-                        line.contains("Total a Pagar:") ||
-                        line.contains("GRACIAS")
-                    ) titlePaint else textPaint
-                )
-                yPosition += lineSpacing
-            }
-            pdfDocument.finishPage(page)
-
-            val fileName = "Ticket_${System.currentTimeMillis()}.pdf"
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    val resolver = applicationContext.contentResolver
-                    val contentValues = ContentValues().apply {
-                        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                        put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
-                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                    }
-                    val uri =
-                        resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-                    uri?.let {
-                        resolver.openOutputStream(it)?.use { outputStream ->
-                            pdfDocument.writeTo(outputStream)
-                            _downloadStatus.value = "Ticket downloaded successfully"
-                        }
-                    } ?: run {
-                        _downloadStatus.value = "Failed to save ticket(MediaStore)"
-                    }
-                } else {
-                    @Suppress("DEPRECATION")
-                    val downloadDir =
-                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    if (!downloadDir.exists()) {
-                        downloadDir.mkdirs()
-                    }
-                    val file = File(downloadDir, fileName)
-                    FileOutputStream(file).use { outputStream ->
-                        pdfDocument.writeTo(outputStream)
-                        _downloadStatus.value = "Ticket downloaded successfully(Legacy)"
-                    }
-                }
-            } catch (e: IOException) {
-                _downloadStatus.value = "Failed to save ticket: ${e.message}"
-                e.printStackTrace()
+                _uiState.update { it.copy(isLoading = true) }
+                val updatedCatalogProduct = product.copy(stock = product.stock - qty)
+                productUseCases.save(updatedCatalogProduct)
+
+                val tempItem = TemporaryProductModel(
+                    id = UUID.randomUUID().toString(),
+                    productId = product.id,
+                    name = product.name,
+                    code = product.code,
+                    price = product.sellingPrice,
+                    priceExcludingIGV = product.priceExcludingIGV,
+                    quantity = qty
+                )
+                temporaryProductUseCases.save(tempItem)
+                closeDialogs()
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = "Error al actualizar stock: ${e.message}") }
             } finally {
-                pdfDocument.close()
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
 
+    private fun updateProductQuantity() {
+        val productInGui = _uiState.value.scannedProduct ?: return
+        val newQty = _uiState.value.quantity.toDoubleOrNull() ?: 0.0
+        val oldQty = productInGui.stock // En esta UI, stock representa la cantidad en la guía
 
-    /*
-    FORMAT TICKET STRING
-     */
-    var string1 = "Bodega 'El Chasqui'"
-    var string2 = "Av. Antigua Panamericana Nª451,"
-    var string2_1 = "Mala, Cañete, Lima"
-    var string3 = "Telefono: 12345678"
-    var string4 = "--------------------------------"
-    var string5 = "Ticket #"
-    var string6 = "Date: "
-    var string7 = "Cliente: "
-    var string8 = "Documento: "
-    var string9 = "--------------------------------"
-    var string10 = "Cant. Producto     Precio Total"
-    var string11 = "Total a Pagar:"
-    var string12 = "¡¡GRACIAS POR SU COMPRA!!"
+        if (newQty <= 0) return
+
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                
+                // 1. Obtener el producto real del catálogo para ver el stock actual
+                val catalogProduct = productUseCases.findByCode(productInGui.code).firstOrNull() 
+                    ?: throw Exception("Producto no encontrado en catálogo")
+
+                val diff = newQty - oldQty
+                
+                // 2. Si pedimos más, verificar disponibilidad
+                if (diff > 0 && catalogProduct.stock < diff) {
+                    _uiState.update { it.copy(errorMessage = "No hay suficiente stock adicional. Disponible: ${catalogProduct.stock}") }
+                    return@launch
+                }
+
+                // 3. Actualizar catálogo: Si diff es positivo, resta; si es negativo (devolución), suma.
+                val updatedCatalogProduct = catalogProduct.copy(stock = catalogProduct.stock - diff)
+                productUseCases.save(updatedCatalogProduct)
+
+                // 4. Actualizar tabla temporal
+                val tempItem = TemporaryProductModel(
+                    id = productInGui.idDetailTicketEntity,
+                    productId = productInGui.id,
+                    name = productInGui.name,
+                    code = productInGui.code,
+                    price = productInGui.sellingPrice,
+                    priceExcludingIGV = productInGui.priceExcludingIGV,
+                    quantity = newQty
+                )
+                temporaryProductUseCases.save(tempItem)
+                
+                closeDialogs()
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = "Error al actualizar: ${e.message}") }
+            } finally {
+                _uiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    fun onClientNameChange(name: String) = _uiState.update { it.copy(clientName = name) }
+    fun onClientDocChange(doc: String) = _uiState.update { it.copy(clientDoc = doc) }
+
+    fun removeItem(product: ProductModel) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                val originalProduct = productUseCases.findByCode(product.code).firstOrNull()
+                if (originalProduct != null) {
+                    val restoredProduct = originalProduct.copy(stock = originalProduct.stock + product.stock)
+                    productUseCases.save(restoredProduct)
+                }
+                temporaryProductUseCases.delete(
+                    TemporaryProductModel(
+                        id = product.idDetailTicketEntity,
+                        productId = product.id,
+                        name = product.name,
+                        code = product.code,
+                        price = product.sellingPrice,
+                        priceExcludingIGV = product.priceExcludingIGV,
+                        quantity = product.stock
+                    )
+                )
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = "Error al devolver stock: ${e.message}") }
+            } finally {
+                _uiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    fun finalizeSale() {
+        val state = _uiState.value
+        if (state.products.isEmpty()) return
+
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                val date = GetCurrentDateTime().getCurrentDateTime()
+                saveClientUseCase(ClientModel(name = state.clientName, numDoc = state.clientDoc))
+
+                val ticket = TicketModel(
+                    id = sessionTicketId,
+                    date = date,
+                    total = state.products.sumOf { it.sellingPrice * it.stock },
+                    state = "COMPLETADO",
+                    idUser = "",
+                    idClient = ""
+                )
+                
+                completeSaleUseCase(ticket, state.products)
+                temporaryProductUseCases.clearAll()
+
+                _uiState.update {
+                    it.copy(isLoading = false, downloadStatus = "Venta finalizada y stock actualizado")
+                }
+                Log.d("GuiaRemisionViewModel", "Venta y Stock sincronizados globalmente")
+
+            } catch (e: Exception) {
+                Log.e("GuiaRemisionViewModel", "Error al finalizar venta", e)
+                _uiState.update { it.copy(errorMessage = "Error al guardar: ${e.message}", isLoading = false) }
+            }
+        }
+    }
+
+    fun downloadTicket() {
+        val state = _uiState.value
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            val ticket = TicketModel(
+                id = sessionTicketId,
+                date = GetCurrentDateTime().getCurrentDateTime(),
+                total = state.products.sumOf { it.sellingPrice * it.stock }
+            )
+
+            pdfService.generateAndSaveTicket(ticket, state.products)
+                .onSuccess { _uiState.update { it.copy(isLoading = false, downloadStatus = "PDF guardado exitosamente") } }
+                .onFailure { e -> _uiState.update { it.copy(isLoading = false, errorMessage = "Error PDF: ${e.message}") } }
+        }
+    }
+
+    fun initiatePrintTicket() {
+        _uiState.update { it.copy(printingStatus = "Iniciando impresión...") }
+        // Aquí iría la lógica real de impresión
+    }
+
+    fun closeDialogs() {
+        _uiState.update {
+            it.copy(
+                showAddDialog = false,
+                showNotFoundError = false,
+                showSelectionSheet = false,
+                scannedProduct = null,
+                quantity = "",
+                isEditing = false
+            )
+        }
+    }
+
+    fun clearDownloadStatus() = _uiState.update { it.copy(downloadStatus = null) }
+    fun clearPrintingStatus() = _uiState.update { it.copy(printingStatus = null) }
 }

@@ -35,9 +35,9 @@ data class TicketEntity(
     @ColumnInfo(name = "state")
     val state: String,
     @ColumnInfo(name = "idUser")
-    val idUser: Int,
+    val idUser: String,
     @ColumnInfo(name = "idClient")
-    val idClient: Int
+    val idClient: String
 )
 //{
 //    var details: List<DetailTicketEntity> = emptyList()

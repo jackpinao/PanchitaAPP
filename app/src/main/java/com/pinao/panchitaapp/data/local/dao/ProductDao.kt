@@ -2,11 +2,10 @@ package com.pinao.panchitaapp.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import androidx.room.Upsert
 import com.pinao.panchitaapp.data.local.entity.ProductWithCategory
 import com.pinao.panchitaapp.data.local.entity.ProductsEntity
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +23,7 @@ interface ProductDao {
     @Query("SELECT * FROM product WHERE code = :codeProduct")
     fun findCodeProduct(codeProduct: String): Flow<ProductsEntity?>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun insertProduct(product: ProductsEntity): Long
     
     @Update
@@ -35,4 +34,10 @@ interface ProductDao {
 
     @Query("SELECT * FROM product WHERE code = :string")
     fun getProductForCode(string: String) : ProductsEntity?
+
+    /**
+     * Busca productos por nombre o código ignorando mayúsculas/minúsculas.
+     */
+    @Query("SELECT * FROM product WHERE name LIKE '%' || :query || '%' OR code LIKE '%' || :query || '%' ORDER BY name ASC")
+    fun searchProducts(query: String): Flow<List<ProductsEntity>>
 }

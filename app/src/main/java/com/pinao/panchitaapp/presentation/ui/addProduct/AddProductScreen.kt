@@ -42,18 +42,27 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun AddProductScreen(
     navController: NavController,
+    initialBarcode: String? = null,
     viewModel: AddProductViewModel = koinViewModel()
 ) {
 
-    val context = LocalContext.current
-
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        initialBarcode?.let { viewModel.onCodeChanged(it) }
+    }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.onErrorShow()
+        }
+    }
+
+    LaunchedEffect(uiState.navigateBack) {
+        if (uiState.navigateBack) {
+            navController.popBackStack()
         }
     }
 
@@ -66,6 +75,8 @@ fun AddProductScreen(
         onCategoryChange = viewModel::onCategoryChange,
         onScannedClick = viewModel::startScanning,
         onCategoryClick = { navController.navigate(AppScreens.AddCategory.route) },
+        onSavenClick = viewModel::saveProduct,
+        //snackbarHostState = snackbarHostState,
         //navController,
         //viewModel = viewModel
     )
@@ -82,12 +93,13 @@ fun AddProductContent(
     onCategoryChange: (String) -> Unit,
     onScannedClick: () -> Unit,
     onCategoryClick: () -> Unit,
+    onSavenClick: () -> Unit,
     //navController: NavController? = null,
     //viewModel: AddProductViewModel = viewModel()
 ) {
 
     val context = LocalContext.current
-    val listCategories = uiState.listOfCategories
+    val listCategories = uiState.listOfCategoriesName
 
     // Estado para controlar si el menú está desplegado o no
     var expanded by remember { mutableStateOf(false) }
@@ -150,7 +162,7 @@ fun AddProductContent(
                 )
                 Spacer(modifier = Modifier.padding(8.dp))
                 TextField(
-                    value = uiState.productPrice,
+                    value = uiState.productPurchasePrice,
                     onValueChange = onPriceChange,
                     label = { Text("Precio de Compra") },
                     modifier = Modifier
@@ -240,6 +252,16 @@ fun AddProductContent(
                         .fillMaxWidth()
                         .padding(start = 30.dp, end = 30.dp)
                 )
+                Spacer(modifier = Modifier.padding(15.dp))
+                Button(
+                    onClick = { onSavenClick() },
+                    modifier = Modifier
+                        .padding(start = 30.dp, end = 30.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text(text = "Guardar")
+                }
+
             }
         }
     }
@@ -262,5 +284,5 @@ private fun BottomApp() {
 @Composable
 fun AddProductScreenPreview() {
     val uiState = AddProductUiState("", "", "", "", "")
-    AddProductContent(uiState, {}, {}, {}, {}, {}, {}, {})
+    AddProductContent(uiState, {}, {}, {}, {}, {}, {}, {}, {})
 }

@@ -17,7 +17,7 @@ class CategoryRepositoryImpl(
     private val firestore: FirebaseFirestore
 ) : CategoryRepository {
 
-    private val categoriesCollection = firestore.collection("categories")
+    private val categoriesCollection = firestore.collection("category")
 
     override fun getAllCategoriesFromDataBase(): Flow<List<CategoryModel>> {
         Log.d("CategoryRepositoryImpl", "Getting all categories from Room")

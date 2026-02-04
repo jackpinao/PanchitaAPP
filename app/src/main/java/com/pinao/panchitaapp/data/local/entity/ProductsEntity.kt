@@ -13,17 +13,11 @@ import androidx.room.Index
             entity = CategoryEntity::class,
             parentColumns = ["id"],
             childColumns = ["idCategory"],
-            onDelete = ForeignKey.CASCADE,
-        ),
-//        ForeignKey(
-//            entity = DetailTicketEntity::class,
-//            parentColumns = ["id"],
-//            childColumns = ["idDetailTicketEntity"],
-//            onDelete = ForeignKey.NO_ACTION,
-//        )
+            onDelete = ForeignKey.RESTRICT,
+        )
     ],
     indices = [
-        Index(value = ["code"], unique = true),
+        Index(value = ["code"] , unique = true),
         Index(value = ["idCategory"])
     ]
 )
@@ -32,14 +26,18 @@ data class ProductsEntity(
     val id: String,
     @ColumnInfo(name = "idCategory")
     val idCategory: String,
-    @ColumnInfo(name = "idDetailTicketEntity")
-    val idDetailTicketEntity: Int,
+    @ColumnInfo(name = "idDetailTicketEntity", defaultValue = "")
+    val idDetailTicketEntity: String,
     @ColumnInfo(name = "name")
     val name: String,
     @ColumnInfo(name = "description")
     val description: String,
-    @ColumnInfo(name = "price")
-    val price: Double,
+    @ColumnInfo(name = "sellingPrice")
+    val sellingPrice: Double, //precio de venta
+    @ColumnInfo(name = "purchasePrice")
+    val purchasePrice: Double,// precio de compra
+    @ColumnInfo(name = "priceExcludingIGV")
+    val priceExcludingIGV: Double, //precio sin igv
     @ColumnInfo(name = "stock")
     val stock: Double,
     @ColumnInfo(name = "code")

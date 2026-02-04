@@ -1,102 +1,54 @@
 package com.pinao.panchitaapp.presentation.ui.guiaremision
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import com.pinao.panchitaapp.presentation.ui.Screen
-import kotlinx.coroutines.launch
-import java.util.Locale
+import org.koin.androidx.compose.koinViewModel
 
+/**
+ * Pantalla de Vista Previa del Ticket.
+ * Implementa Clean Architecture y reactividad total mediante el UiState del ViewModel.
+ */
 @Composable
 fun PreviewTicketScreen(
-    viewModel: GuiaRemisionViewModel,
+    viewModel: GuiaRemisionViewModel = koinViewModel(),
+    navController: NavController
 ) {
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val productsUiState by produceState<ProductsUiState>(
-        initialValue = ProductsUiState.Loading,
-        key1 = viewModel,
-        key2 = lifecycle
-    ) {
-        lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-            viewModel.productsUiState.collect {
-                value = it
-            }
-        }
-    }
-    when (productsUiState) {
-        is ProductsUiState.Loading -> {
-            CircularProgressIndicator()
-        }
-
-        is ProductsUiState.Error -> {
-            // Handle error state
-        }
-
-        is ProductsUiState.Success -> {
-            PreviewTicketContent(
-                products = (productsUiState as ProductsUiState.Success).productsModelList,
-                viewModel = viewModel
-            )
-        }
-    }
-}
-
-@Composable
-fun PreviewTicketContent(
-    products: List<ProductModel>,
-    viewModel: GuiaRemisionViewModel
-) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
 
-    val printingStatus by viewModel.printingStatus.collectAsState()
-    printingStatus?.let { status ->
-        LaunchedEffect(key1 = "print_status_$status") { // Unique key for re-launch if status changes
-            scope.launch {
-                snackbarHostState.showSnackbar(status)
-                // viewModel.clearPrintingStatus() // Optional: if you add this to ViewModel
-            }
+    // Manejo reactivo de estados de descarga, impresión y errores
+    LaunchedEffect(uiState.downloadStatus) {
+        uiState.downloadStatus?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearDownloadStatus()
         }
     }
 
-    val downloadStatus by viewModel.downloadStatus.collectAsState()
-    downloadStatus?.let { status ->
-        LaunchedEffect(key1 = "download_status_$status") { // Unique key
-            scope.launch {
-                snackbarHostState.showSnackbar(status)
-                viewModel.clearDownloadStatus() // Clear the message after showing
-            }
+    LaunchedEffect(uiState.printingStatus) {
+        uiState.printingStatus?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearPrintingStatus()
+        }
+    }
+
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let {
+            snackbarHostState.showSnackbar(it)
         }
     }
 
@@ -104,15 +56,25 @@ fun PreviewTicketContent(
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
-                BottomBar(viewModel = viewModel)
+                PreviewBottomActions(
+                    onPrint = viewModel::initiatePrintTicket,
+                    onDownload = viewModel::downloadTicket,
+                    onBack = {
+                        navController.popBackStack()
+                        viewModel.finalizeSale()
+                    }
+                )
             }
         ) { innerPadding ->
-            Column(
-                modifier = Modifier.padding(innerPadding)
-            ) {
-                CenterAppPreviewTicket(
-                    products = products,
-                    viewModel = viewModel
+            if (uiState.isLoading) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                TicketPreviewContent(
+                    uiState = uiState,
+                    ticketId = viewModel.sessionTicketId,
+                    modifier = Modifier.padding(innerPadding)
                 )
             }
         }
@@ -120,155 +82,181 @@ fun PreviewTicketContent(
 }
 
 @Composable
-private fun BottomBar(viewModel: GuiaRemisionViewModel) {
-    Column {
-        Button(
-            onClick = {
-                viewModel.initiatePrintTicket()
-            },
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = "Print Ticket",
-                modifier = Modifier.padding(8.dp)
-            )
-        }
-        Button(
-            onClick = {
-                viewModel.downloadTicketAsPdf()
-            },
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp)
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = "Download Ticket",
-                modifier = Modifier.padding(8.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun CenterAppPreviewTicket(
-    products: List<ProductModel>,
-    viewModel: GuiaRemisionViewModel
+private fun TicketPreviewContent(
+    uiState: GuiaRemisionUiState,
+    ticketId: String,
+    modifier: Modifier = Modifier
 ) {
-    val nameClient by viewModel.nameClient.collectAsState()
-    val numDocClient by viewModel.numDocClient.collectAsState()
-
-    Text(
-        text = "Preview of Ticket Screen",
-        modifier = Modifier.padding(16.dp)
-    )
-    OutlinedCard(
-        modifier = Modifier
-            .fillMaxWidth()
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Column(
+        Text(
+            text = "Vista Previa del Ticket",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                // Información del Negocio
+                BusinessHeader()
+
+                HorizontalDivider(Modifier.padding(vertical = 8.dp))
+
+                // Información del Cliente y Ticket
+                TicketDetailHeader(
+                    ticketId = ticketId,
+                    clientName = uiState.clientName,
+                    clientDoc = uiState.clientDoc
+                )
+
+                HorizontalDivider(Modifier.padding(vertical = 8.dp))
+
+                // Tabla de Productos
+                ProductsTableHeader()
+                HorizontalDivider(modifier = Modifier.padding(bottom = 4.dp))
+
+                ProductItemsList(uiState.products)
+
+                HorizontalDivider(Modifier.padding(vertical = 8.dp))
+
+                // Resumen de Totales
+                TotalSummary(uiState.products)
+
+                Text(
+                    text = stringResource(R.string.ticket_thanks),
+                    modifier = Modifier.padding(top = 16.dp),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BusinessHeader() {
+    Text(
+        text = stringResource(R.string.bussines_name),
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp
+    )
+    Text(text = stringResource(R.string.bussines_address), fontSize = 12.sp)
+    Text(text = stringResource(R.string.bussines_phone), fontSize = 12.sp)
+}
+
+@Composable
+private fun TicketDetailHeader(ticketId: String, clientName: String, clientDoc: String) {
+    Text(text = "${stringResource(R.string.ticket_title)} #$ticketId", fontWeight = FontWeight.Bold)
+    Text(text = "${stringResource(R.string.ticket_date)} ${GetCurrentDateTime().getCurrentDateTime()}")
+    Text(text = "${stringResource(R.string.ticket_client)} $clientName")
+    Text(text = "${stringResource(R.string.ticket_document)} $clientDoc")
+}
+
+@Composable
+private fun ProductsTableHeader() {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Cant",
+            modifier = Modifier.weight(1f),
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp
+        )
+        Text(
+            text = "Producto",
+            modifier = Modifier.weight(2f),
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp
+        )
+        Text(
+            text = "P. Unit",
+            modifier = Modifier.weight(1f),
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp
+        )
+        Text(
+            text = "Total",
+            modifier = Modifier.weight(1f),
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp
+        )
+    }
+}
+
+@Composable
+private fun ProductItemsList(products: List<ProductModel>) {
+    products.forEach { product ->
+        Row(
             modifier = Modifier
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .padding(vertical = 2.dp)
         ) {
+            Text(text = "${product.stock}", modifier = Modifier.weight(1f), fontSize = 12.sp)
+            Text(text = product.name, modifier = Modifier.weight(2f), fontSize = 12.sp)
             Text(
-                text = stringResource(R.string.bussines_name),
-                modifier = Modifier.padding(bottom = 8.dp)
+                text = "%.2f".format(product.sellingPrice),
+                modifier = Modifier.weight(1f),
+                fontSize = 12.sp
             )
-            Text(text = stringResource(R.string.bussines_address))
-            Text(text = stringResource(R.string.bussines_phone))
-            HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-            Text(text = stringResource(R.string.ticket_title) + viewModel.code) // Should be dynamic
-            HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-            Text(text = stringResource(R.string.ticket_date) + GetCurrentDateTime().getCurrentDateTime()) // Should be dynamic
-            Text(text = stringResource(R.string.ticket_client) + nameClient)
-            Text(text = stringResource(R.string.ticket_document) + numDocClient)
-            HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.ticket_quantity),
-                    modifier = Modifier.weight(1f)
-                )
-                VerticalDivider(thickness = 1.dp)
-                Text(
-                    text = stringResource(R.string.ticket_product),
-                    modifier = Modifier.weight(2f)
-                )
-                VerticalDivider(thickness = 1.dp)
-                Text(
-                    text = stringResource(R.string.ticket_price),
-                    modifier = Modifier.weight(1f)
-                )
-                VerticalDivider(thickness = 1.dp)
-                Text(
-                    text = stringResource(R.string.ticket_total),
-                    modifier = Modifier.weight(1f)
-                )
-                VerticalDivider(thickness = 1.dp)
-            }
-            HorizontalDivider(thickness = 1.dp)
-            ListProducts(
-                products = products
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.ticket_total_title),
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                // This should be dynamically calculated in the ViewModel or here
-                val totalAmount = products.sumOf { it.price * it.stock }
-                Text(
-                    text = String.format(Locale.US, "%.2f", totalAmount),
-                    modifier = Modifier.weight(1f)
-                )
-            }
             Text(
-                text = stringResource(R.string.ticket_thanks),
-                modifier = Modifier.padding(top = 15.dp)
+                text = "%.2f".format(product.sellingPrice * product.stock),
+                modifier = Modifier.weight(1f),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
             )
         }
     }
 }
 
 @Composable
-private fun ListProducts(
-    products: List<ProductModel>
+private fun TotalSummary(products: List<ProductModel>) {
+    val total = products.sumOf { it.sellingPrice * it.stock }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "TOTAL A PAGAR: ", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text(
+            text = "S/. %.2f".format(total),
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 18.sp,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+@Composable
+private fun PreviewBottomActions(
+    onPrint: () -> Unit,
+    onDownload: () -> Unit,
+    onBack: () -> Unit
 ) {
-    Column { // Changed from LazyColumn
-        products.forEach { product -> // Changed from items block
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(text = "${product.stock}", modifier = Modifier.weight(1f))
-                VerticalDivider(thickness = 1.dp)
-                Text(text = product.name, modifier = Modifier.weight(2f))
-                VerticalDivider(thickness = 1.dp)
-                Text(text = "${product.price}", modifier = Modifier.weight(1f))
-                VerticalDivider(thickness = 1.dp)
-                Text(
-                    text = String.format(
-                        Locale.US,
-                        "%.2f",
-                        product.price * product.stock
-                    ),
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            HorizontalDivider(thickness = 1.dp)
+    Column(modifier = Modifier.padding(16.dp)) {
+        Button(
+            onClick = onPrint,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text("Imprimir Ticket")
+        }
+        OutlinedButton(
+            onClick = onDownload,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Descargar PDF")
+        }
+        TextButton(
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
+        ) {
+            Text("Finalizar y Volver")
         }
     }
 }

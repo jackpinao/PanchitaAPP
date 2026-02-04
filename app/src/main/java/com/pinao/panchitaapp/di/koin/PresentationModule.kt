@@ -1,6 +1,7 @@
 package com.pinao.panchitaapp.di.koin
 
 import android.content.Context
+import com.pinao.panchitaapp.domain.service.TicketPdfService
 import com.pinao.panchitaapp.domain.usecase.category.CategoryUseCases
 import com.pinao.panchitaapp.domain.usecase.category.SaveCategoryUseCase
 import com.pinao.panchitaapp.domain.usecase.category.CheckCategoryNameUseCase
@@ -9,15 +10,25 @@ import com.pinao.panchitaapp.domain.usecase.products.DeleteProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.FindCodeProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.GetAllProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
+import com.pinao.panchitaapp.domain.usecase.products.RefreshProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.SaveProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.ScanBarcodeUseCase
+import com.pinao.panchitaapp.domain.usecase.products.SearchProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.rechange.GetAllDateRechangeUseCase
 import com.pinao.panchitaapp.domain.usecase.rechange.GetListForDateRechangeUC
 import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
+import com.pinao.panchitaapp.domain.usecase.temporary.ClearTemporaryProductsUseCase
+import com.pinao.panchitaapp.domain.usecase.temporary.DeleteTemporaryProductUseCase
+import com.pinao.panchitaapp.domain.usecase.temporary.GetAllTemporaryProductsUseCase
+import com.pinao.panchitaapp.domain.usecase.temporary.SaveTemporaryProductUseCase
+import com.pinao.panchitaapp.domain.usecase.temporary.TemporaryProductUseCases
+import com.pinao.panchitaapp.domain.usecase.ticket.CompleteSaleUseCase
+import com.pinao.panchitaapp.domain.usecase.ticket.DetailTicketUseCases
 import com.pinao.panchitaapp.presentation.ui.addCategory.AddCategoryViewModel
 import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductViewModel
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaViewModel
 import com.pinao.panchitaapp.presentation.ui.guiaremision.GuiaRemisionViewModel
+import com.pinao.panchitaapp.presentation.ui.guiaremision.search.ProductSearchViewModel
 import com.pinao.panchitaapp.presentation.ui.home.HomeViewModel
 import com.pinao.panchitaapp.presentation.ui.login.LoginViewModel
 import org.koin.android.annotation.KoinViewModel
@@ -51,25 +62,48 @@ class PresentationModule {
         getAllProductsUseCase: GetAllProductsUseCase,
         findCodeProductUseCase: FindCodeProductUseCase,
         saveProductsUseCase: SaveProductsUseCase,
-        deleteProductUseCase: DeleteProductUseCase
+        deleteProductUseCase: DeleteProductUseCase,
+        refreshProductsUseCase: RefreshProductsUseCase,
+        searchProductsUseCase: SearchProductsUseCase
     ): ProductUseCases = ProductUseCases(
         getAll = getAllProductsUseCase,
         findByCode = findCodeProductUseCase,
         save = saveProductsUseCase,
-        delete = deleteProductUseCase
+        delete = deleteProductUseCase,
+        refreshProducts = refreshProductsUseCase,
+        search = searchProductsUseCase
+    )
+
+    @Factory
+    fun provideTemporaryProductUseCases(
+        getAllTemporaryProductsUseCase: GetAllTemporaryProductsUseCase,
+        saveTemporaryProductUseCase: SaveTemporaryProductUseCase,
+        deleteTemporaryProductUseCase: DeleteTemporaryProductUseCase,
+        clearTemporaryProductsUseCase: ClearTemporaryProductsUseCase
+    ): TemporaryProductUseCases = TemporaryProductUseCases(
+        getAll = getAllTemporaryProductsUseCase,
+        save = saveTemporaryProductUseCase,
+        delete = deleteTemporaryProductUseCase,
+        clearAll = clearTemporaryProductsUseCase
     )
 
     // ViewModel for Guia Remision
     @KoinViewModel
     fun provideGuiaRemisionViewModel(
-        context: Context,
         productUseCases: ProductUseCases,
-        saveClientUseCase: SaveClientUseCase
+        saveClientUseCase: SaveClientUseCase,
+        scanBarcodeUseCase: ScanBarcodeUseCase,
+        completeSaleUseCase: CompleteSaleUseCase,
+        pdfService: TicketPdfService,
+        temporaryProductUseCases: TemporaryProductUseCases
     ): GuiaRemisionViewModel =
         GuiaRemisionViewModel(
-            context,
             productUseCases,
-            saveClientUseCase
+            saveClientUseCase,
+            scanBarcodeUseCase,
+            completeSaleUseCase,
+            pdfService,
+            temporaryProductUseCases
         )
 
     @KoinViewModel
@@ -91,4 +125,9 @@ class PresentationModule {
         saveCategoryUseCase,
         checkCategoryNameUseCase
     )
+
+    @KoinViewModel
+    fun provideProductSearchViewModel(
+        productUseCases: ProductUseCases
+    ): ProductSearchViewModel = ProductSearchViewModel(productUseCases)
 }

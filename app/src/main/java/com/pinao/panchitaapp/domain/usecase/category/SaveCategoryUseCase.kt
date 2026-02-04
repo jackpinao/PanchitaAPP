@@ -7,5 +7,6 @@ class SaveCategoryUseCase(
     private val repository: CategoryRepository
 ) {
 
-    suspend operator fun invoke(categoryModel: CategoryModel) = repository.saveCategory(categoryModel)
+    suspend operator fun invoke(categoryModel: CategoryModel) =
+        repository.saveCategory(categoryModel)
 }

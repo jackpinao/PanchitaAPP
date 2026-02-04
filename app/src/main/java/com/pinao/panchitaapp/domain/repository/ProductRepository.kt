@@ -10,4 +10,5 @@ interface ProductRepository {
     fun findCodeProduct(codeProduct: String): Flow<ProductModel?>
     suspend fun saveProduct(productModel: ProductModel)
     suspend fun deleteProduct(productModel: ProductModel)
+    fun searchProducts(query: String): Flow<List<ProductModel>>
 }

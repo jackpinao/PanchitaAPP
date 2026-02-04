@@ -38,7 +38,7 @@ data class DetailTicketEntity(
     @ColumnInfo(name = "import")
     val import: Double,
     @ColumnInfo(name = "idTicket")
-    val idTicket: Int,
+    val idTicket: String,
     @ColumnInfo(name = "idProduct")
-    val idProduct: Int
+    val idProduct: String
 )

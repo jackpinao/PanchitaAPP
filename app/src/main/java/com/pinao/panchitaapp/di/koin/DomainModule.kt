@@ -3,8 +3,11 @@ package com.pinao.panchitaapp.di.koin
 import com.pinao.panchitaapp.domain.repository.BarcodeScanner
 import com.pinao.panchitaapp.domain.repository.CategoryRepository
 import com.pinao.panchitaapp.domain.repository.ClientRepository
+import com.pinao.panchitaapp.domain.repository.DetailTicketRepository
 import com.pinao.panchitaapp.domain.repository.ProductRepository
 import com.pinao.panchitaapp.domain.repository.RechangeRepository
+import com.pinao.panchitaapp.domain.repository.TemporaryProductRepository
+import com.pinao.panchitaapp.domain.repository.TicketRepository
 import com.pinao.panchitaapp.domain.usecase.category.CategoryUseCases
 import com.pinao.panchitaapp.domain.usecase.category.CheckCategoryNameUseCase
 import com.pinao.panchitaapp.domain.usecase.category.DeleteCategoryUseCase
@@ -19,11 +22,21 @@ import com.pinao.panchitaapp.domain.usecase.client.SaveClientUseCase
 import com.pinao.panchitaapp.domain.usecase.products.DeleteProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.FindCodeProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.GetAllProductsUseCase
+import com.pinao.panchitaapp.domain.usecase.products.RefreshProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.SaveProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.ScanBarcodeUseCase
+import com.pinao.panchitaapp.domain.usecase.products.SearchProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.rechange.GetAllDateRechangeUseCase
 import com.pinao.panchitaapp.domain.usecase.rechange.GetListForDateRechangeUC
 import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
+import com.pinao.panchitaapp.domain.usecase.temporary.ClearTemporaryProductsUseCase
+import com.pinao.panchitaapp.domain.usecase.temporary.DeleteTemporaryProductUseCase
+import com.pinao.panchitaapp.domain.usecase.temporary.GetAllTemporaryProductsUseCase
+import com.pinao.panchitaapp.domain.usecase.temporary.SaveTemporaryProductUseCase
+import com.pinao.panchitaapp.domain.usecase.ticket.CompleteSaleUseCase
+import com.pinao.panchitaapp.domain.usecase.ticket.DetailTicketUseCases
+import com.pinao.panchitaapp.domain.usecase.ticket.GetDetailsByTicketIdUseCase
+import com.pinao.panchitaapp.domain.usecase.ticket.SaveDetailTicketUseCase
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
@@ -76,6 +89,11 @@ class DomainModule {
     fun provideScanBarcodeUseCase(
         barcodeScanner: BarcodeScanner
     ) = ScanBarcodeUseCase(barcodeScanner)
+
+    @Factory
+    fun provideSearchProductsUseCase(
+        productRepository: ProductRepository
+    ) = SearchProductsUseCase(productRepository)
 
     /*
     CATEGORY USE CASES
@@ -147,4 +165,54 @@ class DomainModule {
     fun provideFindClientUseCase(
         clientRepository: ClientRepository
     ) = FindClientUseCase(clientRepository)
+
+    @Factory
+    fun provideDetailTicketUseCases(
+        saveDetailTicketUseCase: SaveDetailTicketUseCase,
+        getDetailsByTicketIdUseCase: GetDetailsByTicketIdUseCase
+    ) = DetailTicketUseCases(
+        save = saveDetailTicketUseCase,
+        getDetailsByTicketId = getDetailsByTicketIdUseCase
+    )
+
+    @Factory
+    fun provideSaveDetailTicketUseCase(
+        detailTicketRepository: DetailTicketRepository
+    ) = SaveDetailTicketUseCase(detailTicketRepository)
+
+    @Factory
+    fun provideGetDetailsByTicketIdUseCase(
+        detailTicketRepository: DetailTicketRepository
+    ) = GetDetailsByTicketIdUseCase(detailTicketRepository)
+
+    @Factory
+    fun provideRefrershProductsUseCase(
+        productRepository: ProductRepository
+    ) = RefreshProductsUseCase(productRepository)
+
+    @Factory
+    fun provideCompleteSaleUseCase(
+        ticketRepository: TicketRepository
+    ) = CompleteSaleUseCase(ticketRepository)
+
+    @Factory
+    fun provideGetAllTemporaryProductsUseCase(
+        temporaryProductRepository: TemporaryProductRepository
+    ) = GetAllTemporaryProductsUseCase(temporaryProductRepository)
+
+    @Factory
+    fun provideSaveTemporaryProductUseCase(
+        temporaryProductRepository: TemporaryProductRepository
+    ) = SaveTemporaryProductUseCase(temporaryProductRepository)
+
+    @Factory
+    fun provideDeleteTemporaryProductUseCase(
+        temporaryProductRepository: TemporaryProductRepository
+    ) = DeleteTemporaryProductUseCase(temporaryProductRepository)
+
+    @Factory
+    fun provideClearTemporaryProductsUseCase(
+        temporaryProductRepository: TemporaryProductRepository
+    ) = ClearTemporaryProductsUseCase(temporaryProductRepository)
+
 }

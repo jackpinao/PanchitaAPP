@@ -23,10 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.pinao.panchitaapp.presentation.ui.AppDrawer
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaScreen
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaViewModel
@@ -43,6 +45,7 @@ import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.presentation.ui.addCategory.AddCategoryScreen
 import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductScreen
 import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductViewModel
+import com.pinao.panchitaapp.presentation.ui.guiaremision.search.ProductSearchScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,7 +62,8 @@ fun AppNavGraph(
 ) {
     //val scope = rememberCoroutineScope()
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = currentNavBackStackEntry?.destination?.route ?: AppScreens.Home.route
+    //val currentRoute = currentNavBackStackEntry?.destination?.route ?: AppScreens.Home.route
+    val currentRoute = "Panchita APP"
     val navigationActions = remember(navController) {
         AppNavigationActions(navController = navController)
     }
@@ -71,7 +75,7 @@ fun AppNavGraph(
                 navigationToHome = { navigationActions.navigateToHome() },
                 navigationToRecarga = { navigationActions.navigateToRecarga() },
                 navigationToGuiaRemision = { navigationActions.navigateToGuiaRemision() },
-                navigationToAddProduct = { navigationActions.navigateToAddProduct()},
+                navigationToAddProduct = { navigationActions.navigateToAddProduct() },
                 //navigationToAddCategory = { navigationActions.navigateToAddCategory() },
                 closeDrawer = { coroutineScope.launch { drawerState.close() } },
                 modifier = Modifier
@@ -133,24 +137,42 @@ fun AppNavGraph(
                 composable(route = AppScreens.GuiaRemision.route) {
                     // Add your GuiaRemisionScreen here
                     GuiaRemisionScreen(
-                        guiaRemisionViewModel = guiaRemisionViewModel,
+                        viewModel = guiaRemisionViewModel,
                         navController = navController
                     )
                 }
-                composable( route = AppScreens.PreviewTicket.route) {
+                composable(route = AppScreens.PreviewTicket.route) {
                     PreviewTicketScreen(
-                        viewModel = guiaRemisionViewModel
+                        viewModel = guiaRemisionViewModel,
+                        navController = navController
                     )
                 }
-                composable(route = AppScreens.AddProduct.route) {
+                composable(
+                    route = AppScreens.AddProduct.route + "?barcode={barcode}",
+                    arguments = listOf(
+                        navArgument("barcode") {
+                            type = NavType.StringType
+                            nullable = true // Permite que sea null (viniendo del Drawer)
+                            defaultValue = null // Valor por defecto
+                        }
+                    )
+                ) { backStackEntry ->
+                    val barcode = backStackEntry.arguments?.getString("barcode")
+                    // Add your AddProductScreen here
                     AddProductScreen(
                         navController = navController,
-                        viewModel = addProductsViewModel
+                        initialBarcode = barcode
+                        //viewModel = addProductsViewModel
                     )
                 }
                 composable(route = AppScreens.AddCategory.route) {
                     // Add your AddCategoryScreen here
                     AddCategoryScreen(
+                        navController = navController
+                    )
+                }
+                composable(route = AppScreens.ProductSearch.route) {
+                    ProductSearchScreen(
                         navController = navController
                     )
                 }

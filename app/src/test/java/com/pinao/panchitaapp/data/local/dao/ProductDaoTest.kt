@@ -39,10 +39,10 @@ class ProductDaoTest {
         val productEntity = ProductsEntity(
             id = "asd",
             idCategory = "123",
-            idDetailTicketEntity = 1,
+            idDetailTicketEntity = "1",
             name = "Test Product",
             description = "Test Description",
-            price = 10.0,
+            sellingPrice = 10.0,
             stock = 100.0,
             code = "TESTCODE123",
             image = "test_image.png"
@@ -57,7 +57,7 @@ class ProductDaoTest {
 
     @Test
     fun insertProduct_withExistingCode_fails() = runBlocking {
-        val product1 = ProductsEntity("qwe", "123",1, "Product 1", "Desc 1", 10.0, 10.0, "CODE1", "")
+        val product1 = ProductsEntity("qwe", "123","1", "Product 1", "Desc 1", 10.0, 10.0, "CODE1", "")
         productDao.insertProduct(product1)
 
         // Attempt to insert another product with the same code
@@ -72,7 +72,7 @@ class ProductDaoTest {
         // We'll catch the expected exception.
         var exceptionThrown = false
         try {
-            val product2 = ProductsEntity("0", "2",2, "Product 2", "Desc 2", 20.0, 20.0, "CODE1", "")
+            val product2 = ProductsEntity("0", "2","2", "Product 2", "Desc 2", 20.0, 20.0, "CODE1", "")
             productDao.insertProduct(product2)
         } catch (e: android.database.sqlite.SQLiteConstraintException) {
             exceptionThrown = true

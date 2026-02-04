@@ -1,6 +1,5 @@
 package com.pinao.panchitaapp.data.local.database
 
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.pinao.panchitaapp.data.local.dao.CategoryDao
@@ -8,6 +7,7 @@ import com.pinao.panchitaapp.data.local.dao.ClientDao
 import com.pinao.panchitaapp.data.local.dao.DetailTicketDao
 import com.pinao.panchitaapp.data.local.dao.ProductDao
 import com.pinao.panchitaapp.data.local.dao.RechangeDao
+import com.pinao.panchitaapp.data.local.dao.TemporaryProductDao
 import com.pinao.panchitaapp.data.local.dao.TicketDao
 import com.pinao.panchitaapp.data.local.dao.UserDao
 import com.pinao.panchitaapp.data.local.entity.CategoryEntity
@@ -15,6 +15,7 @@ import com.pinao.panchitaapp.data.local.entity.ClientEntity
 import com.pinao.panchitaapp.data.local.entity.DetailTicketEntity
 import com.pinao.panchitaapp.data.local.entity.ProductsEntity
 import com.pinao.panchitaapp.data.local.entity.RechangeEntity
+import com.pinao.panchitaapp.data.local.entity.TemporaryProductEntity
 import com.pinao.panchitaapp.data.local.entity.TicketEntity
 import com.pinao.panchitaapp.data.local.entity.UserEntity
 
@@ -26,25 +27,13 @@ import com.pinao.panchitaapp.data.local.entity.UserEntity
         DetailTicketEntity::class,
         ProductsEntity::class,
         RechangeEntity::class,
-        CategoryEntity::class
+        CategoryEntity::class,
+        TemporaryProductEntity::class
     ],
-    exportSchema = true,
-    version = 12,
-    autoMigrations = [
-        AutoMigration(from = 1, to = 2),
-        AutoMigration(from = 2, to = 3),
-        AutoMigration(from = 3, to = 4),
-        AutoMigration(from = 4, to = 5),
-        AutoMigration(from = 5, to = 6),
-        AutoMigration(from = 6, to = 7),
-        AutoMigration(from = 7, to = 8),
-        AutoMigration(from = 8, to = 9),
-        AutoMigration(from = 9, to = 10),
-        AutoMigration(from = 10, to = 11),
-        AutoMigration(from = 11, to = 12),
-    ],
+    exportSchema = false,
+    version = 14,
 )
-  abstract class AppDatabase : RoomDatabase() {
+abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun clientDao(): ClientDao
     abstract fun ticketDao(): TicketDao
@@ -52,4 +41,5 @@ import com.pinao.panchitaapp.data.local.entity.UserEntity
     abstract fun productDao(): ProductDao
     abstract fun categoryDao(): CategoryDao
     abstract fun rechangeDao(): RechangeDao
+    abstract fun temporaryProductDao(): TemporaryProductDao
 }

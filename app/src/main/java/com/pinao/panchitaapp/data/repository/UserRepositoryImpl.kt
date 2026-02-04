@@ -23,7 +23,7 @@ class UserRepositoryImpl(
         return userDao.delete(UserMapper.toDatabase(userModel))
     }
 
-    override suspend fun updatePassword(id: Int, password: String): Int {
+    override suspend fun updatePassword(id: String, password: String): Int {
         return userDao.updatePassword(id, password)
     }
 
@@ -31,7 +31,7 @@ class UserRepositoryImpl(
         return userDao.getUser(email, password)?.let { UserMapper.toDomain(it) }
     }
 
-    override suspend fun getUserForId(id: Int): UserModel? {
+    override suspend fun getUserForId(id: String): UserModel? {
         return userDao.getUserForId(id)?.let { UserMapper.toDomain(it) }
     }
 
