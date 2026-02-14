@@ -24,21 +24,21 @@ interface UserDao {
     @Query("SELECT * FROM user WHERE name LIKE '%' || :name || '%'")
     fun listForName(name: String): Flow<List<UserEntity>>
 
-    @Query("SELECT * FROM user WHERE active=1 AND email = :email AND password = :password")
-    suspend fun getUser(email: String, password: String): UserEntity?
+    @Query("SELECT * FROM user WHERE is_active =1 AND email = :email")
+    suspend fun getUser(email: String): UserEntity?
 
-    @Query("SELECT * FROM user WHERE id = :id")
+    @Query("SELECT * FROM user WHERE user_id = :id")
     suspend fun getUserForId(id: String): UserEntity?
 
-    @Query("SELECT ifnull(count(id),0) FROM user")
+    @Query("SELECT ifnull(count(user_id),0) FROM user")
     suspend fun accountExists(): Int
 
-    @Query("UPDATE user SET password = :password WHERE id = :id")
-    suspend fun updatePassword(id: String, password: String): Int
+//    @Query("UPDATE user SET password = :password WHERE user_id = :id")
+//    suspend fun updatePassword(id: String, password: String): Int
 
     @Transaction
     suspend fun saveAccount(user: UserEntity): UserEntity? {
         val id = insert(user)
-        return getUserForId(user.id)
+        return getUserForId(user.userId)
     }
 }

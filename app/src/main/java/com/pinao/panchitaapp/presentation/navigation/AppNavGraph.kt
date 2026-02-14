@@ -1,5 +1,6 @@
 package com.pinao.panchitaapp.presentation.navigation
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerState
@@ -22,6 +23,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -46,6 +48,7 @@ import com.pinao.panchitaapp.presentation.ui.addCategory.AddCategoryScreen
 import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductScreen
 import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductViewModel
 import com.pinao.panchitaapp.presentation.ui.guiaremision.search.ProductSearchScreen
+import com.pinao.panchitaapp.presentation.ui.login.LoginScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,66 +66,85 @@ fun AppNavGraph(
     //val scope = rememberCoroutineScope()
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
     //val currentRoute = currentNavBackStackEntry?.destination?.route ?: AppScreens.Home.route
-    val currentRoute = "Panchita APP"
+    //val currentRoute = "Panchita APP"
+    val currentRoute = currentNavBackStackEntry?.destination?.route ?: ""
+
+    // Determinar si debemos mostrar el Scaffold (TopBar/Drawer)
+    // Normalmente el Login no lleva Drawer ni TopBar de la App
+    val showMainUI = currentRoute != AppScreens.Login.route
+
     val navigationActions = remember(navController) {
         AppNavigationActions(navController = navController)
     }
 
     ModalNavigationDrawer(
+        gesturesEnabled = showMainUI, // Bloqueamos el drawer en el login
         drawerContent = {
-            AppDrawer(
-                route = currentRoute,
-                navigationToHome = { navigationActions.navigateToHome() },
-                navigationToRecarga = { navigationActions.navigateToRecarga() },
-                navigationToGuiaRemision = { navigationActions.navigateToGuiaRemision() },
-                navigationToAddProduct = { navigationActions.navigateToAddProduct() },
-                //navigationToAddCategory = { navigationActions.navigateToAddCategory() },
-                closeDrawer = { coroutineScope.launch { drawerState.close() } },
-                modifier = Modifier
-            )
+            if (showMainUI) {
+                AppDrawer(
+                    route = currentRoute,
+                    navigationToHome = { navigationActions.navigateToHome() },
+                    navigationToRecarga = { navigationActions.navigateToRecarga() },
+                    navigationToGuiaRemision = { navigationActions.navigateToGuiaRemision() },
+                    navigationToAddProduct = { navigationActions.navigateToAddProduct() },
+                    //navigationToAddCategory = { navigationActions.navigateToAddCategory() },
+                    closeDrawer = { coroutineScope.launch { drawerState.close() } },
+                    modifier = Modifier
+                )
+            }
         },
         drawerState = drawerState
     ) {
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = currentRoute,
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                coroutineScope.launch { drawerState.open() }
-                            },
-                            content = {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.outline_add_home_24),                             //imageVector = Icons.Default.Menu,
-                                    contentDescription = "Menu"
-                                )
-                            },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = MaterialTheme.colorScheme.onPrimary
+                if (showMainUI) {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                text = currentRoute,
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        navigationIcon = {
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch { drawerState.open() }
+                                },
+                                content = {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.outline_add_home_24),                             //imageVector = Icons.Default.Menu,
+                                        contentDescription = "Menu"
+                                    )
+                                },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                )
+                            )
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            titleContentColor = MaterialTheme.colorScheme.onPrimary
                         )
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary
                     )
-                )
+                }
             },
             modifier = Modifier
-        ) {
+        ) { paddingValues ->
             NavHost(
                 navController = navController,
-                startDestination = AppScreens.Home.route,
-                modifier = modifier.padding(it)
+                startDestination = AppScreens.Login.route,
+                modifier = modifier.padding(
+                    if (showMainUI) paddingValues else PaddingValues(0.dp)
+                )
             ) {
+                composable(route = AppScreens.Login.route) {
+                    LoginScreen(
+                        viewModel = loginViewModel,
+                        navController = navController
+                    )
+                }
                 composable(route = AppScreens.Home.route) {
                     HomeScreen(
                         navController = navController,

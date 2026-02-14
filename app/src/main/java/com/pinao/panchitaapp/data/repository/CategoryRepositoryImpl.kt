@@ -59,7 +59,7 @@ class CategoryRepositoryImpl(
             try {
                 Log.d("CategoryRepositoryImpl", "Saving category to Firestore: $categoryModel")
                 // 1. Guardar en Firestore
-                categoriesCollection.document(categoryModel.id).set(categoryModel).await()
+                categoriesCollection.document(categoryModel.categoryId).set(categoryModel).await()
 
                 // 2. Guardar en Room
                 Log.d("CategoryRepositoryImpl", "Saving category to Room: $categoryModel")
@@ -77,7 +77,7 @@ class CategoryRepositoryImpl(
             try {
                 Log.d("CategoryRepositoryImpl", "Deleting category from Firestore: $categoryModel")
                 // 1. Borrar de Firestore
-                categoriesCollection.document(categoryModel.id).delete().await()
+                categoriesCollection.document(categoryModel.categoryId).delete().await()
 
                 // 2. Borrar de Room
                 Log.d("CategoryRepositoryImpl", "Deleting category from Room: $categoryModel")

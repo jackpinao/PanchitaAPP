@@ -109,7 +109,7 @@ class AddProductViewModel(
                 categoryUseCases.getAll()
                     .collect { categories ->
                         val categoryNames = categories.map { it.name }
-                        val categoryIds = categories.map { it.id }
+                        val categoryIds = categories.map { it.categoryId }
                         val categoryRevenue = categories.map { it.revenue }
                         _uiState.update {
                             it.copy(
@@ -153,12 +153,12 @@ class AddProductViewModel(
                 // 2. Crear el objeto ProductModel
                 val product = ProductModel(
                     name = state.productName,
-                    code = state.productCode,
-                    purchasePrice = state.productPurchasePrice.toDoubleOrNull() ?: 0.0,
-                    sellingPrice = sellingPrice,
+                    barcode = state.productCode,
+                    priceBuy = state.productPurchasePrice.toDoubleOrNull() ?: 0.0,
+                    priceSell = sellingPrice,
                     priceExcludingIGV = sellingPrice - (sellingPrice * 0.18),
-                    stock = state.productStock.toDoubleOrNull() ?: 0.0,
-                    idCategory = state.productCategoryId // Aquí asumo que guardas el nombre o ID seleccionado
+                    stockQuantity = state.productStock.toDoubleOrNull() ?: 0.0,
+                    categoryId = state.productCategoryId // Aquí asumo que guardas el nombre o ID seleccionado
                 )
 
                 // 3. Llamar al caso de uso

@@ -1,5 +1,6 @@
 package com.pinao.panchitaapp.di.koin
 
+import com.pinao.panchitaapp.domain.repository.AuthRepository
 import com.pinao.panchitaapp.domain.repository.BarcodeScanner
 import com.pinao.panchitaapp.domain.repository.CategoryRepository
 import com.pinao.panchitaapp.domain.repository.ClientRepository
@@ -7,7 +8,10 @@ import com.pinao.panchitaapp.domain.repository.DetailTicketRepository
 import com.pinao.panchitaapp.domain.repository.ProductRepository
 import com.pinao.panchitaapp.domain.repository.RechangeRepository
 import com.pinao.panchitaapp.domain.repository.TemporaryProductRepository
-import com.pinao.panchitaapp.domain.repository.TicketRepository
+import com.pinao.panchitaapp.domain.repository.SaleRepository
+import com.pinao.panchitaapp.domain.usecase.Auth.AuthUseCase
+import com.pinao.panchitaapp.domain.usecase.Auth.IsUserLoggedInUseCase
+import com.pinao.panchitaapp.domain.usecase.Auth.SignInUseCase
 import com.pinao.panchitaapp.domain.usecase.category.CategoryUseCases
 import com.pinao.panchitaapp.domain.usecase.category.CheckCategoryNameUseCase
 import com.pinao.panchitaapp.domain.usecase.category.DeleteCategoryUseCase
@@ -192,8 +196,8 @@ class DomainModule {
 
     @Factory
     fun provideCompleteSaleUseCase(
-        ticketRepository: TicketRepository
-    ) = CompleteSaleUseCase(ticketRepository)
+        saleRepository: SaleRepository
+    ) = CompleteSaleUseCase(saleRepository)
 
     @Factory
     fun provideGetAllTemporaryProductsUseCase(
@@ -214,5 +218,24 @@ class DomainModule {
     fun provideClearTemporaryProductsUseCase(
         temporaryProductRepository: TemporaryProductRepository
     ) = ClearTemporaryProductsUseCase(temporaryProductRepository)
+
+    @Factory
+    fun provideSignInUseCase(
+        authRepository: AuthRepository
+    ) = SignInUseCase(authRepository)
+
+    @Factory
+    fun provideIsUserLoggedInUseCase(
+        authRepository: AuthRepository
+    ) = IsUserLoggedInUseCase(authRepository)
+
+    @Factory
+    fun provideAuthUseCase(
+        signInUseCase: SignInUseCase,
+        isUserLoggedInUseCase: IsUserLoggedInUseCase
+    ) = AuthUseCase(
+        signInUseCase = signInUseCase,
+        isUserLoggedInUseCase = isUserLoggedInUseCase
+    )
 
 }

@@ -30,14 +30,14 @@ class SaveProductsUseCaseTest {
         // the 'saveProduct' method of the repository is called with the same ProductModel.
         // Given
         val productModel = ProductModel(
-            id = "1",
-            idCategory = "1",
-            idDetailTicketEntity = "1",
+            productId = "1",
+            categoryId = "1",
+            detailTicketEntityId = "1",
             name = "Test Product",
             description = "Test Description",
-            sellingPrice = 10.0,
-            stock = 100.0,
-            code = System.currentTimeMillis().toString(),
+            priceSell = 10.0,
+            stockQuantity = 100.0,
+            barcode = System.currentTimeMillis().toString(),
         )
         // When
         saveProductsUseCase(productModel)
@@ -58,14 +58,14 @@ class SaveProductsUseCaseTest {
         // verify that the 'invoke' method correctly propagates this exception.
         // Given
         val productModel = ProductModel(
-            id = "1",
-            idCategory = "1",
-            idDetailTicketEntity = "1",
+            productId = "1",
+            categoryId = "1",
+            detailTicketEntityId = "1",
             name = "Test Product",
             description = "Test Description",
-            sellingPrice = 10.0,
-            stock = 100.0,
-            code = System.currentTimeMillis().toString(),
+            priceSell = 10.0,
+            stockQuantity = 100.0,
+            barcode = System.currentTimeMillis().toString(),
         )
         val exception = RuntimeException("Database error")
         runBlocking {

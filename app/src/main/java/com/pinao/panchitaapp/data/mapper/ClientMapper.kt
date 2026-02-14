@@ -6,19 +6,19 @@ import com.pinao.panchitaapp.domain.model.ClientModel
 object ClientMapper {
     fun toDomain(entity: ClientEntity): ClientModel {
         return ClientModel(
-            id = entity.id,
+            id = entity.clientId,
             name = entity.name,
             numDoc = entity.numDoc,
-            active = entity.active,
+            active = entity.isActive,
             dateCreate = entity.dateCreate,
         )
     }
     fun toEntity(model: ClientModel): ClientEntity {
         return ClientEntity(
-            id = model.id,
+            clientId = model.id,
             name = model.name,
             numDoc = model.numDoc,
-            active = model.active,
+            isActive = model.active,
             dateCreate = model.dateCreate,
         )
     }

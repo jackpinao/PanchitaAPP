@@ -6,16 +6,21 @@ import com.pinao.panchitaapp.domain.model.CategoryModel
 object CategoryMapper {
     fun toDomain(entity: CategoryEntity): CategoryModel {
         return CategoryModel(
-            id = entity.id,
+            categoryId = entity.categoryId,
+            storeId = entity.storeId,
             name = entity.name,
-            revenue = entity.revenue
+            revenue = entity.revenue,
+            isSynced = entity.isSynced == 1
         )
     }
+
     fun toDatabase(model: CategoryModel): CategoryEntity {
         return CategoryEntity(
-            id = model.id,
+            categoryId = model.categoryId,
+            storeId = model.storeId,
             name = model.name,
-            revenue = model.revenue
+            revenue = model.revenue,
+            isSynced = if (model.isSynced) 1 else 0
         )
     }
 }

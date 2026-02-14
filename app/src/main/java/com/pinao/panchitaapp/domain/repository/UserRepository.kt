@@ -7,8 +7,8 @@ interface UserRepository {
 
     suspend fun save(userModel: UserModel): Int
     suspend fun delete(userModel: UserModel): Int
-    suspend fun updatePassword(id: String, password: String): Int
-    suspend fun getUser(email:String, password: String): UserModel?
+    //suspend fun updatePassword(id: String, password: String): Int
+    suspend fun getUser(email:String): UserModel?
     suspend fun getUserForId(id: String): UserModel?
     suspend fun accountExists(): Int
     suspend fun saveAccount(userModel: UserModel): UserModel?

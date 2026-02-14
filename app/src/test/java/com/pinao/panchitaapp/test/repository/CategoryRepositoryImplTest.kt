@@ -67,7 +67,7 @@ class CategoryRepositoryImplTest {
         val documentReference = mock(DocumentReference::class.java)
 
         `when`(firestore.collection("categories")).thenReturn(collectionReference)
-        `when`(collectionReference.document(category.id)).thenReturn(documentReference)
+        `when`(collectionReference.document(category.categoryId)).thenReturn(documentReference)
         `when`(documentReference.set(category)).thenReturn(Tasks.forResult(null))
 
         repository.saveCategory(category)

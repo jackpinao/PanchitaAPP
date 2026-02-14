@@ -12,7 +12,7 @@ class UserRepositoryImpl(
 ) : UserRepository {
 
     override suspend fun save(userModel: UserModel): Int {
-        return if (userModel.id == "") {
+        return if (userModel.userId == "") {
             userDao.insert(UserMapper.toDatabase(userModel)).toInt()
         } else {
             userDao.update(UserMapper.toDatabase(userModel))
@@ -23,12 +23,12 @@ class UserRepositoryImpl(
         return userDao.delete(UserMapper.toDatabase(userModel))
     }
 
-    override suspend fun updatePassword(id: String, password: String): Int {
-        return userDao.updatePassword(id, password)
-    }
+//    override suspend fun updatePassword(id: String, password: String): Int {
+//        return userDao.updatePassword(id, password)
+//    }
 
-    override suspend fun getUser(email: String, password: String): UserModel? {
-        return userDao.getUser(email, password)?.let { UserMapper.toDomain(it) }
+    override suspend fun getUser(email: String): UserModel? {
+        return userDao.getUser(email)?.let { UserMapper.toDomain(it) }
     }
 
     override suspend fun getUserForId(id: String): UserModel? {

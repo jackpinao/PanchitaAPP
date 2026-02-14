@@ -24,4 +24,9 @@
     <string name="ticket_total_title">Total a Pagar:</string>
     <string name="ticket_thanks">¡¡GRACIAS POR SU COMPRA!!</string>
     <string name="ticket_line">--------------------------------</string>
+    <string name="password">password</string>
+    <string name="email">email</string>
+    <string name="login_action">Login</string>
+    <string name="error_empty_fields">Por favor, complete todos los campos</string>
+    <string name="login_title">Bienvenido</string>
 </resources>

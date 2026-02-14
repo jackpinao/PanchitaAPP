@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.pinao.panchitaapp.domain.model.ClientModel
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.model.TemporaryProductModel
-import com.pinao.panchitaapp.domain.model.TicketModel
+import com.pinao.panchitaapp.domain.model.SaleModel
 import com.pinao.panchitaapp.domain.service.TicketPdfService
 import com.pinao.panchitaapp.domain.usecase.client.SaveClientUseCase
 import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
@@ -83,13 +83,13 @@ class GuiaRemisionViewModel(
                 .collect { list ->
                     val productsForUi = list.map { temp ->
                         ProductModel(
-                            id = temp.productId,
+                            productId = temp.productId,
                             name = temp.name,
-                            code = temp.code,
-                            sellingPrice = temp.price,
+                            barcode = temp.code,
+                            priceSell = temp.price,
                             priceExcludingIGV = temp.priceExcludingIGV,
-                            stock = temp.quantity,
-                            idDetailTicketEntity = temp.id
+                            stockQuantity = temp.quantity,
+                            detailTicketEntityId = temp.id
                         )
                     }
                     _uiState.update { it.copy(products = productsForUi, isLoading = false) }
@@ -129,7 +129,7 @@ class GuiaRemisionViewModel(
         _uiState.update { 
             it.copy(
                 scannedProduct = product, 
-                quantity = product.stock.toString(), 
+                quantity = product.stockQuantity.toString(),
                 showAddDialog = true, 
                 isEditing = true 
             ) 
@@ -158,23 +158,23 @@ class GuiaRemisionViewModel(
         val qty = _uiState.value.quantity.toDoubleOrNull() ?: 0.0
 
         if (qty <= 0) return
-        if (qty > product.stock) {
-            _uiState.update { it.copy(errorMessage = "Stock insuficiente. Disponible: ${product.stock}") }
+        if (qty > product.stockQuantity) {
+            _uiState.update { it.copy(errorMessage = "Stock insuficiente. Disponible: ${product.stockQuantity}") }
             return
         }
 
         viewModelScope.launch {
             try {
                 _uiState.update { it.copy(isLoading = true) }
-                val updatedCatalogProduct = product.copy(stock = product.stock - qty)
+                val updatedCatalogProduct = product.copy(stockQuantity = product.stockQuantity - qty)
                 productUseCases.save(updatedCatalogProduct)
 
                 val tempItem = TemporaryProductModel(
                     id = UUID.randomUUID().toString(),
-                    productId = product.id,
+                    productId = product.productId,
                     name = product.name,
-                    code = product.code,
-                    price = product.sellingPrice,
+                    code = product.barcode,
+                    price = product.priceSell,
                     priceExcludingIGV = product.priceExcludingIGV,
                     quantity = qty
                 )
@@ -191,7 +191,7 @@ class GuiaRemisionViewModel(
     private fun updateProductQuantity() {
         val productInGui = _uiState.value.scannedProduct ?: return
         val newQty = _uiState.value.quantity.toDoubleOrNull() ?: 0.0
-        val oldQty = productInGui.stock // En esta UI, stock representa la cantidad en la guía
+        val oldQty = productInGui.stockQuantity // En esta UI, stock representa la cantidad en la guía
 
         if (newQty <= 0) return
 
@@ -200,28 +200,28 @@ class GuiaRemisionViewModel(
                 _uiState.update { it.copy(isLoading = true) }
                 
                 // 1. Obtener el producto real del catálogo para ver el stock actual
-                val catalogProduct = productUseCases.findByCode(productInGui.code).firstOrNull() 
+                val catalogProduct = productUseCases.findByCode(productInGui.barcode).firstOrNull()
                     ?: throw Exception("Producto no encontrado en catálogo")
 
                 val diff = newQty - oldQty
                 
                 // 2. Si pedimos más, verificar disponibilidad
-                if (diff > 0 && catalogProduct.stock < diff) {
-                    _uiState.update { it.copy(errorMessage = "No hay suficiente stock adicional. Disponible: ${catalogProduct.stock}") }
+                if (diff > 0 && catalogProduct.stockQuantity < diff) {
+                    _uiState.update { it.copy(errorMessage = "No hay suficiente stock adicional. Disponible: ${catalogProduct.stockQuantity}") }
                     return@launch
                 }
 
                 // 3. Actualizar catálogo: Si diff es positivo, resta; si es negativo (devolución), suma.
-                val updatedCatalogProduct = catalogProduct.copy(stock = catalogProduct.stock - diff)
+                val updatedCatalogProduct = catalogProduct.copy(stockQuantity = catalogProduct.stockQuantity - diff)
                 productUseCases.save(updatedCatalogProduct)
 
                 // 4. Actualizar tabla temporal
                 val tempItem = TemporaryProductModel(
-                    id = productInGui.idDetailTicketEntity,
-                    productId = productInGui.id,
+                    id = productInGui.detailTicketEntityId,
+                    productId = productInGui.productId,
                     name = productInGui.name,
-                    code = productInGui.code,
-                    price = productInGui.sellingPrice,
+                    code = productInGui.barcode,
+                    price = productInGui.priceSell,
                     priceExcludingIGV = productInGui.priceExcludingIGV,
                     quantity = newQty
                 )
@@ -243,20 +243,20 @@ class GuiaRemisionViewModel(
         viewModelScope.launch {
             try {
                 _uiState.update { it.copy(isLoading = true) }
-                val originalProduct = productUseCases.findByCode(product.code).firstOrNull()
+                val originalProduct = productUseCases.findByCode(product.barcode).firstOrNull()
                 if (originalProduct != null) {
-                    val restoredProduct = originalProduct.copy(stock = originalProduct.stock + product.stock)
+                    val restoredProduct = originalProduct.copy(stockQuantity = originalProduct.stockQuantity + product.stockQuantity)
                     productUseCases.save(restoredProduct)
                 }
                 temporaryProductUseCases.delete(
                     TemporaryProductModel(
-                        id = product.idDetailTicketEntity,
-                        productId = product.id,
+                        id = product.detailTicketEntityId,
+                        productId = product.productId,
                         name = product.name,
-                        code = product.code,
-                        price = product.sellingPrice,
+                        code = product.barcode,
+                        price = product.priceSell,
                         priceExcludingIGV = product.priceExcludingIGV,
-                        quantity = product.stock
+                        quantity = product.stockQuantity
                     )
                 )
             } catch (e: Exception) {
@@ -277,13 +277,13 @@ class GuiaRemisionViewModel(
                 val date = GetCurrentDateTime().getCurrentDateTime()
                 saveClientUseCase(ClientModel(name = state.clientName, numDoc = state.clientDoc))
 
-                val ticket = TicketModel(
-                    id = sessionTicketId,
-                    date = date,
-                    total = state.products.sumOf { it.sellingPrice * it.stock },
-                    state = "COMPLETADO",
-                    idUser = "",
-                    idClient = ""
+                val ticket = SaleModel(
+                    saleId = sessionTicketId,
+                    saleDate = date,
+                    totalAmount = state.products.sumOf { it.priceSell * it.stockQuantity },
+                    isSynced = true,
+                    userId = "",
+                    clientId = ""
                 )
                 
                 completeSaleUseCase(ticket, state.products)
@@ -305,10 +305,10 @@ class GuiaRemisionViewModel(
         val state = _uiState.value
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            val ticket = TicketModel(
-                id = sessionTicketId,
-                date = GetCurrentDateTime().getCurrentDateTime(),
-                total = state.products.sumOf { it.sellingPrice * it.stock }
+            val ticket = SaleModel(
+                saleId = sessionTicketId,
+                saleDate = GetCurrentDateTime().getCurrentDateTime(),
+                totalAmount = state.products.sumOf { it.priceSell * it.stockQuantity }
             )
 
             pdfService.generateAndSaveTicket(ticket, state.products)

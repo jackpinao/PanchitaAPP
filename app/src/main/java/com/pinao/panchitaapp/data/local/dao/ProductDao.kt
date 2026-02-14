@@ -20,7 +20,7 @@ interface ProductDao {
     @Query("SELECT * FROM product")
     fun getProductsWithCategory(): Flow<List<ProductWithCategory>>
 
-    @Query("SELECT * FROM product WHERE code = :codeProduct")
+    @Query("SELECT * FROM product WHERE barcode = :codeProduct")
     fun findCodeProduct(codeProduct: String): Flow<ProductsEntity?>
 
     @Upsert
@@ -32,12 +32,12 @@ interface ProductDao {
     @Delete
     suspend fun deleteProduct(product: ProductsEntity)
 
-    @Query("SELECT * FROM product WHERE code = :string")
+    @Query("SELECT * FROM product WHERE barcode = :string")
     fun getProductForCode(string: String) : ProductsEntity?
 
     /**
      * Busca productos por nombre o código ignorando mayúsculas/minúsculas.
      */
-    @Query("SELECT * FROM product WHERE name LIKE '%' || :query || '%' OR code LIKE '%' || :query || '%' ORDER BY name ASC")
+    @Query("SELECT * FROM product WHERE name LIKE '%' || :query || '%' OR barcode LIKE '%' || :query || '%' ORDER BY name ASC")
     fun searchProducts(query: String): Flow<List<ProductsEntity>>
 }

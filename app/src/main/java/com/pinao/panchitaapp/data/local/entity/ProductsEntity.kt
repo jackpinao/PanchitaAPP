@@ -11,37 +11,55 @@ import androidx.room.Index
     foreignKeys = [
         ForeignKey(
             entity = CategoryEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["idCategory"],
+            parentColumns = ["category_id"],
+            childColumns = ["category_id"],
+            onDelete = ForeignKey.RESTRICT,
+        ),
+        ForeignKey(
+            entity = BrandEntity::class,
+            parentColumns = ["brand_id"],
+            childColumns = ["brand_id"],
             onDelete = ForeignKey.RESTRICT,
         )
     ],
     indices = [
-        Index(value = ["code"] , unique = true),
-        Index(value = ["idCategory"])
+        Index(value = ["barcode"], unique = true),
+        Index(value = ["category_id"]),
+        Index(value = ["brand_id"])
     ]
 )
 data class ProductsEntity(
     @PrimaryKey
-    val id: String,
-    @ColumnInfo(name = "idCategory")
-    val idCategory: String,
-    @ColumnInfo(name = "idDetailTicketEntity", defaultValue = "")
-    val idDetailTicketEntity: String,
+    @ColumnInfo(name = "product_id")
+    val productId: String,
+    @ColumnInfo(name = "store_id")
+    val storeId: String,
+    @ColumnInfo(name = "category_id")
+    val categoryId: String,
+    @ColumnInfo(name = "brand_id")
+    val brandId: String,
+    @ColumnInfo(name = "detailTicketEntity_id", defaultValue = "")
+    val detailTicketEntityId: String,
     @ColumnInfo(name = "name")
     val name: String,
     @ColumnInfo(name = "description")
     val description: String,
-    @ColumnInfo(name = "sellingPrice")
-    val sellingPrice: Double, //precio de venta
-    @ColumnInfo(name = "purchasePrice")
-    val purchasePrice: Double,// precio de compra
-    @ColumnInfo(name = "priceExcludingIGV")
+    @ColumnInfo(name = "price_Buy")
+    val priceBuy: Double,// precio de compra
+    @ColumnInfo(name = "price_sell")
+    val priceSell: Double, //precio de venta
+    @ColumnInfo(name = "price_excluding_igv")
     val priceExcludingIGV: Double, //precio sin igv
-    @ColumnInfo(name = "stock")
-    val stock: Double,
-    @ColumnInfo(name = "code")
-    val code: String,
+    @ColumnInfo(name = "stock_quantity")
+    val stockQuantity: Double,
+    @ColumnInfo(name = "stock_min", defaultValue = "5.0")
+    val stockMin: Double,
+    @ColumnInfo(name = "barcode")
+    val barcode: String,
     @ColumnInfo(name = "image")
-    val image: String
+    val image: String,
+    @ColumnInfo(name = "last_updated")
+    val lastUpdated: String,
+    @ColumnInfo(name = "is_synced", defaultValue = "0")
+    val isSynced: Int = 0,
 )

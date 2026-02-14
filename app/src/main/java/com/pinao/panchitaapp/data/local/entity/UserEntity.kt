@@ -13,13 +13,18 @@ import androidx.room.PrimaryKey
 )
 data class UserEntity(
     @PrimaryKey
-    val id: String,
+    @ColumnInfo(name = "user_id")
+    val userId: String,
+    @ColumnInfo(name = "store_id")
+    val storeId: String,
     @ColumnInfo(name = "name")
     val name: String,
     @ColumnInfo(name = "email")
     val email: String,
     @ColumnInfo(name = "password")
     val password: String,
-    @ColumnInfo(name = "active")
-    val active: Boolean
+    @ColumnInfo(name = "role")
+    val role: String,
+    @ColumnInfo(name = "is_active")
+    val isActive: Int = 1
 )

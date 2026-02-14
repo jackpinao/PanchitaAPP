@@ -15,7 +15,7 @@ import com.pinao.panchitaapp.presentation.ui.login.LoginViewModel
 @Composable
 fun AppNavigation(
     homeViewModel: HomeViewModel = HomeViewModel(),
-    loginViewModel: LoginViewModel = LoginViewModel()
+//    loginViewModel: LoginViewModel = LoginViewMod()
 ) {
 
     val navController = rememberNavController()
@@ -23,9 +23,9 @@ fun AppNavigation(
         composable(AppScreens.Home.route) {
             HomeScreen(homeViewModel = homeViewModel, navController = navController)
         }
-        composable(AppScreens.Login.route) {
-            LoginScreen(loginViewModel = loginViewModel, navController = navController)
-        }
+//        composable(AppScreens.Login.route) {
+//            LoginScreen(loginViewModel = loginViewModel, navController = navController)
+//        }
     }
 
 }

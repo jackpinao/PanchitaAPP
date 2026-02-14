@@ -76,13 +76,13 @@ fun ProductSearchScreen(
             ) {}
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(products, key = { it.id }) { product ->
+                items(products, key = { it.productId }) { product ->
                     ProductSearchItem(
                         product = product,
                         onClick = {
                             navController.previousBackStackEntry
                                 ?.savedStateHandle
-                                ?.set("selected_product_code", product.code)
+                                ?.set("selected_product_code", product.barcode)
                             navController.popBackStack()
                         }
                     )
@@ -101,7 +101,7 @@ fun ProductSearchItem(
     ListItem(
         modifier = Modifier.clickable { onClick() },
         headlineContent = { Text(product.name) },
-        supportingContent = { Text("Código: ${product.code} | Stock: ${product.stock}") },
-        trailingContent = { Text("S/. ${"%.2f".format(product.sellingPrice)}") }
+        supportingContent = { Text("Código: ${product.barcode} | Stock: ${product.stockQuantity}") },
+        trailingContent = { Text("S/. ${"%.2f".format(product.priceSell)}") }
     )
 }

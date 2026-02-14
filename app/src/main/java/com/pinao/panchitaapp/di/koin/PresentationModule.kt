@@ -1,10 +1,10 @@
 package com.pinao.panchitaapp.di.koin
 
-import android.content.Context
 import com.pinao.panchitaapp.domain.service.TicketPdfService
+import com.pinao.panchitaapp.domain.usecase.Auth.AuthUseCase
 import com.pinao.panchitaapp.domain.usecase.category.CategoryUseCases
-import com.pinao.panchitaapp.domain.usecase.category.SaveCategoryUseCase
 import com.pinao.panchitaapp.domain.usecase.category.CheckCategoryNameUseCase
+import com.pinao.panchitaapp.domain.usecase.category.SaveCategoryUseCase
 import com.pinao.panchitaapp.domain.usecase.client.SaveClientUseCase
 import com.pinao.panchitaapp.domain.usecase.products.DeleteProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.FindCodeProductUseCase
@@ -23,7 +23,6 @@ import com.pinao.panchitaapp.domain.usecase.temporary.GetAllTemporaryProductsUse
 import com.pinao.panchitaapp.domain.usecase.temporary.SaveTemporaryProductUseCase
 import com.pinao.panchitaapp.domain.usecase.temporary.TemporaryProductUseCases
 import com.pinao.panchitaapp.domain.usecase.ticket.CompleteSaleUseCase
-import com.pinao.panchitaapp.domain.usecase.ticket.DetailTicketUseCases
 import com.pinao.panchitaapp.presentation.ui.addCategory.AddCategoryViewModel
 import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductViewModel
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaViewModel
@@ -55,7 +54,11 @@ class PresentationModule {
     fun provideHomeViewModel(): HomeViewModel = HomeViewModel()
 
     @KoinViewModel
-    fun provideLoginViewModel(): LoginViewModel = LoginViewModel()
+    fun provideLoginViewModel(
+        authUseCase: AuthUseCase
+    ): LoginViewModel = LoginViewModel(
+        authUseCase
+    )
 
     @Factory
     fun provideProductUseCases(
@@ -130,4 +133,5 @@ class PresentationModule {
     fun provideProductSearchViewModel(
         productUseCases: ProductUseCases
     ): ProductSearchViewModel = ProductSearchViewModel(productUseCases)
+
 }

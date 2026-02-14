@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 interface ClientDao {
     @Query("SELECT * FROM client")
     fun getClients(): Flow<List<ClientEntity>>
-    @Query("SELECT * FROM client WHERE id = :id")
+    @Query("SELECT * FROM client WHERE client_id = :id")
     fun getById(id: String): Flow<ClientEntity>
     @Query("SELECT * FROM client WHERE name LIKE :name")
     fun getByName(name: String): Flow<List<ClientEntity>>

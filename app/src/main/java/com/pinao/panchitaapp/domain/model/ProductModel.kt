@@ -3,15 +3,20 @@ package com.pinao.panchitaapp.domain.model
 import java.util.UUID
 
 data class ProductModel(
-    val id: String = UUID.randomUUID().toString(),
-    val idCategory: String = "",
-    val idDetailTicketEntity : String = "",
+    val productId: String = UUID.randomUUID().toString(),
+    val storeId: String = "",
+    val categoryId: String = "",
+    val brandId: String = "",
+    val detailTicketEntityId : String = "",
     val name: String = "",
     val description: String = "",
-    val sellingPrice: Double = 0.0,
-    val purchasePrice: Double = 0.0,
+    val priceBuy: Double = 0.0,
+    val priceSell: Double = 0.0,
     val priceExcludingIGV: Double = 0.0,
-    val stock: Double = 0.0,
-    val code: String = "",
+    val stockQuantity: Double = 0.0,
+    val stockMin: Double = 5.0,
+    val barcode: String = "",
     val image: String = "",
+    val lastUpdated: String = "",
+    val isSynced: Boolean = false
 )

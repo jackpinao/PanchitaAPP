@@ -195,15 +195,15 @@ private fun ProductItemsList(products: List<ProductModel>) {
                 .fillMaxWidth()
                 .padding(vertical = 2.dp)
         ) {
-            Text(text = "${product.stock}", modifier = Modifier.weight(1f), fontSize = 12.sp)
+            Text(text = "${product.stockQuantity}", modifier = Modifier.weight(1f), fontSize = 12.sp)
             Text(text = product.name, modifier = Modifier.weight(2f), fontSize = 12.sp)
             Text(
-                text = "%.2f".format(product.sellingPrice),
+                text = "%.2f".format(product.priceSell),
                 modifier = Modifier.weight(1f),
                 fontSize = 12.sp
             )
             Text(
-                text = "%.2f".format(product.sellingPrice * product.stock),
+                text = "%.2f".format(product.priceSell * product.stockQuantity),
                 modifier = Modifier.weight(1f),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
@@ -214,7 +214,7 @@ private fun ProductItemsList(products: List<ProductModel>) {
 
 @Composable
 private fun TotalSummary(products: List<ProductModel>) {
-    val total = products.sumOf { it.sellingPrice * it.stock }
+    val total = products.sumOf { it.priceSell * it.stockQuantity }
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,

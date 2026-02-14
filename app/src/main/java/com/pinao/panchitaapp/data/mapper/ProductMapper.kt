@@ -6,33 +6,43 @@ import com.pinao.panchitaapp.domain.model.ProductModel
 object ProductMapper {
     fun toDomain(entity: ProductsEntity): ProductModel {
         return ProductModel(
-            id = entity.id,
+            productId = entity.productId,
+            storeId = entity.storeId,
+            categoryId = entity.categoryId,
+            brandId = entity.brandId,
+            detailTicketEntityId = entity.detailTicketEntityId,
             name = entity.name,
-            sellingPrice = entity.sellingPrice,
-            purchasePrice = entity.purchasePrice,
+            priceSell = entity.priceSell,
+            priceBuy = entity.priceBuy,
             priceExcludingIGV = entity.priceExcludingIGV,
             description = entity.description,
             image = entity.image,
-            idCategory = entity.idCategory,
-            stock = entity.stock,
-            code = entity.code,
-            idDetailTicketEntity = entity.idDetailTicketEntity
+            stockQuantity = entity.stockQuantity,
+            barcode = entity.barcode,
+            lastUpdated = entity.lastUpdated,
+            stockMin = entity.stockMin,
+            isSynced = entity.isSynced == 1
         )
     }
 
     fun toDatabase(model: ProductModel): ProductsEntity {
         return ProductsEntity(
-            id = model.id,
+            productId = model.productId,
+            storeId = model.storeId,
+            categoryId = model.categoryId,
+            brandId = model.brandId,
+            detailTicketEntityId = model.detailTicketEntityId.toString(),
             name = model.name,
-            sellingPrice = model.sellingPrice,
-            purchasePrice = model.purchasePrice,
+            priceSell = model.priceSell,
+            priceBuy = model.priceBuy,
             priceExcludingIGV = model.priceExcludingIGV,
             description = model.description,
             image = model.image,
-            idCategory = model.idCategory,
-            stock = model.stock,
-            code = model.code,
-            idDetailTicketEntity = model.idDetailTicketEntity.toString()
+            stockQuantity = model.stockQuantity,
+            barcode = model.barcode,
+            lastUpdated = model.lastUpdated,
+            stockMin = model.stockMin,
+            isSynced = if (model.isSynced) 1 else 0
         )
     }
 }

@@ -11,7 +11,7 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import com.pinao.panchitaapp.domain.model.ProductModel
-import com.pinao.panchitaapp.domain.model.TicketModel
+import com.pinao.panchitaapp.domain.model.SaleModel
 import com.pinao.panchitaapp.domain.service.TicketPdfService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -23,7 +23,7 @@ class AndroidTicketPdfService(
 ) : TicketPdfService {
 
     override suspend fun generateAndSaveTicket(
-        ticket: TicketModel,
+        ticket: SaleModel,
         products: List<ProductModel>
     ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
@@ -36,7 +36,7 @@ class AndroidTicketPdfService(
 
             pdfDocument.finishPage(page)
 
-            val fileName = "Ticket_${ticket.id}_${System.currentTimeMillis()}.pdf"
+            val fileName = "Ticket_${ticket.saleId}_${System.currentTimeMillis()}.pdf"
             savePdfToFile(pdfDocument, fileName)
 
             pdfDocument.close()
@@ -46,7 +46,7 @@ class AndroidTicketPdfService(
         }
     }
 
-    private fun drawTicketContent(canvas: Canvas, ticket: TicketModel, products: List<ProductModel>) {
+    private fun drawTicketContent(canvas: Canvas, ticket: SaleModel, products: List<ProductModel>) {
         val titlePaint = Paint().apply {
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             textSize = 14f
@@ -61,9 +61,9 @@ class AndroidTicketPdfService(
         var y = 50f
         canvas.drawText("Bodega 'El Chasqui'", 40f, y, titlePaint)
         y += 30f
-        canvas.drawText("Ticket ID: ${ticket.id}", 40f, y, textPaint)
+        canvas.drawText("Ticket ID: ${ticket.saleId}", 40f, y, textPaint)
         y += 20f
-        canvas.drawText("Fecha: ${ticket.date}", 40f, y, textPaint)
+        canvas.drawText("Fecha: ${ticket.saleDate}", 40f, y, textPaint)
         y += 30f
         canvas.drawText("------------------------------------", 40f, y, textPaint)
         y += 20f
@@ -78,7 +78,7 @@ class AndroidTicketPdfService(
             canvas.drawText(line, 40f, y, textPaint)
             y += 20f
             val line2 = String.format("x%-3.0f S/.%6.2f S/.%6.2f",
-                product.stock, product.sellingPrice, product.sellingPrice * product.stock)
+                product.stockQuantity, product.priceSell, product.priceSell * product.stockQuantity)
             canvas.drawText( line2, 40f, y, textPaint)
             y += 20f
         }
@@ -86,7 +86,7 @@ class AndroidTicketPdfService(
         y += 10f
         canvas.drawText("--------------------------------", 40f, y, textPaint)
         y += 30f
-        canvas.drawText("TOTAL A PAGAR: S/. ${ticket.total}", 40f, y, titlePaint)
+        canvas.drawText("TOTAL A PAGAR: S/. ${ticket.totalAmount}", 40f, y, titlePaint)
     }
 
     private fun savePdfToFile(pdfDocument: PdfDocument, fileName: String) {

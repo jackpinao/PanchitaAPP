@@ -55,6 +55,7 @@ tasks.withType<JavaCompile> {
 }
 
 dependencies {
+    implementation(platform(libs.firebase.bom))
     implementation(libs.kotzilla.sdk)
 
     implementation(libs.androidx.core.ktx)
@@ -75,6 +76,7 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.google.firebase.firestore)
     implementation(libs.androidx.compose.ui.text)
+    implementation(libs.firebase.auth)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
 
@@ -98,7 +100,6 @@ dependencies {
     implementation(libs.kotlin.coroutines.core)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.serialization.json)
-    implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
 

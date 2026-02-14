@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -20,18 +21,18 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.pinao.panchitaapp.domain.model.CategoryModel
 import com.pinao.panchitaapp.presentation.ui.Screen
 import org.koin.androidx.compose.koinViewModel
 
@@ -43,23 +44,28 @@ fun AddCategoryScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Efecto para navegar hacia atrás cuando sea necesario
-    LaunchedEffect(uiState.navigateBack) {
-        if (uiState.navigateBack) {
-            navController.popBackStack()
+    LaunchedEffect(uiState) {
+        when (uiState) {
+            is AddCategoryUiState.Success -> {
+                navController.popBackStack()
+            }
+            is AddCategoryUiState.Error -> {
+                snackbarHostState.showSnackbar((uiState as AddCategoryUiState.Error).message)
+            }
+            else -> {}
         }
     }
 
-    // Efecto para mostrar el Snackbar cuando haya un error
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let {
-            snackbarHostState.showSnackbar(it)
-            viewModel.onErrorShown() // Limpiar el error después de mostrarlo
-        }
+    val currentCategory = when (uiState) {
+        is AddCategoryUiState.Idle -> (uiState as AddCategoryUiState.Idle).category
+        is AddCategoryUiState.Loading -> (uiState as AddCategoryUiState.Loading).category
+        is AddCategoryUiState.Error -> (uiState as AddCategoryUiState.Error).category
+        else -> CategoryModel()
     }
 
     AddCategoryContent(
         uiState = uiState,
+        category = currentCategory,
         snackbarHostState = snackbarHostState,
         onNameChange = viewModel::onNameChange,
         onRevenueChange = viewModel::onRevenueChange,
@@ -72,6 +78,7 @@ fun AddCategoryScreen(
 @Composable
 fun AddCategoryContent(
     uiState: AddCategoryUiState,
+    category: CategoryModel,
     snackbarHostState: SnackbarHostState,
     onNameChange: (String) -> Unit,
     onRevenueChange: (String) -> Unit,
@@ -85,6 +92,9 @@ fun AddCategoryContent(
                 AddCategoryTopBar(onBackClick = onBackClick)
             },
         ) { innerPadding ->
+            val isLoading = uiState is AddCategoryUiState.Loading
+            val isError = uiState is AddCategoryUiState.Error
+
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
@@ -92,13 +102,14 @@ fun AddCategoryContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 TextField(
-                    value = uiState.categoryName,
+                    value = category.name,
                     onValueChange = onNameChange,
                     label = { Text("Nombre de Categoria") },
                     modifier = Modifier
                         .padding(start = 30.dp, end = 30.dp)
                         .fillMaxWidth(),
-                    isError = uiState.error != null
+                    isError = isError,
+                    enabled = !isLoading
                 )
                 Spacer(modifier = Modifier.padding(8.dp))
                 Row(
@@ -107,12 +118,14 @@ fun AddCategoryContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextField(
-                        value = uiState.categoryRevenue,
+                        value = if (category.revenue == 0.0) "" else category.revenue.toString(),
                         onValueChange = onRevenueChange,
                         label = { Text("Ganancia") },
                         modifier = Modifier
                             .weight(1f)
-                            .padding(end = 8.dp)
+                            .padding(end = 8.dp),
+                        enabled = !isLoading,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
                     Text(
                         text = " % ",
@@ -129,9 +142,9 @@ fun AddCategoryContent(
                     modifier = Modifier
                         .padding(start = 30.dp, end = 30.dp)
                         .fillMaxWidth(),
-                    enabled = !uiState.isLoading
+                    enabled = !isLoading
                 ) {
-                    if (uiState.isLoading) {
+                    if (isLoading) {
                         CircularProgressIndicator()
                     } else {
                         Text(text = "Guardar")
@@ -162,6 +175,15 @@ fun AddCategoryTopBar(onBackClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun AddCategoryScreenPreview() {
-    val uiState = AddCategoryUiState("Bebidas", "10.5")
-    AddCategoryContent(uiState, SnackbarHostState(), {}, {}, {}, {})
+    val category = CategoryModel(name = "Bebidas", revenue = 10.5)
+    val uiState = AddCategoryUiState.Idle(category)
+    AddCategoryContent(
+        uiState = uiState,
+        category = category,
+        snackbarHostState = SnackbarHostState(),
+        onNameChange = {},
+        onRevenueChange = {},
+        onSaveClick = {},
+        onBackClick = {}
+    )
 }

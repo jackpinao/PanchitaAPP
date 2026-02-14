@@ -1,20 +1,25 @@
 package com.pinao.panchitaapp.di.koin
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import com.pinao.panchitaapp.data.local.SessionManager
 import com.pinao.panchitaapp.data.local.dao.CategoryDao
 import com.pinao.panchitaapp.data.local.dao.ClientDao
-import com.pinao.panchitaapp.data.local.dao.DetailTicketDao
+import com.pinao.panchitaapp.data.local.dao.SaleDetailDao
 import com.pinao.panchitaapp.data.local.dao.ProductDao
 import com.pinao.panchitaapp.data.local.dao.RechangeDao
 import com.pinao.panchitaapp.data.local.dao.TemporaryProductDao
-import com.pinao.panchitaapp.data.local.dao.TicketDao
+import com.pinao.panchitaapp.data.local.dao.SaleDao
 import com.pinao.panchitaapp.data.local.database.AppDatabase
 import com.pinao.panchitaapp.data.network.rechange.RechangeApiClient
 import com.pinao.panchitaapp.data.network.rechange.RechangeService
+import com.pinao.panchitaapp.data.repository.AuthRepositoryImpl
 import com.pinao.panchitaapp.data.repository.CategoryRepositoryImpl
 import com.pinao.panchitaapp.data.repository.ClientRepositoryImpl
 import com.pinao.panchitaapp.data.repository.DetailTicketRepositoryImpl
@@ -22,8 +27,9 @@ import com.pinao.panchitaapp.data.repository.GmsBarcodeScannerImpl
 import com.pinao.panchitaapp.data.repository.ProductsRepositoryImpl
 import com.pinao.panchitaapp.data.repository.RechangeRepositoryImpl
 import com.pinao.panchitaapp.data.repository.TemporaryProductRepositoryImpl
-import com.pinao.panchitaapp.data.repository.TicketRepositoryImpl
+import com.pinao.panchitaapp.data.repository.SaleRepositoryImpl
 import com.pinao.panchitaapp.data.service.AndroidTicketPdfService
+import com.pinao.panchitaapp.domain.repository.AuthRepository
 import com.pinao.panchitaapp.domain.repository.BarcodeScanner
 import com.pinao.panchitaapp.domain.repository.CategoryRepository
 import com.pinao.panchitaapp.domain.repository.ClientRepository
@@ -31,7 +37,7 @@ import com.pinao.panchitaapp.domain.repository.DetailTicketRepository
 import com.pinao.panchitaapp.domain.repository.ProductRepository
 import com.pinao.panchitaapp.domain.repository.RechangeRepository
 import com.pinao.panchitaapp.domain.repository.TemporaryProductRepository
-import com.pinao.panchitaapp.domain.repository.TicketRepository
+import com.pinao.panchitaapp.domain.repository.SaleRepository
 import com.pinao.panchitaapp.domain.service.TicketPdfService
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
@@ -55,6 +61,21 @@ class DataModule {
     @Single
     fun provideFirestore(): FirebaseFirestore {
         return Firebase.firestore
+    }
+
+    @Single
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return Firebase.auth
+    }
+
+    @Single
+    fun provideSharedPreferences(context: Context): SharedPreferences {
+        return context.getSharedPreferences("panchita_prefs", Context.MODE_PRIVATE)
+    }
+
+    @Single
+    fun provideSessionManager(sharedPreferences: SharedPreferences): SessionManager {
+        return SessionManager(sharedPreferences)
     }
 
     @Single
@@ -90,12 +111,12 @@ class DataModule {
     }
 
     @Single
-    fun provideDetailTicketDao(database: AppDatabase): DetailTicketDao {
+    fun provideDetailTicketDao(database: AppDatabase): SaleDetailDao {
         return database.detailTicketDao()
     }
 
     @Single
-    fun provideTicketDao(database: AppDatabase): TicketDao {
+    fun provideTicketDao(database: AppDatabase): SaleDao {
         return database.ticketDao()
     }
 
@@ -146,10 +167,10 @@ class DataModule {
 
     @Single
     fun provideDetailTicketRepository(
-        detailTicketDao: DetailTicketDao,
+        saleDetailDao: SaleDetailDao,
         firestore: FirebaseFirestore
     ): DetailTicketRepository {
-        return DetailTicketRepositoryImpl(detailTicketDao, firestore)
+        return DetailTicketRepositoryImpl(saleDetailDao, firestore)
     }
 
     @Single
@@ -159,13 +180,13 @@ class DataModule {
 
     @Single
     fun provideTicketRepository(
-        ticketDao: TicketDao,
-        detailTicketDao: DetailTicketDao,
+        saleDao: SaleDao,
+        saleDetailDao: SaleDetailDao,
         firestore: FirebaseFirestore
-    ): TicketRepository {
-        return TicketRepositoryImpl(
-            ticketDao,
-            detailTicketDao,
+    ): SaleRepository {
+        return SaleRepositoryImpl(
+            saleDao,
+            saleDetailDao,
             firestore
         )
     }
@@ -176,6 +197,18 @@ class DataModule {
     ): TemporaryProductRepository {
         return TemporaryProductRepositoryImpl(
             temporaryProductDao
+        )
+    }
+    @Single
+    fun provideAuthRepository(
+        firebaseAuth: FirebaseAuth,
+        firestore: FirebaseFirestore,
+        sessionManager: SessionManager
+    ): AuthRepository{
+        return AuthRepositoryImpl(
+            firebaseAuth,
+            firestore,
+            sessionManager
         )
     }
 

@@ -47,7 +47,7 @@ class ProductsRepositoryImpl(
                 val categories = categorySnapshot.toObjects(CategoryModel::class.java)
 
                 // We keep track of the category IDs that exist in Firestore/Local
-                val categoryIds = categories.map { it.id }.toSet()
+                val categoryIds = categories.map { it.categoryId }.toSet()
                 
                 categories.forEach { categoryModel ->
                     categoryDao.insertCategory(CategoryMapper.toDatabase(categoryModel))
@@ -61,7 +61,7 @@ class ProductsRepositoryImpl(
 
                 // Filter products that have a valid category ID to avoid SQLiteConstraintException
                 val validProducts = products.filter { product ->
-                    categoryIds.contains(product.idCategory)
+                    categoryIds.contains(product.categoryId)
                 }
 
                 // Una vez obtenidos los datos de Firestore, los guardamos en Room.
@@ -83,7 +83,7 @@ class ProductsRepositoryImpl(
     override suspend fun saveProduct(productModel: ProductModel) {
         withContext(Dispatchers.IO) {
             try {
-                productsCollection.document(productModel.id).set(productModel).await()
+                productsCollection.document(productModel.productId).set(productModel).await()
                 productDao.insertProduct(ProductMapper.toDatabase(productModel))
             } catch (e: Exception) {
                 Log.e("ProductsRepositoryImpl", "Error saving product", e)
@@ -94,7 +94,7 @@ class ProductsRepositoryImpl(
     override suspend fun deleteProduct(productModel: ProductModel) {
         withContext(Dispatchers.IO) {
             try {
-                productsCollection.document(productModel.id).delete().await()
+                productsCollection.document(productModel.productId).delete().await()
                 productDao.deleteProduct(ProductMapper.toDatabase(productModel))
             } catch (e: Exception) {
                 Log.e("ProductsRepositoryImpl", "Error deleting product", e)

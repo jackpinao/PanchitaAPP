@@ -13,13 +13,14 @@ import androidx.room.PrimaryKey
 )
 data class ClientEntity(
     @PrimaryKey
-    val id: String,
+    @ColumnInfo(name = "client_id")
+    val clientId: String,
     @ColumnInfo(name = "name")
     val name: String,
     @ColumnInfo(name = "numDoc")
     val numDoc: String,
-    @ColumnInfo(name = "active")
-    val active: Boolean,
+    @ColumnInfo(name = "is_active")
+    val isActive: Boolean,
     @ColumnInfo(name = "dateCreate", defaultValue = "CURRENT_TIMESTAMP")
     val dateCreate: String,
 )

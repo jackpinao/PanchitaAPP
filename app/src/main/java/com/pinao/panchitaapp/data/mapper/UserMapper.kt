@@ -5,26 +5,27 @@ import com.pinao.panchitaapp.domain.model.UserModel
 
 object UserMapper {
 
-    fun toDomain(
-        entity: UserEntity
-    ): UserModel {
+    fun toDomain(entity: UserEntity): UserModel {
         return UserModel(
-            id = entity.id,
+            userId = entity.userId,
+            storeId = entity.storeId,
             name = entity.name,
             email = entity.email,
             password = entity.password,
-            active = entity.active
+            role = entity.role,
+            active = entity.isActive == 1
         )
     }
-    fun toDatabase(
-        model: UserModel
-    ): UserEntity {
+
+    fun toDatabase(model: UserModel): UserEntity {
         return UserEntity(
-            id = model.id,
+            userId = model.userId,
+            storeId = model.storeId,
             name = model.name,
             email = model.email,
             password = model.password,
-            active = model.active
+            role = model.role,
+            isActive = if (model.active) 1 else 0
         )
     }
 }
