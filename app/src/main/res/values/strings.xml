@@ -29,4 +29,7 @@
     <string name="login_action">Login</string>
     <string name="error_empty_fields">Por favor, complete todos los campos</string>
     <string name="login_title">Bienvenido</string>
+    <string name="error_unknown">Error desconocido</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
 </resources>

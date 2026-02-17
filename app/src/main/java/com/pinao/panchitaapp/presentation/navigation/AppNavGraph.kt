@@ -78,7 +78,7 @@ fun AppNavGraph(
     }
 
     ModalNavigationDrawer(
-        gesturesEnabled = showMainUI, // Bloqueamos el drawer en el login
+        //gesturesEnabled = showMainUI, // Bloqueamos el drawer en el login
         drawerContent = {
             if (showMainUI) {
                 AppDrawer(
