@@ -87,10 +87,6 @@ fun LoginScreen(
                 )
             }
 
-            is LoginUiState.Idle -> {
-                //emailFocusRequester.requestFocus()
-            }
-
             else -> Unit
         }
     }
@@ -221,7 +217,6 @@ fun LoginContent(
                     }
                 }
             }
-
         }
     }
 }

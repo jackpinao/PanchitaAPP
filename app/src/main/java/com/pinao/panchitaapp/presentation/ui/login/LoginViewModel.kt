@@ -22,6 +22,16 @@ class LoginViewModel(
     )
     val uiState = _uiState.asStateFlow()
 
+    init {
+        checkUserSession()
+    }
+
+    private fun checkUserSession() {
+        if (authUseCase.isUserLoggedInUseCase()) {
+            _uiState.value = LoginUiState.Success(UserModel())
+        }
+    }
+
     /**
      * Actualiza el modelo de usuario de forma atómica.
      * Si el estado actual es [LoginUiState.Error], cambia automáticamente a [LoginUiState.Idle]
@@ -38,9 +48,8 @@ class LoginViewModel(
                     is LoginUiState.Idle -> currentState.copy(user = updatedUser)
                     is LoginUiState.Loading -> currentState.copy(user = updatedUser)
                     is LoginUiState.Success -> currentState.copy(user = updatedUser)
-                    else -> {}
                 }
-            }) as LoginUiState
+            })
         }
     }
 
@@ -85,5 +94,10 @@ class LoginViewModel(
                 )
             }
         }
+    }
+
+    fun logout() {
+        authUseCase.signOutUseCase()
+        _uiState.value = LoginUiState.Idle(UserModel())
     }
 }

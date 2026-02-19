@@ -19,7 +19,7 @@ class SessionManager(private val sharedPreferences: SharedPreferences) {
         }
     }
 
-    fun clear() {
+    fun clearSession() {
         sharedPreferences.edit().clear().apply()
     }
 }

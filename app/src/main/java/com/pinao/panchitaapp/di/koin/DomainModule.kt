@@ -12,6 +12,7 @@ import com.pinao.panchitaapp.domain.repository.SaleRepository
 import com.pinao.panchitaapp.domain.usecase.Auth.AuthUseCase
 import com.pinao.panchitaapp.domain.usecase.Auth.IsUserLoggedInUseCase
 import com.pinao.panchitaapp.domain.usecase.Auth.SignInUseCase
+import com.pinao.panchitaapp.domain.usecase.Auth.SignOutUseCase
 import com.pinao.panchitaapp.domain.usecase.category.CategoryUseCases
 import com.pinao.panchitaapp.domain.usecase.category.CheckCategoryNameUseCase
 import com.pinao.panchitaapp.domain.usecase.category.DeleteCategoryUseCase
@@ -230,12 +231,19 @@ class DomainModule {
     ) = IsUserLoggedInUseCase(authRepository)
 
     @Factory
+    fun provideSignOutUseCase(
+        authRepository: AuthRepository
+    ) = SignOutUseCase(authRepository)
+
+    @Factory
     fun provideAuthUseCase(
         signInUseCase: SignInUseCase,
-        isUserLoggedInUseCase: IsUserLoggedInUseCase
+        isUserLoggedInUseCase: IsUserLoggedInUseCase,
+        signOutUseCase: SignOutUseCase
     ) = AuthUseCase(
         signInUseCase = signInUseCase,
-        isUserLoggedInUseCase = isUserLoggedInUseCase
+        isUserLoggedInUseCase = isUserLoggedInUseCase,
+        signOutUseCase = signOutUseCase
     )
 
 }

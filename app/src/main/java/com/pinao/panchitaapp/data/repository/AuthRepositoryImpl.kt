@@ -19,12 +19,11 @@ class AuthRepositoryImpl(
             val uid = authResult.user?.uid ?: throw Exception("Error al obtener UID")
 
             // Buscamos datos adicionales en Firestore
-            // Tip: Asegúrate de tener un índice en UID o usar el UID como ID del documento
             val userDoc = firestore.collection("users").document(uid).get().await()
 
             val role = userDoc.getString("role") ?: "vendedor"
             val storeId = userDoc.getString("store_id") ?: ""
-            val email = userDoc.getString("email") ?: ""
+            val emailValue = userDoc.getString("email") ?: ""
             val name = userDoc.getString("name") ?: ""
             val active = userDoc.getBoolean("is_active") ?: false
 
@@ -34,7 +33,7 @@ class AuthRepositoryImpl(
             val user = UserModel(
                 userId = uid,
                 storeId = storeId,
-                email = email,
+                email = emailValue,
                 role = role,
                 active = active,
                 name = name
@@ -46,4 +45,9 @@ class AuthRepositoryImpl(
     }
 
     override fun isUserLoggedIn(): Boolean = firebaseAuth.currentUser != null
+
+    override fun signOut() {
+        firebaseAuth.signOut()
+        sessionManager.clearSession()
+    }
 }

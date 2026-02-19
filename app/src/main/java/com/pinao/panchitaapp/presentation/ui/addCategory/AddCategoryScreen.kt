@@ -14,6 +14,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -26,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.pinao.panchitaapp.domain.model.CategoryModel
 import com.pinao.panchitaapp.presentation.ui.Screen
+import com.pinao.panchitaapp.presentation.ui.login.UiText
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -43,29 +46,43 @@ fun AddCategoryScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     LaunchedEffect(uiState) {
         when (uiState) {
             is AddCategoryUiState.Success -> {
                 navController.popBackStack()
             }
+
             is AddCategoryUiState.Error -> {
-                snackbarHostState.showSnackbar((uiState as AddCategoryUiState.Error).message)
+                val errorState = uiState as AddCategoryUiState.Error
+                val message = when (val uiText = errorState.message) {
+                    is UiText.DynamicString -> uiText.value
+                    is UiText.StringResource -> context.resources.getString(
+                        uiText.resId,
+                        *uiText.args
+                    )
+                }
+                snackbarHostState.showSnackbar(
+                    message = message,
+                    duration = SnackbarDuration.Short
+                )
             }
-            else -> {}
+
+            else -> Unit
         }
     }
 
-    val currentCategory = when (uiState) {
-        is AddCategoryUiState.Idle -> (uiState as AddCategoryUiState.Idle).category
-        is AddCategoryUiState.Loading -> (uiState as AddCategoryUiState.Loading).category
-        is AddCategoryUiState.Error -> (uiState as AddCategoryUiState.Error).category
-        else -> CategoryModel()
-    }
+//    val currentCategory = when (uiState) {
+//        is AddCategoryUiState.Idle -> (uiState as AddCategoryUiState.Idle).category
+//        is AddCategoryUiState.Loading -> (uiState as AddCategoryUiState.Loading).category
+//        is AddCategoryUiState.Error -> (uiState as AddCategoryUiState.Error).category
+//        else -> CategoryModel()
+//    }
 
     AddCategoryContent(
         uiState = uiState,
-        category = currentCategory,
+        //category = currentCategory,
         snackbarHostState = snackbarHostState,
         onNameChange = viewModel::onNameChange,
         onRevenueChange = viewModel::onRevenueChange,
@@ -78,7 +95,7 @@ fun AddCategoryScreen(
 @Composable
 fun AddCategoryContent(
     uiState: AddCategoryUiState,
-    category: CategoryModel,
+    //category: CategoryModel,
     snackbarHostState: SnackbarHostState,
     onNameChange: (String) -> Unit,
     onRevenueChange: (String) -> Unit,
@@ -92,6 +109,7 @@ fun AddCategoryContent(
                 AddCategoryTopBar(onBackClick = onBackClick)
             },
         ) { innerPadding ->
+            val category = uiState.category
             val isLoading = uiState is AddCategoryUiState.Loading
             val isError = uiState is AddCategoryUiState.Error
 
@@ -179,7 +197,7 @@ fun AddCategoryScreenPreview() {
     val uiState = AddCategoryUiState.Idle(category)
     AddCategoryContent(
         uiState = uiState,
-        category = category,
+        //category = category,
         snackbarHostState = SnackbarHostState(),
         onNameChange = {},
         onRevenueChange = {},

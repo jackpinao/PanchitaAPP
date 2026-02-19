@@ -32,4 +32,8 @@
     <string name="error_unknown">Error desconocido</string>
     <string name="hide_password">Hide password</string>
     <string name="show_password">Show password</string>
+    <string name="logout">Cerrar Sesión</string>
+    <string name="error_category_name_exists">La categoría ya existe.</string>
+    <string name="inventary_center">Inventario Central</string>
+    <string name="delete_produdct">Eliminar producto</string>
 </resources>

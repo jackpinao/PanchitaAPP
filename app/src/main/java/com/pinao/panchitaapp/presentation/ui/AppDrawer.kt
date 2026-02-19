@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -29,10 +31,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.presentation.navigation.AppScreens
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppDrawer(
     route: String,
@@ -41,8 +44,8 @@ fun AppDrawer(
     navigationToRecarga: () -> Unit = {},
     navigationToGuiaRemision: () -> Unit = {},
     navigationToAddProduct: () -> Unit = {},
+    onLogout: () -> Unit = {},
     closeDrawer: () -> Unit = {},
-    //navigationToAddCategory: () -> Unit,
 ) {
     ModalDrawerSheet(
         modifier = Modifier
@@ -99,7 +102,7 @@ fun AppDrawer(
             selected = route == AppScreens.GuiaRemision.route,
             onClick = {
                 closeDrawer()
-                 navigationToGuiaRemision() // Uncomment when navigation function is implemented
+                 navigationToGuiaRemision()
             },
             icon = {
                 Icon(
@@ -129,6 +132,30 @@ fun AppDrawer(
                 )
             },
             shape = MaterialTheme.shapes.small
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        NavigationDrawerItem(
+            label = {
+                Text(
+                    text = stringResource(id = R.string.logout),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            },
+            selected = false,
+            onClick = {
+                closeDrawer()
+                onLogout()
+            },
+            icon = {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Logout,
+                    contentDescription = stringResource(id = R.string.logout)
+                )
+            },
+            shape = MaterialTheme.shapes.small,
+            modifier = Modifier.padding(bottom = 16.dp)
         )
     }
 }

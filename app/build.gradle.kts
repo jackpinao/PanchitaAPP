@@ -4,12 +4,12 @@ plugins {
     // alias(libs.plugins.kotlin.android) // No longer required in AGP 9.0
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.navigation.safe.args)
+    // alias(libs.plugins.navigation.safe.args)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.gms)
     alias(libs.plugins.crashlytics)
     alias(libs.plugins.room)
-    alias(libs.plugins.kotzilla)
+    // alias(libs.plugins.kotzilla)
 }
 
 room {
@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.google.firebase.firestore)
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.firebase.auth)
+    implementation(libs.androidx.compose.material3)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
 

@@ -63,14 +63,10 @@ fun AppNavGraph(
     guiaRemisionViewModel: GuiaRemisionViewModel = koinViewModel(),
     addProductsViewModel: AddProductViewModel = koinViewModel()
 ) {
-    //val scope = rememberCoroutineScope()
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
-    //val currentRoute = currentNavBackStackEntry?.destination?.route ?: AppScreens.Home.route
-    //val currentRoute = "Panchita APP"
     val currentRoute = currentNavBackStackEntry?.destination?.route ?: ""
 
     // Determinar si debemos mostrar el Scaffold (TopBar/Drawer)
-    // Normalmente el Login no lleva Drawer ni TopBar de la App
     val showMainUI = currentRoute != AppScreens.Login.route
 
     val navigationActions = remember(navController) {
@@ -78,7 +74,6 @@ fun AppNavGraph(
     }
 
     ModalNavigationDrawer(
-        //gesturesEnabled = showMainUI, // Bloqueamos el drawer en el login
         drawerContent = {
             if (showMainUI) {
                 AppDrawer(
@@ -87,7 +82,12 @@ fun AppNavGraph(
                     navigationToRecarga = { navigationActions.navigateToRecarga() },
                     navigationToGuiaRemision = { navigationActions.navigateToGuiaRemision() },
                     navigationToAddProduct = { navigationActions.navigateToAddProduct() },
-                    //navigationToAddCategory = { navigationActions.navigateToAddCategory() },
+                    onLogout = {
+                        loginViewModel.logout()
+                        navController.navigate(AppScreens.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
                     closeDrawer = { coroutineScope.launch { drawerState.close() } },
                     modifier = Modifier
                 )
@@ -114,7 +114,7 @@ fun AppNavGraph(
                                 },
                                 content = {
                                     Icon(
-                                        imageVector = ImageVector.vectorResource(id = R.drawable.outline_add_home_24),                             //imageVector = Icons.Default.Menu,
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.outline_add_home_24),
                                         contentDescription = "Menu"
                                     )
                                 },
@@ -157,7 +157,6 @@ fun AppNavGraph(
                     )
                 }
                 composable(route = AppScreens.GuiaRemision.route) {
-                    // Add your GuiaRemisionScreen here
                     GuiaRemisionScreen(
                         viewModel = guiaRemisionViewModel,
                         navController = navController
@@ -174,21 +173,18 @@ fun AppNavGraph(
                     arguments = listOf(
                         navArgument("barcode") {
                             type = NavType.StringType
-                            nullable = true // Permite que sea null (viniendo del Drawer)
-                            defaultValue = null // Valor por defecto
+                            nullable = true
+                            defaultValue = null
                         }
                     )
                 ) { backStackEntry ->
                     val barcode = backStackEntry.arguments?.getString("barcode")
-                    // Add your AddProductScreen here
                     AddProductScreen(
                         navController = navController,
                         initialBarcode = barcode
-                        //viewModel = addProductsViewModel
                     )
                 }
                 composable(route = AppScreens.AddCategory.route) {
-                    // Add your AddCategoryScreen here
                     AddCategoryScreen(
                         navController = navController
                     )

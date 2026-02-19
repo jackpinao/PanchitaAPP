@@ -29,6 +29,7 @@ import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaViewModel
 import com.pinao.panchitaapp.presentation.ui.guiaremision.GuiaRemisionViewModel
 import com.pinao.panchitaapp.presentation.ui.guiaremision.search.ProductSearchViewModel
 import com.pinao.panchitaapp.presentation.ui.home.HomeViewModel
+import com.pinao.panchitaapp.presentation.ui.inventoryList.InventoryListViewModel
 import com.pinao.panchitaapp.presentation.ui.login.LoginViewModel
 import org.koin.android.annotation.KoinViewModel
 import org.koin.core.annotation.Factory
@@ -59,6 +60,14 @@ class PresentationModule {
     ): LoginViewModel = LoginViewModel(
         authUseCase
     )
+
+    @KoinViewModel
+    fun provideInventoryListViewModel(
+        productUseCases: ProductUseCases
+    ): InventoryListViewModel = InventoryListViewModel(
+        productUseCases
+    )
+
 
     @Factory
     fun provideProductUseCases(
