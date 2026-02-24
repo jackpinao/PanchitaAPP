@@ -10,6 +10,8 @@ object AllDestinations {
     const val PREVIEW_TICKET = "previewTicket"
     const val ADD_PRODUCT = "addProduct"
     const val ADD_CATEGORY = "addCategory"
+    const val PRODUCT_SEARCH = "productSearch"
+    const val INVENTORY_LIST = "inventoryList"
 }
 
 class AppNavigationActions(
@@ -53,6 +55,18 @@ class AppNavigationActions(
     }
     fun navigateToAddCategory() {
         navController.navigate(AllDestinations.ADD_CATEGORY) {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    fun navigateToProductSearch(){
+        navController.navigate(AllDestinations.PRODUCT_SEARCH) {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    fun navigateToInventary(){
+        navController.navigate(AllDestinations.INVENTORY_LIST){
             launchSingleTop = true
             restoreState = true
         }

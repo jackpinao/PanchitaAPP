@@ -49,6 +49,7 @@ import com.pinao.panchitaapp.presentation.ui.login.UiText
 import org.koin.androidx.compose.koinViewModel
 import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.domain.model.ProductModel
+import com.pinao.panchitaapp.presentation.navigation.AppScreens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,17 +84,20 @@ fun InventoryListScreen(
 
     Screen {
         Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text(stringResource(R.string.inventary_center)) },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                )
-            },
+//            topBar = {
+//                TopAppBar(
+//                    title = { Text(stringResource(R.string.inventary_center)) },
+//                    colors = TopAppBarDefaults.topAppBarColors(
+//                        containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+//                        titleContentColor = MaterialTheme.colorScheme.onPrimary
+//                    )
+//                )
+//            },
             floatingActionButton = {
-                FloatingActionButton(onClick = viewModel::onNavigateToAddItem) {
+                FloatingActionButton(
+                    //onClick = viewModel::onNavigateToAddItem
+                    onClick = {navController.navigate(AppScreens.AddProduct.route)}
+                ) {
                     Icon(
                         Icons.Default.Add,
                         contentDescription = stringResource(R.string.add_produdct)
@@ -112,7 +116,8 @@ fun InventoryListScreen(
                         color = MaterialTheme.colorScheme.primary
                     )
 
-                    else -> InventoryListContent(products = uiState.inventoryList,
+                    else -> InventoryListContent(
+                        products = uiState.inventoryList,
                         onItemClick = { product ->
                             viewModel.onItemClick(product.productId)
                         },
@@ -139,8 +144,8 @@ fun InventoryListContent(
         items(products) { item ->
             InventoryItemCard(
                 product = item,
-                onItemClick = {onItemClick(item)},
-                onDeleteClick = {onDeleteClick(item)}
+                onItemClick = { onItemClick(item) },
+                onDeleteClick = { onDeleteClick(item) }
             )
         }
     }

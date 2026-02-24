@@ -48,6 +48,7 @@ import com.pinao.panchitaapp.presentation.ui.addCategory.AddCategoryScreen
 import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductScreen
 import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductViewModel
 import com.pinao.panchitaapp.presentation.ui.guiaremision.search.ProductSearchScreen
+import com.pinao.panchitaapp.presentation.ui.inventoryList.InventoryListScreen
 import com.pinao.panchitaapp.presentation.ui.login.LoginScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,7 +62,8 @@ fun AppNavGraph(
     homeViewModel: HomeViewModel = koinViewModel(),
     loginViewModel: LoginViewModel = koinViewModel(),
     guiaRemisionViewModel: GuiaRemisionViewModel = koinViewModel(),
-    addProductsViewModel: AddProductViewModel = koinViewModel()
+    addProductsViewModel: AddProductViewModel = koinViewModel(),
+    inventaryViewModel: AddProductViewModel = koinViewModel()
 ) {
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentNavBackStackEntry?.destination?.route ?: ""
@@ -82,6 +84,7 @@ fun AppNavGraph(
                     navigationToRecarga = { navigationActions.navigateToRecarga() },
                     navigationToGuiaRemision = { navigationActions.navigateToGuiaRemision() },
                     navigationToAddProduct = { navigationActions.navigateToAddProduct() },
+                    navigationToInventoryList = { navigationActions.navigateToInventary() },
                     onLogout = {
                         loginViewModel.logout()
                         navController.navigate(AppScreens.Login.route) {
@@ -191,6 +194,11 @@ fun AppNavGraph(
                 }
                 composable(route = AppScreens.ProductSearch.route) {
                     ProductSearchScreen(
+                        navController = navController
+                    )
+                }
+                composable(route = AppScreens.InventoryList.route) {
+                    InventoryListScreen(
                         navController = navController
                     )
                 }

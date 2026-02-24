@@ -44,6 +44,7 @@ fun AppDrawer(
     navigationToRecarga: () -> Unit = {},
     navigationToGuiaRemision: () -> Unit = {},
     navigationToAddProduct: () -> Unit = {},
+    navigationToInventoryList: () -> Unit = {},
     onLogout: () -> Unit = {},
     closeDrawer: () -> Unit = {},
 ) {
@@ -132,6 +133,26 @@ fun AppDrawer(
                 )
             },
             shape = MaterialTheme.shapes.small
+        )
+        NavigationDrawerItem(
+            label = {
+                Text(
+                    text = stringResource(id = R.string.inventary_center),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            },
+            selected = false,
+            onClick = {
+                closeDrawer()
+                navigationToInventoryList()
+            },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.AddShoppingCart,
+                    contentDescription = stringResource(id = R.string.inventary_center)
+                )
+            }
+
         )
 
         Spacer(modifier = Modifier.weight(1f))

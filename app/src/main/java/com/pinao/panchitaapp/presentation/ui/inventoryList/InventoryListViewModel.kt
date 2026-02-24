@@ -34,6 +34,7 @@ class InventoryListViewModel(
 
     fun onNavigateToAddItem(){
 
+
     }
 
     fun onItemClick(productId: String) {}
