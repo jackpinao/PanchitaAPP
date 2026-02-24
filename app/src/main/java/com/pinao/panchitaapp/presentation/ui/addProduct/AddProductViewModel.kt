@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import android.util.Log
 import com.pinao.panchitaapp.domain.model.ProductModel
+import java.util.UUID
 
 data class AddProductUiState(
     val productCode: String = "",
@@ -153,12 +154,13 @@ class AddProductViewModel(
                 // 2. Crear el objeto ProductModel
                 val product = ProductModel(
                     name = state.productName,
+                    brandId = UUID.randomUUID().toString(),// Acá se va guardar el Id de Marca- BRAND
                     barcode = state.productCode,
                     priceBuy = state.productPurchasePrice.toDoubleOrNull() ?: 0.0,
                     priceSell = sellingPrice,
                     priceExcludingIGV = sellingPrice - (sellingPrice * 0.18),
                     stockQuantity = state.productStock.toDoubleOrNull() ?: 0.0,
-                    categoryId = state.productCategoryId // Aquí asumo que guardas el nombre o ID seleccionado
+                    categoryId = state.productCategoryId // Aquí asumo que guardas el nombre o ID seleccionado,
                 )
 
                 // 3. Llamar al caso de uso
