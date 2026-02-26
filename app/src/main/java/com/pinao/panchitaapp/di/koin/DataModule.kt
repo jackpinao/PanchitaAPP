@@ -9,6 +9,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.pinao.panchitaapp.data.local.SessionManager
+import com.pinao.panchitaapp.data.local.dao.BrandDao
 import com.pinao.panchitaapp.data.local.dao.CategoryDao
 import com.pinao.panchitaapp.data.local.dao.ClientDao
 import com.pinao.panchitaapp.data.local.dao.SaleDetailDao
@@ -28,9 +29,11 @@ import com.pinao.panchitaapp.data.repository.ProductsRepositoryImpl
 import com.pinao.panchitaapp.data.repository.RechangeRepositoryImpl
 import com.pinao.panchitaapp.data.repository.TemporaryProductRepositoryImpl
 import com.pinao.panchitaapp.data.repository.SaleRepositoryImpl
+import com.pinao.panchitaapp.data.repository.BrandRepositoryImpl
 import com.pinao.panchitaapp.data.service.AndroidTicketPdfService
 import com.pinao.panchitaapp.domain.repository.AuthRepository
 import com.pinao.panchitaapp.domain.repository.BarcodeScanner
+import com.pinao.panchitaapp.domain.repository.BrandRepository
 import com.pinao.panchitaapp.domain.repository.CategoryRepository
 import com.pinao.panchitaapp.domain.repository.ClientRepository
 import com.pinao.panchitaapp.domain.repository.DetailTicketRepository
@@ -126,6 +129,11 @@ class DataModule {
     }
 
     @Single
+    fun provideBrandDao(database: AppDatabase): BrandDao {
+        return database.brandDao()
+    }
+
+    @Single
     fun provideRechangeService(api: RechangeApiClient): RechangeService {
         return RechangeService(api)
     }
@@ -146,6 +154,14 @@ class DataModule {
     ): ProductRepository {
         return ProductsRepositoryImpl(productDao, categoryDao, firestore)
     }
+
+    @Single(createdAtStart = true)
+    fun provideBrandRepository(
+        brandDao: BrandDao
+    ): BrandRepository {
+        return BrandRepositoryImpl(brandDao)
+    }
+
 
     @Single(createdAtStart = true)
     fun provideClientRepository(clientDao: ClientDao): ClientRepository {

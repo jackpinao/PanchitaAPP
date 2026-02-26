@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface BrandRepository {
     fun getAllBrands(): Flow<List<BrandModel>>
+    fun getBrandById(id: Int): Flow<BrandModel?>
     suspend fun saveBrand(brand: BrandModel)
     suspend fun deleteBrand(brand: BrandModel)
-
 }
