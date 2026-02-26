@@ -2,6 +2,7 @@ package com.pinao.panchitaapp.di.koin
 
 import com.pinao.panchitaapp.domain.service.TicketPdfService
 import com.pinao.panchitaapp.domain.usecase.Auth.AuthUseCase
+import com.pinao.panchitaapp.domain.usecase.brand.BrandUseCases
 import com.pinao.panchitaapp.domain.usecase.category.CategoryUseCases
 import com.pinao.panchitaapp.domain.usecase.category.CheckCategoryNameUseCase
 import com.pinao.panchitaapp.domain.usecase.category.SaveCategoryUseCase
@@ -122,11 +123,13 @@ class PresentationModule {
     fun provideAddProductViewModel(
         productUseCases: ProductUseCases,
         categoryUseCases: CategoryUseCases,
-        scanBarcodeUseCase: ScanBarcodeUseCase
+        scanBarcodeUseCase: ScanBarcodeUseCase,
+        brandUseCases: BrandUseCases
     ): AddProductViewModel = AddProductViewModel(
         productUseCases,
         categoryUseCases,
-        scanBarcodeUseCase
+        scanBarcodeUseCase,
+        brandUseCases
     )
 
     @KoinViewModel

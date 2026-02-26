@@ -15,8 +15,8 @@ interface BrandDao {
     @Upsert
     suspend fun upsertAll(brand: BrandEntity)
 
-    @Query("SELECT * FROM brand WHERE brand_id = :brand_id")
-    suspend fun getBrandById(brand_id: Int): Flow<BrandEntity?>
+    @Query("SELECT * FROM brand WHERE brand_id = :id")
+    fun getBrandById(id: Int): Flow<BrandEntity?>
 
     @Delete
     suspend fun deleteAll(brand: BrandEntity)

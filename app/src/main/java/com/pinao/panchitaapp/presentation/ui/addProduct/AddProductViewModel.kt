@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import android.util.Log
 import com.pinao.panchitaapp.domain.model.BrandModel
 import com.pinao.panchitaapp.domain.model.ProductModel
+import com.pinao.panchitaapp.domain.usecase.brand.BrandUseCases
 import java.util.UUID
 
 data class AddProductUiState(
@@ -34,7 +35,8 @@ data class AddProductUiState(
 class AddProductViewModel(
     private val productUseCases: ProductUseCases,
     private val categoryUseCases: CategoryUseCases,
-    private val scanBarcodeUseCase: ScanBarcodeUseCase
+    private val scanBarcodeUseCase: ScanBarcodeUseCase,
+    private val brandUseCases: BrandUseCases
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddProductUiState())
@@ -172,7 +174,7 @@ class AddProductViewModel(
                     categoryId = state.productCategoryId // Aquí asumo que guardas el nombre o ID seleccionado,
                 )
 
-
+                brandUseCases.save(brand)
                 // 3. Llamar al caso de uso
                 productUseCases.save(product)
 

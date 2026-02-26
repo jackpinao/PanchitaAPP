@@ -2,6 +2,7 @@ package com.pinao.panchitaapp.data.local.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.pinao.panchitaapp.data.local.dao.BrandDao
 import com.pinao.panchitaapp.data.local.dao.CategoryDao
 import com.pinao.panchitaapp.data.local.dao.ClientDao
 import com.pinao.panchitaapp.data.local.dao.SaleDetailDao
@@ -52,4 +53,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun temporaryProductDao(): TemporaryProductDao
     abstract fun supplierDao(): SupplierDao
     abstract fun stockEntryDao(): StockEntryDao
+    abstract fun brandDao(): BrandDao
 }
