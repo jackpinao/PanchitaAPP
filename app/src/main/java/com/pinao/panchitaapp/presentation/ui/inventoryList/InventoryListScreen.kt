@@ -28,12 +28,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -96,7 +98,7 @@ fun InventoryListScreen(
             floatingActionButton = {
                 FloatingActionButton(
                     //onClick = viewModel::onNavigateToAddItem
-                    onClick = {navController.navigate(AppScreens.AddProduct.route)}
+                    onClick = { navController.navigate(AppScreens.AddProduct.route) }
                 ) {
                     Icon(
                         Icons.Default.Add,
@@ -123,7 +125,9 @@ fun InventoryListScreen(
                         },
                         onDeleteClick = { product ->
                             viewModel.onDeleteClick(product.productId)
-                        })
+                        },
+                        padding = innerPadding
+                    )
                 }
             }
         }
@@ -131,24 +135,52 @@ fun InventoryListScreen(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InventoryListContent(
     products: List<ProductModel> = emptyList(),
     onItemClick: (ProductModel) -> Unit = {},
-    onDeleteClick: (ProductModel) -> Unit = {}
+    onDeleteClick: (ProductModel) -> Unit = {},
+    padding: PaddingValues
 ) {
-    LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    var expanded by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
     ) {
-        items(products) { item ->
-            InventoryItemCard(
-                product = item,
-                onItemClick = { onItemClick(item) },
-                onDeleteClick = { onDeleteClick(item) }
-            )
+
+        SearchBar(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            inputField = {
+                SearchBarDefaults.InputField(
+                    query = "",
+                    onQueryChange = {},
+                    onSearch = {},
+                    active = false,
+                    onActiveChange = {},
+                )
+            },
+            expanded = expanded
+        ){
+
+        }
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(products) { item ->
+                InventoryItemCard(
+                    product = item,
+                    onItemClick = { onItemClick(item) },
+                    onDeleteClick = { onDeleteClick(item) }
+                )
+            }
         }
     }
+
 }
 
 @Composable
