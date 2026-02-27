@@ -50,7 +50,7 @@ fun AddProductScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
-        initialBarcode?.let { viewModel.onCodeChanged(it) }
+        initialBarcode?.let { viewModel.loadProduct(it) }
     }
 
     LaunchedEffect(uiState.error) {
@@ -76,9 +76,6 @@ fun AddProductScreen(
         onScannedClick = viewModel::startScanning,
         onCategoryClick = { navController.navigate(AppScreens.AddCategory.route) },
         onSavenClick = viewModel::saveProduct,
-        //snackbarHostState = snackbarHostState,
-        //navController,
-        //viewModel = viewModel
     )
 }
 
@@ -94,24 +91,14 @@ fun AddProductContent(
     onScannedClick: () -> Unit,
     onCategoryClick: () -> Unit,
     onSavenClick: () -> Unit,
-    //navController: NavController? = null,
-    //viewModel: AddProductViewModel = viewModel()
 ) {
-
-    val context = LocalContext.current
     val listCategories = uiState.listOfCategoriesName
-
-    // Estado para controlar si el menú está desplegado o no
     var expanded by remember { mutableStateOf(false) }
 
     Screen {
         Scaffold(
             topBar = {
-                TopApp()
-            },
-            bottomBar = {
-//                BottomApp(
-//                )
+                TopApp(isEditMode = uiState.isEditMode)
             }
         ) { innerPadding ->
             Column(
@@ -126,28 +113,28 @@ fun AddProductContent(
                     TextField(
                         value = uiState.productCode,
                         onValueChange = onCodeChange,
-                        label = { Text("Agregar Codigo") },
+                        label = { Text("Código de barras") },
                         modifier = Modifier.weight(4f),
-                        singleLine = true
+                        singleLine = true,
+                        enabled = !uiState.isEditMode // Generalmente no se edita el código una vez creado
                     )
-                    Button(
-                        //onClick = { viewModel.startScanning(context) },
-                        onClick = onScannedClick,
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .weight(1f),
-                        enabled = !uiState.isLoading
-                    ) {
-                        if (uiState.isLoading) {
-                            CircularProgressIndicator()
-                        } else {
-                            Icon(
-                                //painter = painterResource(id = R.drawable.outline_calendar_view_week_24),
-                                imageVector = Icons.Default.QrCodeScanner,
-                                contentDescription = "QR Scanner",
-                                modifier = Modifier.size(ButtonDefaults.IconSize)
-                            )
-                            //Text(text = "Escanear")
+                    if (!uiState.isEditMode) {
+                        Button(
+                            onClick = onScannedClick,
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .weight(1f),
+                            enabled = !uiState.isLoading
+                        ) {
+                            if (uiState.isLoading) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.QrCodeScanner,
+                                    contentDescription = "QR Scanner",
+                                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                                )
+                            }
                         }
                     }
                 }
@@ -155,7 +142,7 @@ fun AddProductContent(
                 TextField(
                     value = uiState.productName,
                     onValueChange = onNameChange,
-                    label = { Text("Name Product") },
+                    label = { Text("Nombre del Producto") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 30.dp, end = 30.dp)
@@ -171,25 +158,22 @@ fun AddProductContent(
                 )
                 Spacer(modifier = Modifier.padding(8.dp))
 
-                // --- SECCIÓN CATEGORÍA (DROPDOWN + BOTÓN AGREGAR) ---
                 Row(
                     modifier = Modifier
                         .padding(start = 30.dp, end = 30.dp)
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Implementación del Spinner (ExposedDropdownMenuBox)
                     ExposedDropdownMenuBox(
                         expanded = expanded,
                         onExpandedChange = { expanded = !expanded },
                         modifier = Modifier
                             .weight(2f)
-                            .padding(end = 8.dp) // Espacio entre el dropdown y el botón "+"
+                            .padding(end = 8.dp)
                     ) {
-                        // El campo de texto que muestra la selección
                         TextField(
-                            value = uiState.productCategory, // Viene del UI State
-                            onValueChange = {}, // ReadOnly, no se escribe manualmente
+                            value = uiState.productCategory,
+                            onValueChange = {},
                             readOnly = true,
                             label = { Text("Categoría") },
                             trailingIcon = {
@@ -197,15 +181,13 @@ fun AddProductContent(
                             },
                             colors = ExposedDropdownMenuDefaults.textFieldColors(),
                             modifier = Modifier
-                                //.menuAnchor(MenuAnchorType.PrimaryNotEditable, true) // Conecta el menú al TextField
                                 .menuAnchor(
                                     ExposedDropdownMenuAnchorType.PrimaryNotEditable,
                                     true
-                                ) // Conecta el menú al TextField
+                                )
                                 .fillMaxWidth()
                         )
 
-                        // La lista desplegable
                         ExposedDropdownMenu(
                             expanded = expanded,
                             onDismissRequest = { expanded = false }
@@ -220,8 +202,8 @@ fun AddProductContent(
                                     DropdownMenuItem(
                                         text = { Text(text = categoryName) },
                                         onClick = {
-                                            onCategoryChange(categoryName) // Actualiza el ViewModel
-                                            expanded = false // Cierra el menú
+                                            onCategoryChange(categoryName)
+                                            expanded = false
                                         },
                                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                                     )
@@ -230,14 +212,11 @@ fun AddProductContent(
                         }
                     }
 
-                    // Botón para agregar nueva categoría
                     Button(
-                        onClick = {
-                            onCategoryClick()
-                        },
+                        onClick = onCategoryClick,
                         modifier = Modifier
                             .weight(1f)
-                            .padding(start = 8.dp) // Ajuste visual
+                            .padding(start = 8.dp)
                     ) {
                         Text(text = "+")
                     }
@@ -259,7 +238,7 @@ fun AddProductContent(
                         .padding(start = 30.dp, end = 30.dp)
                         .fillMaxWidth()
                 ) {
-                    Text(text = "Guardar")
+                    Text(text = if (uiState.isEditMode) "Actualizar" else "Guardar")
                 }
 
             }
@@ -269,20 +248,15 @@ fun AddProductContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopApp() {
+private fun TopApp(isEditMode: Boolean) {
     TopAppBar(
-        title = { Text(text = "Agregar Producto") },
+        title = { Text(text = if (isEditMode) "Editar Producto" else "Agregar Producto") },
     )
-}
-
-@Composable
-private fun BottomApp() {
-
 }
 
 @Preview(showBackground = true)
 @Composable
 fun AddProductScreenPreview() {
-    val uiState = AddProductUiState("", "", "", "", "")
+    val uiState = AddProductUiState(productName = "Producto Test", isEditMode = true)
     AddProductContent(uiState, {}, {}, {}, {}, {}, {}, {}, {})
 }

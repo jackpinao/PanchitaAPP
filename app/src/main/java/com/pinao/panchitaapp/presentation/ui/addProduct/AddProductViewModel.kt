@@ -13,9 +13,11 @@ import android.util.Log
 import com.pinao.panchitaapp.domain.model.BrandModel
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.usecase.brand.BrandUseCases
+import kotlinx.coroutines.flow.firstOrNull
 import java.util.UUID
 
 data class AddProductUiState(
+    val productId: String? = null,
     val productCode: String = "",
     val productName: String = "",
     val productPurchasePrice: String = "",
@@ -29,7 +31,8 @@ data class AddProductUiState(
     val expanded: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val navigateBack: Boolean = false
+    val navigateBack: Boolean = false,
+    val isEditMode: Boolean = false
 )
 
 class AddProductViewModel(
@@ -53,7 +56,6 @@ class AddProductViewModel(
     }
 
     fun onCategoryChange(newCategoryName: String) {
-        // Buscamos la posición del nombre para obtener el ID en la misma posición
         val index = _uiState.value.listOfCategoriesName.indexOf(newCategoryName)
         val categoryId = if (index != -1) _uiState.value.listOfCategoriesId[index] else ""
         val categoryRevenue = if (index != -1) _uiState.value.listOfCategoriesRevenue[index] else 0.0
@@ -81,26 +83,43 @@ class AddProductViewModel(
         listCategories()
     }
 
+    fun loadProduct(barcode: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            val product = productUseCases.findByCode(barcode).firstOrNull()
+            if (product != null) {
+                _uiState.update { state ->
+                    val categoryIndex = state.listOfCategoriesId.indexOf(product.categoryId)
+                    val categoryName = if (categoryIndex != -1) state.listOfCategoriesName[categoryIndex] else ""
+                    val categoryRevenue = if (categoryIndex != -1) state.listOfCategoriesRevenue[categoryIndex] else 0.0
+                    
+                    state.copy(
+                        productId = product.productId,
+                        productCode = product.barcode,
+                        productName = product.name,
+                        productPurchasePrice = product.priceBuy.toString(),
+                        productCategory = categoryName,
+                        productCategoryId = product.categoryId,
+                        productStock = product.stockQuantity.toInt().toString(),
+                        productRevenueCategory = categoryRevenue,
+                        isEditMode = true,
+                        isLoading = false
+                    )
+                }
+            } else {
+                _uiState.update { it.copy(isLoading = false, productCode = barcode) }
+            }
+        }
+    }
+
     fun startScanning() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            
             val scannedCode = scanBarcodeUseCase()
-            
             if (scannedCode != null) {
-                _uiState.update { 
-                    it.copy(
-                        productCode = scannedCode, 
-                        isLoading = false 
-                    ) 
-                }
+                _uiState.update { it.copy(productCode = scannedCode, isLoading = false) }
             } else {
-                _uiState.update { 
-                    it.copy(
-                        isLoading = false 
-                        // Opcional: Mostrar error de "Cancelado" si lo deseas
-                    ) 
-                }
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
@@ -110,28 +129,23 @@ class AddProductViewModel(
             _uiState.update { it.copy(isLoading = true) }
             categoryUseCases.refreshCategories()
             try {
-                categoryUseCases.getAll()
-                    .collect { categories ->
-                        val categoryNames = categories.map { it.name }
-                        val categoryIds = categories.map { it.categoryId }
-                        val categoryRevenue = categories.map { it.revenue }
-                        _uiState.update {
-                            it.copy(
-                                listOfCategoriesName = categoryNames,
-                                listOfCategoriesId = categoryIds,
-                                listOfCategoriesRevenue = categoryRevenue,
-                                isLoading = false
-                            )
-                        }
+                categoryUseCases.getAll().collect { categories ->
+                    val categoryNames = categories.map { it.name }
+                    val categoryIds = categories.map { it.categoryId }
+                    val categoryRevenue = categories.map { it.revenue }
+                    _uiState.update {
+                        it.copy(
+                            listOfCategoriesName = categoryNames,
+                            listOfCategoriesId = categoryIds,
+                            listOfCategoriesRevenue = categoryRevenue,
+                            isLoading = false
+                        )
                     }
+                }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(
-                        error = "Error al obtener las categorías: ${e.message}",
-                        isLoading = false
-                    )
+                    it.copy(error = "Error: ${e.message}", isLoading = false)
                 }
-                Log.e("AddProductViewModel", "Error al obtener las categorías", e)
             }
         }
     }
@@ -139,8 +153,6 @@ class AddProductViewModel(
     fun saveProduct() {
         viewModelScope.launch {
             val state = _uiState.value
-
-            // 1. Validaciones básicas
             if (state.productName.isBlank() || state.productPurchasePrice.isBlank() ||
                 state.productCode.isBlank() || state.productCategoryId.isBlank()) {
                 _uiState.update { it.copy(error = "Por favor, completa los campos obligatorios") }
@@ -148,47 +160,29 @@ class AddProductViewModel(
             }
 
             _uiState.update { it.copy(isLoading = true) }
-
             val purchasePrice = state.productPurchasePrice.toDoubleOrNull() ?: 0.0
             val revenueCategory = state.productRevenueCategory
             val sellingPrice = purchasePrice + (purchasePrice * (revenueCategory / 100))
 
-            val brandId = UUID.randomUUID().toString()
-
             try {
-
-                val brand = BrandModel(
-                    brandId = brandId,
-                    name = "test"
-                )
-
-                // 2. Crear el objeto ProductModel
                 val product = ProductModel(
+                    productId = state.productId ?: UUID.randomUUID().toString(),
                     name = state.productName,
-                    brandId = brandId,// Acá se va guardar el Id de Marca- BRAND
+                    brandId = UUID.randomUUID().toString(), // Simplificado por ahora
                     barcode = state.productCode,
-                    priceBuy = state.productPurchasePrice.toDoubleOrNull() ?: 0.0,
+                    priceBuy = purchasePrice,
                     priceSell = sellingPrice,
                     priceExcludingIGV = sellingPrice - (sellingPrice * 0.18),
                     stockQuantity = state.productStock.toDoubleOrNull() ?: 0.0,
-                    categoryId = state.productCategoryId // Aquí asumo que guardas el nombre o ID seleccionado,
+                    categoryId = state.productCategoryId
                 )
 
-                brandUseCases.save(brand)
-                // 3. Llamar al caso de uso
                 productUseCases.save(product)
-
-                // 4. Éxito: Detener carga y señalar navegación de regreso
                 _uiState.update { it.copy(isLoading = false, navigateBack = true) }
-
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(
-                        error = "Error al guardar producto: ${e.message}",
-                        isLoading = false
-                    )
+                    it.copy(error = "Error al guardar: ${e.message}", isLoading = false)
                 }
-                Log.e("AddProductViewModel", "Error al guardar", e)
             }
         }
     }
