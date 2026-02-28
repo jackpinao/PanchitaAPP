@@ -150,9 +150,10 @@ class DataModule {
     fun provideProductRepository(
         productDao: ProductDao,
         categoryDao: CategoryDao,
+        brandDao: BrandDao,
         firestore: FirebaseFirestore
     ): ProductRepository {
-        return ProductsRepositoryImpl(productDao, categoryDao, firestore)
+        return ProductsRepositoryImpl(productDao, categoryDao, brandDao, firestore)
     }
 
     @Single(createdAtStart = true)

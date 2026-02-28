@@ -23,11 +23,15 @@ data class AddProductUiState(
     val productPurchasePrice: String = "",
     val productCategory: String = "",
     val productCategoryId: String = "",
+    val productBrand: String = "",
+    val productBrandId: String = "",
     val productStock: String = "",
     val productRevenueCategory: Double = 0.0,
     val listOfCategoriesName: List<String> = emptyList(),
     val listOfCategoriesId: List<String> = emptyList(),
     val listOfCategoriesRevenue: List<Double> = emptyList(),
+    val listOfBrandsName: List<String> = emptyList(),
+    val listOfBrandsId: List<String> = emptyList(),
     val expanded: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null,
@@ -69,6 +73,18 @@ class AddProductViewModel(
         }
     }
 
+    fun onBrandChange(newBrandName: String) {
+        val index = _uiState.value.listOfBrandsName.indexOf(newBrandName)
+        val brandId = if (index != -1) _uiState.value.listOfBrandsId[index] else ""
+
+        _uiState.update {
+            it.copy(
+                productBrand = newBrandName,
+                productBrandId = brandId
+            )
+        }
+    }
+
     fun onStockChange(newStock: String) {
         if (newStock.isEmpty() || newStock.matches(Regex("^\\d+$"))) {
             _uiState.update { it.copy(productStock = newStock) }
@@ -81,6 +97,7 @@ class AddProductViewModel(
 
     init {
         listCategories()
+        listBrands()
     }
 
     fun loadProduct(barcode: String) {
@@ -93,6 +110,9 @@ class AddProductViewModel(
                     val categoryName = if (categoryIndex != -1) state.listOfCategoriesName[categoryIndex] else ""
                     val categoryRevenue = if (categoryIndex != -1) state.listOfCategoriesRevenue[categoryIndex] else 0.0
                     
+                    val brandIndex = state.listOfBrandsId.indexOf(product.brandId)
+                    val brandName = if (brandIndex != -1) state.listOfBrandsName[brandIndex] else ""
+
                     state.copy(
                         productId = product.productId,
                         productCode = product.barcode,
@@ -100,6 +120,8 @@ class AddProductViewModel(
                         productPurchasePrice = product.priceBuy.toString(),
                         productCategory = categoryName,
                         productCategoryId = product.categoryId,
+                        productBrand = brandName,
+                        productBrandId = product.brandId,
                         productStock = product.stockQuantity.toInt().toString(),
                         productRevenueCategory = categoryRevenue,
                         isEditMode = true,
@@ -150,6 +172,19 @@ class AddProductViewModel(
         }
     }
 
+    private fun listBrands() {
+        viewModelScope.launch {
+            brandUseCases.getAll().collect { brands ->
+                _uiState.update { 
+                    it.copy(
+                        listOfBrandsName = brands.map { b -> b.name },
+                        listOfBrandsId = brands.map { b -> b.brandId }
+                    ) 
+                }
+            }
+        }
+    }
+
     fun saveProduct() {
         viewModelScope.launch {
             val state = _uiState.value
@@ -165,10 +200,23 @@ class AddProductViewModel(
             val sellingPrice = purchasePrice + (purchasePrice * (revenueCategory / 100))
 
             try {
+                // Ensure we have a valid brandId.
+                var brandId = state.productBrandId
+                if (brandId.isBlank()) {
+                    if (state.listOfBrandsId.isNotEmpty()) {
+                        brandId = state.listOfBrandsId.first()
+                    } else {
+                        // Create a default brand to satisfy Foreign Key constraint if none exist
+                        val defaultBrand = BrandModel(name = "General")
+                        brandUseCases.save(defaultBrand)
+                        brandId = defaultBrand.brandId
+                    }
+                }
+
                 val product = ProductModel(
                     productId = state.productId ?: UUID.randomUUID().toString(),
                     name = state.productName,
-                    brandId = UUID.randomUUID().toString(), // Simplificado por ahora
+                    brandId = brandId,
                     barcode = state.productCode,
                     priceBuy = purchasePrice,
                     priceSell = sellingPrice,
@@ -180,6 +228,7 @@ class AddProductViewModel(
                 productUseCases.save(product)
                 _uiState.update { it.copy(isLoading = false, navigateBack = true) }
             } catch (e: Exception) {
+                Log.e("AddProductViewModel", "Error saving product", e)
                 _uiState.update {
                     it.copy(error = "Error al guardar: ${e.message}", isLoading = false)
                 }

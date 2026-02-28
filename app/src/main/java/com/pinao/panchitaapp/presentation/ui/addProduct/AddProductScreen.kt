@@ -30,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -73,6 +72,7 @@ fun AddProductScreen(
         onPriceChange = viewModel::onPriceChange,
         onStockChange = viewModel::onStockChange,
         onCategoryChange = viewModel::onCategoryChange,
+        onBrandChange = viewModel::onBrandChange,
         onScannedClick = viewModel::startScanning,
         onCategoryClick = { navController.navigate(AppScreens.AddCategory.route) },
         onSavenClick = viewModel::saveProduct,
@@ -88,12 +88,15 @@ fun AddProductContent(
     onPriceChange: (String) -> Unit,
     onStockChange: (String) -> Unit,
     onCategoryChange: (String) -> Unit,
+    onBrandChange: (String) -> Unit,
     onScannedClick: () -> Unit,
     onCategoryClick: () -> Unit,
     onSavenClick: () -> Unit,
 ) {
     val listCategories = uiState.listOfCategoriesName
-    var expanded by remember { mutableStateOf(false) }
+    val listBrands = uiState.listOfBrandsName
+    var categoryExpanded by remember { mutableStateOf(false) }
+    var brandExpanded by remember { mutableStateOf(false) }
 
     Screen {
         Scaffold(
@@ -116,7 +119,7 @@ fun AddProductContent(
                         label = { Text("Código de barras") },
                         modifier = Modifier.weight(4f),
                         singleLine = true,
-                        enabled = !uiState.isEditMode // Generalmente no se edita el código una vez creado
+                        enabled = !uiState.isEditMode
                     )
                     if (!uiState.isEditMode) {
                         Button(
@@ -158,6 +161,7 @@ fun AddProductContent(
                 )
                 Spacer(modifier = Modifier.padding(8.dp))
 
+                // Categoría
                 Row(
                     modifier = Modifier
                         .padding(start = 30.dp, end = 30.dp)
@@ -165,8 +169,8 @@ fun AddProductContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = !expanded },
+                        expanded = categoryExpanded,
+                        onExpandedChange = { categoryExpanded = !categoryExpanded },
                         modifier = Modifier
                             .weight(2f)
                             .padding(end = 8.dp)
@@ -177,7 +181,7 @@ fun AddProductContent(
                             readOnly = true,
                             label = { Text("Categoría") },
                             trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded)
                             },
                             colors = ExposedDropdownMenuDefaults.textFieldColors(),
                             modifier = Modifier
@@ -189,13 +193,13 @@ fun AddProductContent(
                         )
 
                         ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
+                            expanded = categoryExpanded,
+                            onDismissRequest = { categoryExpanded = false }
                         ) {
                             if (listCategories.isEmpty()) {
                                 DropdownMenuItem(
                                     text = { Text("Sin categorías") },
-                                    onClick = { expanded = false }
+                                    onClick = { categoryExpanded = false }
                                 )
                             } else {
                                 listCategories.forEach { categoryName ->
@@ -203,7 +207,7 @@ fun AddProductContent(
                                         text = { Text(text = categoryName) },
                                         onClick = {
                                             onCategoryChange(categoryName)
-                                            expanded = false
+                                            categoryExpanded = false
                                         },
                                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                                     )
@@ -219,6 +223,63 @@ fun AddProductContent(
                             .padding(start = 8.dp)
                     ) {
                         Text(text = "+")
+                    }
+                }
+
+                Spacer(modifier = Modifier.padding(8.dp))
+
+                // Marca (Brand)
+                Row(
+                    modifier = Modifier
+                        .padding(start = 30.dp, end = 30.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ExposedDropdownMenuBox(
+                        expanded = brandExpanded,
+                        onExpandedChange = { brandExpanded = !brandExpanded },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        TextField(
+                            value = uiState.productBrand,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Marca") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = brandExpanded)
+                            },
+                            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                            modifier = Modifier
+                                .menuAnchor(
+                                    ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                    true
+                                )
+                                .fillMaxWidth()
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = brandExpanded,
+                            onDismissRequest = { brandExpanded = false }
+                        ) {
+                            if (listBrands.isEmpty()) {
+                                DropdownMenuItem(
+                                    text = { Text("Sin marcas") },
+                                    onClick = { brandExpanded = false }
+                                )
+                            } else {
+                                listBrands.forEach { brandName ->
+                                    DropdownMenuItem(
+                                        text = { Text(text = brandName) },
+                                        onClick = {
+                                            onBrandChange(brandName)
+                                            brandExpanded = false
+                                        },
+                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -258,5 +319,5 @@ private fun TopApp(isEditMode: Boolean) {
 @Composable
 fun AddProductScreenPreview() {
     val uiState = AddProductUiState(productName = "Producto Test", isEditMode = true)
-    AddProductContent(uiState, {}, {}, {}, {}, {}, {}, {}, {})
+    AddProductContent(uiState, {}, {}, {}, {}, {}, {}, {}, {}, {})
 }
