@@ -13,6 +13,7 @@ import android.util.Log
 import com.pinao.panchitaapp.domain.model.BrandModel
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.usecase.brand.BrandUseCases
+import com.pinao.panchitaapp.domain.util.PriceUtils
 import kotlinx.coroutines.flow.firstOrNull
 import java.util.UUID
 
@@ -198,6 +199,10 @@ class AddProductViewModel(
             val purchasePrice = state.productPurchasePrice.toDoubleOrNull() ?: 0.0
             val revenueCategory = state.productRevenueCategory
             val sellingPrice = purchasePrice + (purchasePrice * (revenueCategory / 100))
+
+            val rawSellingPrice = purchasePrice + (purchasePrice * (revenueCategory/100))
+            val finalSellingPrice = PriceUtils.roundSellingPrice(rawSellingPrice)
+            val priceWithoutIGV = PriceUtils.calculatePriceExcludingIGV(finalSellingPrice)
 
             try {
                 // Ensure we have a valid brandId.

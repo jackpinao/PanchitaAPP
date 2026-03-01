@@ -113,27 +113,27 @@ fun AppDrawer(
             },
             shape = MaterialTheme.shapes.small
         )
-        NavigationDrawerItem(
-            label = {
-                Text(
-                    text = stringResource(id = R.string.add_produdct),
-                    style = MaterialTheme.typography.labelSmall
-                )
-
-            },
-            selected = route == AppScreens.AddProduct.route,
-            onClick = {
-                closeDrawer()
-                navigationToAddProduct()
-            },
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.AddShoppingCart,
-                    contentDescription = stringResource(id = R.string.add_produdct)
-                )
-            },
-            shape = MaterialTheme.shapes.small
-        )
+//        NavigationDrawerItem(
+//            label = {
+//                Text(
+//                    text = stringResource(id = R.string.add_produdct),
+//                    style = MaterialTheme.typography.labelSmall
+//                )
+//
+//            },
+//            selected = route == AppScreens.AddProduct.route,
+//            onClick = {
+//                closeDrawer()
+//                navigationToAddProduct()
+//            },
+//            icon = {
+//                Icon(
+//                    imageVector = Icons.Default.AddShoppingCart,
+//                    contentDescription = stringResource(id = R.string.add_produdct)
+//                )
+//            },
+//            shape = MaterialTheme.shapes.small
+//        )
         NavigationDrawerItem(
             label = {
                 Text(
