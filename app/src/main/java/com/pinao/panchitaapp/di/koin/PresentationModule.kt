@@ -27,8 +27,8 @@ import com.pinao.panchitaapp.domain.usecase.ticket.CompleteSaleUseCase
 import com.pinao.panchitaapp.presentation.ui.addCategory.AddCategoryViewModel
 import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductViewModel
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaViewModel
-import com.pinao.panchitaapp.presentation.ui.guiaremision.GuiaRemisionViewModel
-import com.pinao.panchitaapp.presentation.ui.guiaremision.search.ProductSearchViewModel
+import com.pinao.panchitaapp.presentation.ui.moduloVenta.GuiaRemisionViewModel
+import com.pinao.panchitaapp.presentation.ui.moduloVenta.search.ProductSearchViewModel
 import com.pinao.panchitaapp.presentation.ui.home.HomeViewModel
 import com.pinao.panchitaapp.presentation.ui.inventoryList.InventoryListViewModel
 import com.pinao.panchitaapp.presentation.ui.login.LoginViewModel

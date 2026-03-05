@@ -198,7 +198,7 @@ class AddProductViewModel(
             _uiState.update { it.copy(isLoading = true) }
             val purchasePrice = state.productPurchasePrice.toDoubleOrNull() ?: 0.0
             val revenueCategory = state.productRevenueCategory
-            val sellingPrice = purchasePrice + (purchasePrice * (revenueCategory / 100))
+            //val sellingPrice = purchasePrice + (purchasePrice * (revenueCategory / 100))
 
             val rawSellingPrice = purchasePrice + (purchasePrice * (revenueCategory/100))
             val finalSellingPrice = PriceUtils.roundSellingPrice(rawSellingPrice)
@@ -224,8 +224,8 @@ class AddProductViewModel(
                     brandId = brandId,
                     barcode = state.productCode,
                     priceBuy = purchasePrice,
-                    priceSell = sellingPrice,
-                    priceExcludingIGV = sellingPrice - (sellingPrice * 0.18),
+                    priceSell = finalSellingPrice,
+                    priceExcludingIGV = priceWithoutIGV,
                     stockQuantity = state.productStock.toDoubleOrNull() ?: 0.0,
                     categoryId = state.productCategoryId
                 )

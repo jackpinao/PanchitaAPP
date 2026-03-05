@@ -1,4 +1,4 @@
-package com.pinao.panchitaapp.presentation.ui.guiaremision.search
+package com.pinao.panchitaapp.presentation.ui.moduloVenta.search
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column

@@ -1,4 +1,4 @@
-package com.pinao.panchitaapp.presentation.ui.guiaremision.search
+package com.pinao.panchitaapp.presentation.ui.moduloVenta.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

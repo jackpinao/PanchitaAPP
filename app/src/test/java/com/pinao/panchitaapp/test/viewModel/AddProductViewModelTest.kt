@@ -1,6 +1,7 @@
 package com.pinao.panchitaapp.test.viewModel
 
 import com.pinao.panchitaapp.domain.model.CategoryModel
+import com.pinao.panchitaapp.domain.usecase.brand.BrandUseCases
 import com.pinao.panchitaapp.domain.usecase.category.CategoryUseCases
 import com.pinao.panchitaapp.domain.usecase.category.GetAllCategoriesUseCase
 import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
@@ -27,6 +28,7 @@ class AddProductViewModelTest {
     private lateinit var categoryUseCases: CategoryUseCases
     private lateinit var scanBarcodeUseCase: ScanBarcodeUseCase
     private lateinit var getAllCategoriesUseCase: GetAllCategoriesUseCase
+    private lateinit var brandUseCases: BrandUseCases
     
     private lateinit var viewModel: AddProductViewModel
     private val testDispatcher = StandardTestDispatcher()
@@ -39,6 +41,7 @@ class AddProductViewModelTest {
         categoryUseCases = mock(CategoryUseCases::class.java)
         scanBarcodeUseCase = mock(ScanBarcodeUseCase::class.java)
         getAllCategoriesUseCase = mock(GetAllCategoriesUseCase::class.java)
+        brandUseCases = mock(BrandUseCases::class.java)
 
         `when`(categoryUseCases.getAll).thenReturn(getAllCategoriesUseCase)
         
@@ -48,7 +51,8 @@ class AddProductViewModelTest {
         viewModel = AddProductViewModel(
             productUseCases = productUseCases,
             categoryUseCases = categoryUseCases,
-            scanBarcodeUseCase = scanBarcodeUseCase
+            scanBarcodeUseCase = scanBarcodeUseCase,
+            brandUseCases = brandUseCases
         )
     }
 

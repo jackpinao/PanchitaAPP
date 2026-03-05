@@ -1,4 +1,4 @@
-package com.pinao.panchitaapp.presentation.ui.guiaremision
+package com.pinao.panchitaapp.presentation.ui.moduloVenta
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState

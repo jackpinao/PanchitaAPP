@@ -34,9 +34,9 @@ import androidx.navigation.navArgument
 import com.pinao.panchitaapp.presentation.ui.AppDrawer
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaScreen
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaViewModel
-import com.pinao.panchitaapp.presentation.ui.guiaremision.GuiaRemisionScreen
-import com.pinao.panchitaapp.presentation.ui.guiaremision.GuiaRemisionViewModel
-import com.pinao.panchitaapp.presentation.ui.guiaremision.PreviewTicketScreen
+import com.pinao.panchitaapp.presentation.ui.moduloVenta.GuiaRemisionScreen
+import com.pinao.panchitaapp.presentation.ui.moduloVenta.GuiaRemisionViewModel
+import com.pinao.panchitaapp.presentation.ui.moduloVenta.PreviewTicketScreen
 import com.pinao.panchitaapp.presentation.ui.home.HomeScreen
 import com.pinao.panchitaapp.presentation.ui.home.HomeViewModel
 import com.pinao.panchitaapp.presentation.ui.login.LoginViewModel
@@ -47,7 +47,7 @@ import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.presentation.ui.addCategory.AddCategoryScreen
 import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductScreen
 import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductViewModel
-import com.pinao.panchitaapp.presentation.ui.guiaremision.search.ProductSearchScreen
+import com.pinao.panchitaapp.presentation.ui.moduloVenta.search.ProductSearchScreen
 import com.pinao.panchitaapp.presentation.ui.inventoryList.InventoryListScreen
 import com.pinao.panchitaapp.presentation.ui.login.LoginScreen
 

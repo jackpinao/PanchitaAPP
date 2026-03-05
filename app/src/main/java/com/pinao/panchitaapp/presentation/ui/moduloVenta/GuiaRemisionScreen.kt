@@ -1,4 +1,4 @@
-package com.pinao.panchitaapp.presentation.ui.guiaremision
+package com.pinao.panchitaapp.presentation.ui.moduloVenta
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -55,6 +55,8 @@ import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.presentation.navigation.AppScreens
 import com.pinao.panchitaapp.presentation.ui.Screen
 import org.koin.androidx.compose.koinViewModel
+import java.util.Locale
+import java.util.Locale.getDefault
 
 /**
  * Pantalla principal de Guía de Remisión refactorizada con Clean Code.
@@ -111,7 +113,13 @@ fun GuiaRemisionScreen(
                         viewModel.startScanningProduct()
                     },
                     headlineContent = { Text("Escanear Código") },
-                    leadingContent = { Icon(Icons.Default.QrCodeScanner, contentDescription = null, modifier = Modifier.size(24.dp)) }
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.QrCodeScanner,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 )
                 ListItem(
                     modifier = Modifier.clickable {
@@ -119,7 +127,13 @@ fun GuiaRemisionScreen(
                         navController.navigate(AppScreens.ProductSearch.route)
                     },
                     headlineContent = { Text("Búsqueda Manual") },
-                    leadingContent = { Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(24.dp)) }
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 )
             }
         }
@@ -195,9 +209,11 @@ fun GuiaRemisionContent(
                 }
             }
         ) { padding ->
-            Column(modifier = Modifier
-                .padding(padding)
-                .padding(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .padding(16.dp)
+            ) {
                 Text("Guía de Remisión", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
                 OutlinedTextField(
@@ -223,9 +239,11 @@ fun GuiaRemisionContent(
 
                 Text("Productos Añadidos", fontSize = 18.sp, fontWeight = FontWeight.Medium)
 
-                OutlinedCard(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)) {
+                OutlinedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                ) {
                     LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
                         items(uiState.products) { product ->
                             ListItem(
@@ -251,8 +269,9 @@ fun GuiaRemisionContent(
                                                 }\n" +
                                                 " Total: S/. ${
                                                     String.format(
-                                                        "%.2f",
-                                                        product.priceSell * product.stockQuantity
+                                                        locale = getDefault(),
+                                                        format = "%.2f",
+                                                         product.priceSell * product.stockQuantity
                                                     )
                                                 }\n"
 
@@ -269,6 +288,25 @@ fun GuiaRemisionContent(
                                 }
                             )
                             HorizontalDivider()
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("TOTAL", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                                Text(
+                                    "S/. ${
+                                        String.format(
+                                            locale = getDefault(),
+                                            "%.2f",
+                                            uiState.products.sumOf { it.priceSell * it.stockQuantity })
+                                    }",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFF388E3C) // Un verde oscuro
+                                )
+                            }
                         }
                     }
                 }
@@ -307,9 +345,11 @@ fun AddProductQuantityDialog(
 ) {
     if (product == null) return
     Dialog(onDismissRequest = onDismiss) {
-        Card(modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -329,7 +369,10 @@ fun AddProductQuantityDialog(
                         .padding(vertical = 16.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
                     TextButton(onClick = onDismiss) { Text("Cancelar") }
                     Button(onClick = onConfirm, enabled = quantity.isNotEmpty()) {
                         Text(if (isEditing) "Actualizar" else "Añadir")

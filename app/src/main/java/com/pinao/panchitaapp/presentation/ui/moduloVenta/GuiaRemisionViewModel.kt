@@ -1,4 +1,4 @@
-package com.pinao.panchitaapp.presentation.ui.guiaremision
+package com.pinao.panchitaapp.presentation.ui.moduloVenta
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
