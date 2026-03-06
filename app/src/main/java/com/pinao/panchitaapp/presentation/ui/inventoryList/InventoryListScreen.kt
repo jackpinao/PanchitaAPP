@@ -54,6 +54,7 @@ import org.koin.androidx.compose.koinViewModel
 import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.presentation.navigation.AppScreens
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,6 +86,16 @@ fun InventoryListScreen(
             else -> Unit
         }
 
+    }
+
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is InventoryListViewModel.InventoryListEvent.NavigateToEdit -> {
+                    navController.navigate(AppScreens.AddProduct.route + "?barcode=${event.barcode}")
+                }
+            }
+        }
     }
 
     Screen {

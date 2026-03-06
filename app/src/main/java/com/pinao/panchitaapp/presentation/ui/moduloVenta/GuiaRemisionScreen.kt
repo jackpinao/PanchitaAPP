@@ -54,12 +54,11 @@ import androidx.navigation.NavController
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.presentation.navigation.AppScreens
 import com.pinao.panchitaapp.presentation.ui.Screen
+import com.pinao.panchitaapp.presentation.common.toCurrency
 import org.koin.androidx.compose.koinViewModel
-import java.util.Locale
-import java.util.Locale.getDefault
 
 /**
- * Pantalla principal de Guía de Remisión refactorizada con Clean Code.
+ * Pantalla principal del Módulo de Ventas refactorizada.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,7 +82,6 @@ fun GuiaRemisionScreen(
         }
     }
 
-    // Escuchamos el estado de error y lo "consumimos" tras mostrarlo
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let { message ->
             snackbarHostState.showSnackbar(message = message, actionLabel = "OK")
@@ -91,7 +89,6 @@ fun GuiaRemisionScreen(
         }
     }
 
-    // Modal para elegir Escáner o Búsqueda Manual
     if (uiState.showSelectionSheet) {
         ModalBottomSheet(
             onDismissRequest = viewModel::closeDialogs,
@@ -109,17 +106,9 @@ fun GuiaRemisionScreen(
                     fontWeight = FontWeight.Bold
                 )
                 ListItem(
-                    modifier = Modifier.clickable {
-                        viewModel.startScanningProduct()
-                    },
+                    modifier = Modifier.clickable { viewModel.startScanningProduct() },
                     headlineContent = { Text("Escanear Código") },
-                    leadingContent = {
-                        Icon(
-                            Icons.Default.QrCodeScanner,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                    leadingContent = { Icon(Icons.Default.QrCodeScanner, null, modifier = Modifier.size(24.dp)) }
                 )
                 ListItem(
                     modifier = Modifier.clickable {
@@ -127,19 +116,12 @@ fun GuiaRemisionScreen(
                         navController.navigate(AppScreens.ProductSearch.route)
                     },
                     headlineContent = { Text("Búsqueda Manual") },
-                    leadingContent = {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                    leadingContent = { Icon(Icons.Default.Search, null, modifier = Modifier.size(24.dp)) }
                 )
             }
         }
     }
 
-    // Manejo de Diálogos mediante el Estado Único
     if (uiState.showNotFoundError) {
         NotFoundErrorDialog(
             code = uiState.lastScannedCode,
@@ -171,7 +153,6 @@ fun GuiaRemisionScreen(
         onRemoveProduct = viewModel::removeItem,
         onProductLongClick = viewModel::onProductLongClick,
         onNavigateToPreview = {
-            //viewModel.finalizeSale()
             navController.navigate(AppScreens.PreviewTicket.route)
         }
     )
@@ -205,106 +186,73 @@ fun GuiaRemisionContent(
                         .padding(16.dp),
                     enabled = uiState.products.isNotEmpty() && !uiState.isLoading
                 ) {
-                    Text(if (uiState.isLoading) "Procesando..." else "Preview Ticket")
+                    Text(if (uiState.isLoading) "Procesando..." else "Finalizar Venta")
                 }
             }
         ) { padding ->
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .padding(16.dp)
-            ) {
-                Text("Guía de Remisión", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Column(modifier = Modifier.padding(padding).padding(16.dp)) {
+                Text("Venta Minimarket", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
                 OutlinedTextField(
                     value = uiState.clientName,
                     onValueChange = onClientNameChange,
                     label = { Text("Nombre del Cliente") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                 )
 
                 OutlinedTextField(
                     value = uiState.clientDoc,
                     onValueChange = onClientDocChange,
-                    label = { Text("Documento") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
+                    label = { Text("Documento (DNI/RUC)") },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
-                Spacer(modifier = Modifier.padding(16.dp))
+                Spacer(modifier = Modifier.padding(12.dp))
 
-                Text("Productos Añadidos", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                Text("Productos en el Carrito", fontSize = 18.sp, fontWeight = FontWeight.Medium)
 
-                OutlinedCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                ) {
-                    LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
+                OutlinedCard(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                    LazyColumn(modifier = Modifier.heightIn(max = 450.dp)) {
                         items(uiState.products) { product ->
                             ListItem(
                                 modifier = Modifier.combinedClickable(
-                                    onClick = { /* Opcional: ver detalle */ },
+                                    onClick = { /* Opcional */ },
                                     onLongClick = { onProductLongClick(product) }
                                 ),
-                                headlineContent = { Text(product.name) },
+                                headlineContent = { Text(product.name, fontWeight = FontWeight.Bold) },
                                 supportingContent = {
                                     Text(
-                                        "Precio sin IGV: S/. ${
-                                            String.format(
-                                                "%.2f",
-                                                product.priceExcludingIGV
-                                            )
-                                        }\n" +
-                                                "Cant: ${product.stockQuantity} |" +
-                                                "Precio unitario: S/. ${
-                                                    String.format(
-                                                        "%.2f",
-                                                        product.priceSell
-                                                    )
-                                                }\n" +
-                                                " Total: S/. ${
-                                                    String.format(
-                                                        locale = getDefault(),
-                                                        format = "%.2f",
-                                                         product.priceSell * product.stockQuantity
-                                                    )
-                                                }\n"
-
+                                        "Cant: ${product.stockQuantity} | " +
+                                        "P. Unit: ${product.priceSell.toCurrency()}\n" +
+                                        "Subtotal: ${(product.priceSell * product.stockQuantity).toCurrency()}"
                                     )
                                 },
                                 trailingContent = {
                                     IconButton(onClick = { onRemoveProduct(product) }) {
-                                        Icon(
-                                            Icons.Default.Delete,
-                                            contentDescription = null,
-                                            tint = Color.Red
-                                        )
+                                        Icon(Icons.Default.Delete, null, tint = Color.Red)
                                     }
                                 }
                             )
-                            HorizontalDivider()
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
+                        }
+
+                        // Resumen de Total al final de la lista
+                        item {
+                            val total = uiState.products.sumOf { it.priceSell * it.stockQuantity }
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("TOTAL", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                                Text("TOTAL A PAGAR", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
                                 Text(
-                                    "S/. ${
-                                        String.format(
-                                            locale = getDefault(),
-                                            "%.2f",
-                                            uiState.products.sumOf { it.priceSell * it.stockQuantity })
-                                    }",
-                                    fontSize = 20.sp,
+                                    text = total.toCurrency(),
+                                    fontSize = 22.sp,
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = Color(0xFF388E3C) // Un verde oscuro
+                                    color = Color(0xFF388E3C)
                                 )
                             }
                         }
@@ -316,21 +264,13 @@ fun GuiaRemisionContent(
 }
 
 @Composable
-fun NotFoundErrorDialog(
-    code: String,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
+fun NotFoundErrorDialog(code: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Producto no encontrado") },
-        text = { Text("El código [$code] no está registrado. ¿Deseas agregarlo?") },
-        confirmButton = {
-            TextButton(onClick = onConfirm) { Text("Aceptar") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
-        }
+        text = { Text("El código [$code] no está registrado. ¿Deseas agregarlo al inventario?") },
+        confirmButton = { TextButton(onClick = onConfirm) { Text("Agregar") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
     )
 }
 
@@ -345,36 +285,22 @@ fun AddProductQuantityDialog(
 ) {
     if (product == null) return
     Dialog(onDismissRequest = onDismiss) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    if (isEditing) "Actualizar Cantidad" else "Añadir Cantidad",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text("Producto: ${product.name}")
-                TextField(
+        Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(if (isEditing) "Editar Cantidad" else "Añadir al Carrito", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.heightIn(8.dp))
+                Text(product.name, color = Color.Gray)
+                OutlinedTextField(
                     value = quantity,
                     onValueChange = onQuantityChange,
                     label = { Text("Cantidad") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     TextButton(onClick = onDismiss) { Text("Cancelar") }
-                    Button(onClick = onConfirm, enabled = quantity.isNotEmpty()) {
+                    Button(onClick = onConfirm, enabled = quantity.isNotEmpty() && (quantity.toDoubleOrNull() ?: 0.0) > 0) {
                         Text(if (isEditing) "Actualizar" else "Añadir")
                     }
                 }

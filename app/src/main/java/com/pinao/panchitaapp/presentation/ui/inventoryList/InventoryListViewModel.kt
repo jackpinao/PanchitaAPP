@@ -6,7 +6,9 @@ import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -26,6 +28,9 @@ class InventoryListViewModel(
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()
+
+    private val _eventFlow = MutableSharedFlow<InventoryListEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
 
     init {
         observeProducts()
@@ -54,7 +59,14 @@ class InventoryListViewModel(
         _searchQuery.value = newQuery
     }
 
-    fun onItemClick(productId: String) {}
+    fun onItemClick(productId: String) {
+        viewModelScope.launch {
+            val product = uiState.value.inventoryList.find { it.productId == productId }
+            product?.let {
+                _eventFlow.emit(InventoryListEvent.NavigateToEdit(it.barcode))
+            }
+        }
+    }
     
     fun onDeleteClick(productId: String) {
         viewModelScope.launch {
@@ -67,5 +79,9 @@ class InventoryListViewModel(
 
     fun onNavigateToAddItem(){
         
+    }
+
+    sealed class InventoryListEvent {
+        data class NavigateToEdit(val barcode: String) : InventoryListEvent()
     }
 }
