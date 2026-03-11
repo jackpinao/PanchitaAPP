@@ -13,14 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -28,10 +20,18 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,13 +48,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.pinao.panchitaapp.presentation.ui.Screen
-import com.pinao.panchitaapp.presentation.ui.login.UiText
-import org.koin.androidx.compose.koinViewModel
 import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.presentation.navigation.AppScreens
+import com.pinao.panchitaapp.presentation.ui.Screen
+import com.pinao.panchitaapp.presentation.ui.login.UiText
 import kotlinx.coroutines.flow.collectLatest
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,7 +132,7 @@ fun InventoryListScreen(
                         onDeleteClick = { product ->
                             viewModel.onDeleteClick(product.productId)
                         },
-                        padding = innerPadding
+                        //padding = innerPadding
                     )
                 }
             }
@@ -149,7 +149,7 @@ fun InventoryListContent(
     onSearchQueryChange: (String) -> Unit = {},
     onItemClick: (ProductModel) -> Unit = {},
     onDeleteClick: (ProductModel) -> Unit = {},
-    padding: PaddingValues
+    //padding: PaddingValues
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -191,7 +191,7 @@ fun InventoryListContent(
                 items(products) { item ->
                     InventoryItemCard(
                         product = item,
-                        onItemClick = { 
+                        onItemClick = {
                             onItemClick(item)
                             expanded = false
                         },

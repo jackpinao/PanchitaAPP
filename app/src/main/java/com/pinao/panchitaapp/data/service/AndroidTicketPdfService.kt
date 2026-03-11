@@ -10,7 +10,6 @@ import android.graphics.pdf.PdfDocument
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import androidx.compose.ui.text.intl.Locale
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.model.SaleModel
 import com.pinao.panchitaapp.domain.service.TicketPdfService
