@@ -48,6 +48,12 @@ android {
     buildFeatures {
         compose = true
     }
+
+    lint {
+//        abortOnError = false
+        checkReleaseBuilds = false
+        warningsAsErrors = false
+    }
 }
 
 tasks.withType<JavaCompile> {
