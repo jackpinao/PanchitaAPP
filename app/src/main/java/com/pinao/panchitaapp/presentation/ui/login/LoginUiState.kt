@@ -23,11 +23,12 @@ sealed interface LoginUiState {
 sealed class UiText {
     data class DynamicString(val value: String) : UiText()
     class StringResource(
-        @StringRes val resId: Int,
+        @param:StringRes val resId: Int,
         vararg val args: Any
     ) : UiText()
 
     @Composable
+    @Suppress("UNUSED")
     fun asString(): String {
         return when (this) {
             is DynamicString -> value

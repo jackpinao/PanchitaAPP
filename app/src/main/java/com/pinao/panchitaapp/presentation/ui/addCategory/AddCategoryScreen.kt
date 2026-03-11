@@ -36,7 +36,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.pinao.panchitaapp.domain.model.CategoryModel
 import com.pinao.panchitaapp.presentation.ui.Screen
-import com.pinao.panchitaapp.presentation.ui.login.UiText
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
