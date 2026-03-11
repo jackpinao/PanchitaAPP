@@ -56,13 +56,7 @@ fun AddCategoryScreen(
 
             is AddCategoryUiState.Error -> {
                 val errorState = uiState as AddCategoryUiState.Error
-                val message = when (val uiText = errorState.message) {
-                    is UiText.DynamicString -> uiText.value
-                    is UiText.StringResource -> context.resources.getString(
-                        uiText.resId,
-                        *uiText.args
-                    )
-                }
+                val message = errorState.message.asString(context)
                 snackbarHostState.showSnackbar(
                     message = message,
                     duration = SnackbarDuration.Short
