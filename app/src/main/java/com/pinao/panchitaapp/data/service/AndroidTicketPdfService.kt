@@ -10,6 +10,7 @@ import android.graphics.pdf.PdfDocument
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import androidx.compose.ui.text.intl.Locale
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.model.SaleModel
 import com.pinao.panchitaapp.domain.service.TicketPdfService
@@ -77,7 +78,9 @@ class AndroidTicketPdfService(
             val line = String.format("%-15s", product.name.take(15))
             canvas.drawText(line, 40f, y, textPaint)
             y += 20f
-            val line2 = String.format("x%-3.0f S/.%6.2f S/.%6.2f",
+            val line2 = String.format(
+                locale = java.util.Locale.getDefault(),
+                "x%-3.0f S/.%6.2f S/.%6.2f",
                 product.stockQuantity, product.priceSell, product.priceSell * product.stockQuantity)
             canvas.drawText( line2, 40f, y, textPaint)
             y += 20f

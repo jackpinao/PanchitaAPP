@@ -98,11 +98,7 @@ class SaveProductsUseCaseTest {
         // checking for potential truncation or errors in the repository layer.
     }
 
-    @Test
-    fun `invoke method with ProductModel having special characters in string fields`() {
-        // Test how 'invoke' and the repository handle ProductModel string fields containing special characters, unicode, or emojis 
-        // to ensure proper encoding and storage.
-    }
+
 
     @Test
     fun `invoke method called multiple times sequentially`() {
