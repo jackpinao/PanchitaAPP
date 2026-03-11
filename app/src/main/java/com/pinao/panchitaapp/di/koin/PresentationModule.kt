@@ -15,6 +15,7 @@ import com.pinao.panchitaapp.domain.usecase.products.RefreshProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.SaveProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.ScanBarcodeUseCase
 import com.pinao.panchitaapp.domain.usecase.products.SearchProductsUseCase
+import com.pinao.panchitaapp.domain.usecase.products.SyncUnsyncedProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.rechange.GetAllDateRechangeUseCase
 import com.pinao.panchitaapp.domain.usecase.rechange.GetListForDateRechangeUC
 import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
@@ -57,9 +58,11 @@ class PresentationModule {
 
     @KoinViewModel
     fun provideLoginViewModel(
-        authUseCase: AuthUseCase
+        authUseCase: AuthUseCase,
+        refreshProductsUseCase: RefreshProductsUseCase
     ): LoginViewModel = LoginViewModel(
-        authUseCase
+        authUseCase,
+        refreshProductsUseCase
     )
 
     @KoinViewModel
@@ -77,14 +80,16 @@ class PresentationModule {
         saveProductsUseCase: SaveProductsUseCase,
         deleteProductUseCase: DeleteProductUseCase,
         refreshProductsUseCase: RefreshProductsUseCase,
-        searchProductsUseCase: SearchProductsUseCase
+        searchProductsUseCase: SearchProductsUseCase,
+        syncUnsyncedProductsUseCase: SyncUnsyncedProductsUseCase
     ): ProductUseCases = ProductUseCases(
         getAll = getAllProductsUseCase,
         findByCode = findCodeProductUseCase,
         save = saveProductsUseCase,
         delete = deleteProductUseCase,
         refreshProducts = refreshProductsUseCase,
-        search = searchProductsUseCase
+        search = searchProductsUseCase,
+        syncUnsyncedProducts = syncUnsyncedProductsUseCase
     )
 
     @Factory

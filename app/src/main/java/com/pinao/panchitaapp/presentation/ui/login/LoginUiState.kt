@@ -7,6 +7,7 @@ sealed interface LoginUiState {
     val user: UserModel
     data class Idle(override val user: UserModel) : LoginUiState
     data class Loading(override val user: UserModel) : LoginUiState
+    data class Syncing(override val user: UserModel) : LoginUiState
     data class Error(
         override val user: UserModel,
         val message: UiText

@@ -51,6 +51,7 @@ junitKtx = "1.3.0"
 ui = "1.10.3"
 uiText = "1.10.3"
 material3 = "1.4.0"
+workManager = "2.10.0"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
@@ -130,6 +131,8 @@ google-firebase-firestore = { group = "com.google.firebase", name = "firebase-fi
 androidx-compose-ui-text = { group = "androidx.compose.ui", name = "ui-text", version.ref = "uiText" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

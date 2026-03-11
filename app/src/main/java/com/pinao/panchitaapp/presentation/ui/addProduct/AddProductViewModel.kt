@@ -87,7 +87,7 @@ class AddProductViewModel(
     }
 
     fun onStockChange(newStock: String) {
-        if (newStock.isEmpty() || newStock.matches(Regex("^\\d+$"))) {
+        if (newStock.isEmpty() || newStock.matches(Regex("^\\d*\\.?\\d*$"))) {
             _uiState.update { it.copy(productStock = newStock) }
         }
     }
@@ -123,7 +123,7 @@ class AddProductViewModel(
                         productCategoryId = product.categoryId,
                         productBrand = brandName,
                         productBrandId = product.brandId,
-                        productStock = product.stockQuantity.toInt().toString(),
+                        productStock = product.stockQuantity.toString(),
                         productRevenueCategory = categoryRevenue,
                         isEditMode = true,
                         isLoading = false

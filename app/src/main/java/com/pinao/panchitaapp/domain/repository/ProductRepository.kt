@@ -11,4 +11,5 @@ interface ProductRepository {
     suspend fun saveProduct(productModel: ProductModel)
     suspend fun deleteProduct(productModel: ProductModel)
     fun searchProducts(query: String): Flow<List<ProductModel>>
+    suspend fun syncUnsyncedProducts()
 }

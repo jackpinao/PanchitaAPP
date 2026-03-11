@@ -1,8 +1,13 @@
 package com.pinao.panchitaapp.presentation.ui.login
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,11 +45,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.pinao.panchitaapp.R
@@ -91,14 +98,52 @@ fun LoginScreen(
         }
     }
 
-    LoginContent(
-        uiState = uiState,
-        snackbarHostState = snackbarHostState,
-        onEmailChange = viewModel::onEmailChange,
-        onPasswordChange = viewModel::onPasswordChange,
-        onLoginClick = viewModel::login,
-        emailFocusRequester = emailFocusRequester
-    )
+    Box(modifier = Modifier.fillMaxSize()) {
+        LoginContent(
+            uiState = uiState,
+            snackbarHostState = snackbarHostState,
+            onEmailChange = viewModel::onEmailChange,
+            onPasswordChange = viewModel::onPasswordChange,
+            onLoginClick = viewModel::login,
+            emailFocusRequester = emailFocusRequester
+        )
+
+        // Overlay de Sincronización
+        AnimatedVisibility(
+            visible = uiState is LoginUiState.Syncing,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            SyncingOverlay()
+        }
+    }
+}
+
+@Composable
+fun SyncingOverlay() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.7f))
+            .clickable(enabled = false) {}, // Bloquear interacciones
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            CircularProgressIndicator(color = Color.White)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Sincronizando datos...",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Esto puede tardar unos segundos",
+                color = Color.White.copy(alpha = 0.8f),
+                fontSize = 14.sp
+            )
+        }
+    }
 }
 
 @Composable
@@ -149,6 +194,7 @@ fun LoginContent(
                         .fillMaxWidth()
                         .focusRequester(emailFocusRequester),
                     singleLine = true,
+                    enabled = uiState !is LoginUiState.Syncing && uiState !is LoginUiState.Loading,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
@@ -163,6 +209,7 @@ fun LoginContent(
                     label = { Text(stringResource(R.string.password)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
+                    enabled = uiState !is LoginUiState.Syncing && uiState !is LoginUiState.Loading,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         val image =
@@ -200,7 +247,7 @@ fun LoginContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    enabled = uiState !is LoginUiState.Loading,
+                    enabled = uiState !is LoginUiState.Loading && uiState !is LoginUiState.Syncing,
                     shape = MaterialTheme.shapes.medium,
                 ) {
                     if (uiState is LoginUiState.Loading) {

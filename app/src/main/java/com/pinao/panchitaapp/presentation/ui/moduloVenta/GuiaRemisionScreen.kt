@@ -5,14 +5,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -35,7 +38,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,9 +54,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.pinao.panchitaapp.domain.model.ProductModel
+import com.pinao.panchitaapp.presentation.common.toCurrency
 import com.pinao.panchitaapp.presentation.navigation.AppScreens
 import com.pinao.panchitaapp.presentation.ui.Screen
-import com.pinao.panchitaapp.presentation.common.toCurrency
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -108,7 +110,13 @@ fun GuiaRemisionScreen(
                 ListItem(
                     modifier = Modifier.clickable { viewModel.startScanningProduct() },
                     headlineContent = { Text("Escanear Código") },
-                    leadingContent = { Icon(Icons.Default.QrCodeScanner, null, modifier = Modifier.size(24.dp)) }
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.QrCodeScanner,
+                            null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 )
                 ListItem(
                     modifier = Modifier.clickable {
@@ -116,7 +124,13 @@ fun GuiaRemisionScreen(
                         navController.navigate(AppScreens.ProductSearch.route)
                     },
                     headlineContent = { Text("Búsqueda Manual") },
-                    leadingContent = { Icon(Icons.Default.Search, null, modifier = Modifier.size(24.dp)) }
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.Search,
+                            null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 )
             }
         }
@@ -170,6 +184,9 @@ fun GuiaRemisionContent(
     onProductLongClick: (ProductModel) -> Unit,
     onNavigateToPreview: () -> Unit
 ) {
+
+    val listState = rememberLazyListState()
+
     Screen {
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -190,21 +207,29 @@ fun GuiaRemisionContent(
                 }
             }
         ) { padding ->
-            Column(modifier = Modifier.padding(padding).padding(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .padding(16.dp)
+            ) {
                 Text("Venta Minimarket", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
                 OutlinedTextField(
                     value = uiState.clientName,
                     onValueChange = onClientNameChange,
                     label = { Text("Nombre del Cliente") },
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
                 )
 
                 OutlinedTextField(
                     value = uiState.clientDoc,
                     onValueChange = onClientDocChange,
                     label = { Text("Documento (DNI/RUC)") },
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
@@ -212,20 +237,35 @@ fun GuiaRemisionContent(
 
                 Text("Productos en el Carrito", fontSize = 18.sp, fontWeight = FontWeight.Medium)
 
-                OutlinedCard(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                    LazyColumn(modifier = Modifier.heightIn(max = 450.dp)) {
+                OutlinedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                        .weight(1f)
+                ) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
                         items(uiState.products) { product ->
                             ListItem(
                                 modifier = Modifier.combinedClickable(
                                     onClick = { /* Opcional */ },
                                     onLongClick = { onProductLongClick(product) }
                                 ),
-                                headlineContent = { Text(product.name, fontWeight = FontWeight.Bold) },
+                                headlineContent = {
+                                    Text(
+                                        product.name,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                },
                                 supportingContent = {
                                     Text(
                                         "Cant: ${product.stockQuantity} | " +
-                                        "P. Unit: ${product.priceSell.toCurrency()}\n" +
-                                        "Subtotal: ${(product.priceSell * product.stockQuantity).toCurrency()}"
+                                                "P. Unit: ${product.priceSell.toCurrency()}\n" +
+                                                "P. Sin IGV: ${product.priceExcludingIGV.toCurrency()}\n" +
+                                                "Subtotal: ${(product.priceSell * product.stockQuantity).toCurrency()}"
                                     )
                                 },
                                 trailingContent = {
@@ -247,7 +287,11 @@ fun GuiaRemisionContent(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("TOTAL A PAGAR", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+                                Text(
+                                    "TOTAL A PAGAR",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
                                 Text(
                                     text = total.toCurrency(),
                                     fontSize = 22.sp,
@@ -285,22 +329,38 @@ fun AddProductQuantityDialog(
 ) {
     if (product == null) return
     Dialog(onDismissRequest = onDismiss) {
-        Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(if (isEditing) "Editar Cantidad" else "Añadir al Carrito", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    if (isEditing) "Editar Cantidad" else "Añadir al Carrito",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
                 Spacer(modifier = Modifier.heightIn(8.dp))
                 Text(product.name, color = Color.Gray)
                 OutlinedTextField(
                     value = quantity,
                     onValueChange = onQuantityChange,
                     label = { Text("Cantidad") },
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true
                 )
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     TextButton(onClick = onDismiss) { Text("Cancelar") }
-                    Button(onClick = onConfirm, enabled = quantity.isNotEmpty() && (quantity.toDoubleOrNull() ?: 0.0) > 0) {
+                    Button(
+                        onClick = onConfirm,
+                        enabled = quantity.isNotEmpty() && (quantity.toDoubleOrNull() ?: 0.0) > 0
+                    ) {
                         Text(if (isEditing) "Actualizar" else "Añadir")
                     }
                 }

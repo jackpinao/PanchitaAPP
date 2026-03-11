@@ -40,4 +40,13 @@ interface ProductDao {
      */
     @Query("SELECT * FROM product WHERE name LIKE '%' || :query || '%' OR barcode LIKE '%' || :query || '%' ORDER BY name ASC")
     fun searchProducts(query: String): Flow<List<ProductsEntity>>
+
+    @Query("DELETE FROM product WHERE product_id NOT IN (:ids)")
+    suspend fun deleteProductsNotInList(ids: List<String>)
+
+    @Query("DELETE FROM product")
+    suspend fun deleteAllProducts()
+
+    @Query("SELECT * FROM product WHERE is_synced = 0")
+    suspend fun getUnsyncedProducts(): List<ProductsEntity>
 }

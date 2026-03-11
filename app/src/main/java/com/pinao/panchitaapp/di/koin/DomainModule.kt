@@ -37,6 +37,7 @@ import com.pinao.panchitaapp.domain.usecase.products.RefreshProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.SaveProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.ScanBarcodeUseCase
 import com.pinao.panchitaapp.domain.usecase.products.SearchProductsUseCase
+import com.pinao.panchitaapp.domain.usecase.products.SyncUnsyncedProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.rechange.GetAllDateRechangeUseCase
 import com.pinao.panchitaapp.domain.usecase.rechange.GetListForDateRechangeUC
 import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
@@ -105,6 +106,11 @@ class DomainModule {
     fun provideSearchProductsUseCase(
         productRepository: ProductRepository
     ) = SearchProductsUseCase(productRepository)
+
+    @Factory
+    fun provideSyncUnsyncedProductsUseCase(
+        productRepository: ProductRepository
+    ) = SyncUnsyncedProductsUseCase(productRepository)
 
     /*
     CATEGORY USE CASES

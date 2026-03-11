@@ -1,10 +1,12 @@
 package com.pinao.panchitaapp.presentation.ui.login
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.domain.model.UserModel
 import com.pinao.panchitaapp.domain.usecase.Auth.AuthUseCase
+import com.pinao.panchitaapp.domain.usecase.products.RefreshProductsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,7 +16,8 @@ import kotlinx.coroutines.launch
  * ViewModel que gestiona la lógica de autenticación y el estado reactivo de la UI de Login.
  */
 class LoginViewModel(
-    private val authUseCase: AuthUseCase
+    private val authUseCase: AuthUseCase,
+    private val refreshProductsUseCase: RefreshProductsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<LoginUiState>(
@@ -29,6 +32,19 @@ class LoginViewModel(
     private fun checkUserSession() {
         if (authUseCase.isUserLoggedInUseCase()) {
             _uiState.value = LoginUiState.Success(UserModel())
+            syncData()
+        }
+    }
+    
+    private fun syncData(){
+        viewModelScope.launch {
+            try {
+                refreshProductsUseCase()
+                Log.d("LoginViewModel", "Sincronización de datos completada")
+            } catch (e: Exception) {
+                Log.e("LoginViewModel", "Error al sincronizar datos", e)
+            }
+        
         }
     }
 
@@ -47,6 +63,7 @@ class LoginViewModel(
                 when (currentState) {
                     is LoginUiState.Idle -> currentState.copy(user = updatedUser)
                     is LoginUiState.Loading -> currentState.copy(user = updatedUser)
+                    is LoginUiState.Syncing -> currentState.copy(user = updatedUser)
                     is LoginUiState.Success -> currentState.copy(user = updatedUser)
                 }
             })
@@ -77,6 +94,13 @@ class LoginViewModel(
             try {
                 authUseCase.signInUseCase(user.email, user.password)
                     .onSuccess { authenticatedUser ->
+                        // Cambiamos al estado de Sincronización
+                        _uiState.value = LoginUiState.Syncing(authenticatedUser)
+                        
+                        // Realizamos la sincronización
+                        refreshProductsUseCase()
+                        
+                        // Una vez terminada, pasamos a Success para que la UI navegue
                         _uiState.value = LoginUiState.Success(authenticatedUser)
                     }
                     .onFailure { exception ->
