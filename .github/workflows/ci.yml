@@ -45,6 +45,13 @@ jobs:
       - name: Ejecutar Análisis de Código (Lint)
         run: ./gradlew lintDebug
 
+      - name: Upload Lint Report
+        if: always() # Esto asegura que se suba aunque el paso anterior falle
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: app/build/reports/lint-results-debug.html
+
       - name: Ejecutar Tests Unitarios (SOLID Validation)
         run: ./gradlew testDebugUnitTest
 

@@ -50,9 +50,20 @@ android {
     }
 
     lint {
-        abortOnError = false
-        checkReleaseBuilds = false
-        warningsAsErrors = false
+        // No detengas la build por errores si prefieres revisarlos después (no recomendado para producción)
+        abortOnError = true
+        // Genera reportes en HTML y XML para que GitHub Actions los pueda guardar
+        htmlReport = true
+        xmlReport = true
+        // Opcional: Ignora advertencias, solo falla con errores fatales
+        ignoreWarnings = false
+        // Si hay errores que sabes que son falsos positivos, puedes listarlos aquí
+        // disable += listOf("TypographyFractions", "IconMissingDensityFolder")
+
+        // Muy útil para Clean Architecture: revisa dependencias
+        checkDependencies = true
+//        checkReleaseBuilds = false
+//        warningsAsErrors = false
     }
 }
 
