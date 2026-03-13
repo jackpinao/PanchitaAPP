@@ -1,14 +1,11 @@
 package com.pinao.panchitaapp.presentation.ui.clarorecarga
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pinao.panchitaapp.domain.model.RechangeModel
 import com.pinao.panchitaapp.domain.usecase.rechange.GetAllDateRechangeUseCase
 import com.pinao.panchitaapp.domain.usecase.rechange.GetListForDateRechangeUC
 import com.pinao.panchitaapp.domain.usecase.rechange.SaveRechangeUseCase
-import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.RechangeUiState.Error
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.RechangeUiState.Loading
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.RechangeUiState.Success
@@ -18,8 +15,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import org.koin.android.annotation.KoinViewModel
 
-//@RequiresApi(Build.VERSION_CODES.O)
+@KoinViewModel
 class ClaroRecargaViewModel(
     private val saveRechangeUseCase: SaveRechangeUseCase,
     private val getListForDateRechangeUC: GetListForDateRechangeUC,

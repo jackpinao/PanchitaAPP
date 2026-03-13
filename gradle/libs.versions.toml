@@ -1,56 +1,56 @@
 [versions]
-agp = "9.1.0"
+agp = "8.8.0"
 coreTesting = "2.2.0"
-firebaseBom = "34.9.0"
+firebaseBom = "34.10.0"
 
-kotlin = "2.3.10"
-kspVersion = "2.3.2"
+kotlin = "2.1.0"
+kspVersion = "2.1.0-1.0.29"
 
-coreKtx = "1.17.0"
+coreKtx = "1.15.0"
 junit = "4.13.2"
-junitVersion = "1.3.0"
-espressoCore = "3.7.0"
-kotlinxCoroutinesAndroid = "1.10.2"
-kotlinxCoroutinesPlayService = "1.10.2"
-kotlinx-serialization = "1.10.0"
-kotlinxCoroutinesTest = "1.10.2"
-lifecycleRuntimeKtx = "2.10.0"
-activityCompose = "1.12.4"
-composeBom = "2026.02.00"
-material = "1.10.3"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+kotlinxCoroutinesAndroid = "1.10.1"
+kotlinxCoroutinesPlayService = "1.10.1"
+kotlinx-serialization = "1.7.3"
+kotlinxCoroutinesTest = "1.10.1"
+lifecycleRuntimeKtx = "2.8.7"
+activityCompose = "1.10.0"
+composeBom = "2025.01.00"
+material = "1.7.6"
 
-materialIconsExtended = "1.7.8"
+materialIconsExtended = "1.7.6"
 playServicesCodeScanner = "16.1.0"
-roomKtx = "2.8.4"
-roomPlugin = "2.8.4"
-truth = "1.4.5"
+roomKtx = "2.6.1"
+roomPlugin = "2.6.1"
+truth = "1.4.4"
 libreiaapcs = "1.1.0"
 
-safeargsVersion = "2.9.7"
-navigationVersion = "2.9.7"
+safeargsVersion = "2.8.5"
+navigationVersion = "2.8.5"
 
-runtimeLivedata = "1.10.3"
-splashScreen = "1.2.0"
-retrofit = "3.0.0"
+runtimeLivedata = "1.7.6"
+splashScreen = "1.0.1"
+retrofit = "2.11.0"
 
-mockitoVersion = "5.21.0"
-mockkVersion = "1.14.9"
-junitJupiter = "6.0.3"
-lifecycleViewmodelCompose = "2.9.6"
-coroutines = "1.10.2"
+mockitoVersion = "5.14.2"
+mockkVersion = "1.13.13"
+junitJupiter = "5.11.3"
+lifecycleViewmodelCompose = "2.8.7"
+coroutines = "1.10.1"
 hamcrest = "3.0"
-gms = "4.4.4"
-crashlytics = "3.0.6"
+gms = "4.4.2"
+crashlytics = "3.0.2"
 
-koin-bom = "4.1.1"
-koin-annotations-bom = "2.3.1"
-kotzilla = "2.0.4"
-kotzillaPlugin = "2.0.4"
-runtimeSaveable = "1.10.3"
-junitKtx = "1.3.0"
-ui = "1.10.3"
-uiText = "1.10.3"
-material3 = "1.4.0"
+koin-bom = "4.0.0"
+koin-annotations-bom = "1.4.0"
+kotzilla = "2.0.8"
+kotzillaPlugin = "2.0.8"
+runtimeSaveable = "1.7.6"
+junitKtx = "1.2.1"
+ui = "1.7.6"
+uiText = "1.7.6"
+material3 = "1.3.1"
 workManager = "2.10.0"
 
 [libraries]
@@ -121,7 +121,7 @@ mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockkVersion" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
 
-lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotzilla-sdk = { group = "io.kotzilla", name = "kotzilla-sdk", version.ref = "kotzilla" }
 androidx-runtime-saveable = { group = "androidx.compose.runtime", name = "runtime-saveable", version.ref = "runtimeSaveable" }
@@ -136,6 +136,7 @@ androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "kspVersion" }
@@ -144,4 +145,4 @@ navigation-safe-args = { id = "androidx.navigation.safeargs.kotlin", version.ref
 gms = { id = "com.google.gms.google-services", version.ref = "gms" }
 crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
 room = {id = "androidx.room", version.ref = "roomPlugin" }
-kotzilla = { id = "io.kotzilla.kotzilla-plugin", version.ref = "kotzilla" }
+kotzilla = { id = "io.kotzilla.kotzilla-plugin", version.ref = "kotzillaPlugin" }

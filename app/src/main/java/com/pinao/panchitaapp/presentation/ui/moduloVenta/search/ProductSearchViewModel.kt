@@ -13,7 +13,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import org.koin.android.annotation.KoinViewModel
 
+
+@KoinViewModel
 class ProductSearchViewModel(
     private val productUseCases: ProductUseCases
 ) : ViewModel() {

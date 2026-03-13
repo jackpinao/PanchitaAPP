@@ -15,6 +15,7 @@ import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.usecase.brand.BrandUseCases
 import com.pinao.panchitaapp.domain.util.PriceUtils
 import kotlinx.coroutines.flow.firstOrNull
+import org.koin.android.annotation.KoinViewModel
 import java.util.UUID
 
 data class AddProductUiState(
@@ -40,6 +41,7 @@ data class AddProductUiState(
     val isEditMode: Boolean = false
 )
 
+@KoinViewModel
 class AddProductViewModel(
     private val productUseCases: ProductUseCases,
     private val categoryUseCases: CategoryUseCases,

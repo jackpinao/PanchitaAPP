@@ -31,25 +31,25 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.presentation.ui.AppDrawer
+import com.pinao.panchitaapp.presentation.ui.addCategory.AddCategoryScreen
+import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductScreen
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaScreen
 import com.pinao.panchitaapp.presentation.ui.clarorecarga.ClaroRecargaViewModel
+import com.pinao.panchitaapp.presentation.ui.home.HomeScreen
+import com.pinao.panchitaapp.presentation.ui.home.HomeViewModel
+import com.pinao.panchitaapp.presentation.ui.inventoryList.InventoryListScreen
+import com.pinao.panchitaapp.presentation.ui.inventoryList.InventoryListViewModel
+import com.pinao.panchitaapp.presentation.ui.login.LoginScreen
+import com.pinao.panchitaapp.presentation.ui.login.LoginViewModel
 import com.pinao.panchitaapp.presentation.ui.moduloVenta.GuiaRemisionScreen
 import com.pinao.panchitaapp.presentation.ui.moduloVenta.GuiaRemisionViewModel
 import com.pinao.panchitaapp.presentation.ui.moduloVenta.PreviewTicketScreen
-import com.pinao.panchitaapp.presentation.ui.home.HomeScreen
-import com.pinao.panchitaapp.presentation.ui.home.HomeViewModel
-import com.pinao.panchitaapp.presentation.ui.login.LoginViewModel
+import com.pinao.panchitaapp.presentation.ui.moduloVenta.search.ProductSearchScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import com.pinao.panchitaapp.R
-import com.pinao.panchitaapp.presentation.ui.addCategory.AddCategoryScreen
-import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductScreen
-import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductViewModel
-import com.pinao.panchitaapp.presentation.ui.moduloVenta.search.ProductSearchScreen
-import com.pinao.panchitaapp.presentation.ui.inventoryList.InventoryListScreen
-import com.pinao.panchitaapp.presentation.ui.login.LoginScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,8 +62,7 @@ fun AppNavGraph(
     homeViewModel: HomeViewModel = koinViewModel(),
     loginViewModel: LoginViewModel = koinViewModel(),
     guiaRemisionViewModel: GuiaRemisionViewModel = koinViewModel(),
-    addProductsViewModel: AddProductViewModel = koinViewModel(),
-    inventaryViewModel: AddProductViewModel = koinViewModel()
+    inventaryViewModel: InventoryListViewModel = koinViewModel()
 ) {
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentNavBackStackEntry?.destination?.route ?: ""
@@ -199,7 +198,8 @@ fun AppNavGraph(
                 }
                 composable(route = AppScreens.InventoryList.route) {
                     InventoryListScreen(
-                        navController = navController
+                        navController = navController,
+                        viewModel = inventaryViewModel
                     )
                 }
             }

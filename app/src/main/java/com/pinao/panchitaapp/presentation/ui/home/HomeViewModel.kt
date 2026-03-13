@@ -1,20 +1,9 @@
 package com.pinao.panchitaapp.presentation.ui.home
 
-//import com.pinao.panchitaapp.presentation.common.UtilsAdmob
 import androidx.lifecycle.ViewModel
+import org.koin.android.annotation.KoinViewModel
 
-
+@KoinViewModel
 class HomeViewModel : ViewModel() {
-
-//    @Inject
-//    lateinit var utilsAdmob: UtilsAdmob
-
-    fun getGreeting(): String {
-        return "Hello Android!"
-    }
-
-//    fun initAdmob() {
-//        //utilsAdmob.interstitial?.show(requireActivity())
-//        utilsAdmob.initInterstitialAd()
-//    }
+    // Implementación...
 }

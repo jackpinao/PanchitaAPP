@@ -11,10 +11,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.android.annotation.KoinViewModel
 
 /**
  * ViewModel que gestiona la lógica de autenticación y el estado reactivo de la UI de Login.
  */
+@KoinViewModel
 class LoginViewModel(
     private val authUseCase: AuthUseCase,
     private val refreshProductsUseCase: RefreshProductsUseCase
@@ -35,8 +37,8 @@ class LoginViewModel(
             syncData()
         }
     }
-    
-    private fun syncData(){
+
+    private fun syncData() {
         viewModelScope.launch {
             try {
                 refreshProductsUseCase()
@@ -44,7 +46,7 @@ class LoginViewModel(
             } catch (e: Exception) {
                 Log.e("LoginViewModel", "Error al sincronizar datos", e)
             }
-        
+
         }
     }
 
@@ -57,16 +59,13 @@ class LoginViewModel(
         _uiState.update { currentState ->
             val updatedUser = reduce(currentState.user)
 
-            (if (currentState is LoginUiState.Error) {
-                LoginUiState.Idle(user = updatedUser)
-            } else {
-                when (currentState) {
-                    is LoginUiState.Idle -> currentState.copy(user = updatedUser)
-                    is LoginUiState.Loading -> currentState.copy(user = updatedUser)
-                    is LoginUiState.Syncing -> currentState.copy(user = updatedUser)
-                    is LoginUiState.Success -> currentState.copy(user = updatedUser)
-                }
-            })
+            when (currentState) {
+                is LoginUiState.Idle -> currentState.copy(user = updatedUser)
+                is LoginUiState.Loading -> currentState.copy(user = updatedUser)
+                is LoginUiState.Syncing -> currentState.copy(user = updatedUser)
+                is LoginUiState.Success -> currentState.copy(user = updatedUser)
+                is LoginUiState.Error -> LoginUiState.Idle(user = updatedUser)
+            }
         }
     }
 
@@ -90,23 +89,23 @@ class LoginViewModel(
 
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading(user)
-            
+
             try {
                 authUseCase.signInUseCase(user.email, user.password)
                     .onSuccess { authenticatedUser ->
                         // Cambiamos al estado de Sincronización
                         _uiState.value = LoginUiState.Syncing(authenticatedUser)
-                        
+
                         // Realizamos la sincronización
                         refreshProductsUseCase()
-                        
+
                         // Una vez terminada, pasamos a Success para que la UI navegue
                         _uiState.value = LoginUiState.Success(authenticatedUser)
                     }
                     .onFailure { exception ->
                         _uiState.value = LoginUiState.Error(
                             user = user,
-                            message = exception.message?.let { UiText.DynamicString(it) } 
+                            message = exception.message?.let { UiText.DynamicString(it) }
                                 ?: UiText.StringResource(R.string.error_unknown)
                         )
                     }

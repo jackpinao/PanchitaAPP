@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pinao.panchitaapp.domain.model.ClientModel
 import com.pinao.panchitaapp.domain.model.ProductModel
-import com.pinao.panchitaapp.domain.model.TemporaryProductModel
 import com.pinao.panchitaapp.domain.model.SaleModel
+import com.pinao.panchitaapp.domain.model.TemporaryProductModel
 import com.pinao.panchitaapp.domain.service.TicketPdfService
 import com.pinao.panchitaapp.domain.usecase.client.SaveClientUseCase
 import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.android.annotation.KoinViewModel
 import java.util.UUID
 
 /**
@@ -46,6 +47,7 @@ data class GuiaRemisionUiState(
 /**
  * ViewModel encargado de la lógica de la Guía de Remisión.
  */
+@KoinViewModel
 class GuiaRemisionViewModel(
     private val productUseCases: ProductUseCases,
     private val saveClientUseCase: SaveClientUseCase,
@@ -115,7 +117,13 @@ class GuiaRemisionViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(lastScannedCode = code) }
             productUseCases.findByCode(code).firstOrNull()?.let { product ->
-                _uiState.update { it.copy(scannedProduct = product, showAddDialog = true, isEditing = false) }
+                _uiState.update {
+                    it.copy(
+                        scannedProduct = product,
+                        showAddDialog = true,
+                        isEditing = false
+                    )
+                }
             } ?: run {
                 _uiState.update { it.copy(showNotFoundError = true) }
             }
@@ -126,13 +134,13 @@ class GuiaRemisionViewModel(
      * Prepara el diálogo para editar un producto ya existente en la lista.
      */
     fun onProductLongClick(product: ProductModel) {
-        _uiState.update { 
+        _uiState.update {
             it.copy(
-                scannedProduct = product, 
+                scannedProduct = product,
                 quantity = product.stockQuantity.toString(),
-                showAddDialog = true, 
-                isEditing = true 
-            ) 
+                showAddDialog = true,
+                isEditing = true
+            )
         }
     }
 
@@ -166,7 +174,8 @@ class GuiaRemisionViewModel(
         viewModelScope.launch {
             try {
                 _uiState.update { it.copy(isLoading = true) }
-                val updatedCatalogProduct = product.copy(stockQuantity = product.stockQuantity - qty)
+                val updatedCatalogProduct =
+                    product.copy(stockQuantity = product.stockQuantity - qty)
                 productUseCases.save(updatedCatalogProduct)
 
                 val tempItem = TemporaryProductModel(
@@ -191,20 +200,21 @@ class GuiaRemisionViewModel(
     private fun updateProductQuantity() {
         val productInGui = _uiState.value.scannedProduct ?: return
         val newQty = _uiState.value.quantity.toDoubleOrNull() ?: 0.0
-        val oldQty = productInGui.stockQuantity // En esta UI, stock representa la cantidad en la guía
+        val oldQty =
+            productInGui.stockQuantity // En esta UI, stock representa la cantidad en la guía
 
         if (newQty <= 0) return
 
         viewModelScope.launch {
             try {
                 _uiState.update { it.copy(isLoading = true) }
-                
+
                 // 1. Obtener el producto real del catálogo para ver el stock actual
                 val catalogProduct = productUseCases.findByCode(productInGui.barcode).firstOrNull()
                     ?: throw Exception("Producto no encontrado en catálogo")
 
                 val diff = newQty - oldQty
-                
+
                 // 2. Si pedimos más, verificar disponibilidad
                 if (diff > 0 && catalogProduct.stockQuantity < diff) {
                     _uiState.update { it.copy(errorMessage = "No hay suficiente stock adicional. Disponible: ${catalogProduct.stockQuantity}") }
@@ -212,7 +222,8 @@ class GuiaRemisionViewModel(
                 }
 
                 // 3. Actualizar catálogo: Si diff es positivo, resta; si es negativo (devolución), suma.
-                val updatedCatalogProduct = catalogProduct.copy(stockQuantity = catalogProduct.stockQuantity - diff)
+                val updatedCatalogProduct =
+                    catalogProduct.copy(stockQuantity = catalogProduct.stockQuantity - diff)
                 productUseCases.save(updatedCatalogProduct)
 
                 // 4. Actualizar tabla temporal
@@ -226,7 +237,7 @@ class GuiaRemisionViewModel(
                     quantity = newQty
                 )
                 temporaryProductUseCases.save(tempItem)
-                
+
                 closeDialogs()
             } catch (e: Exception) {
                 _uiState.update { it.copy(errorMessage = "Error al actualizar: ${e.message}") }
@@ -245,7 +256,8 @@ class GuiaRemisionViewModel(
                 _uiState.update { it.copy(isLoading = true) }
                 val originalProduct = productUseCases.findByCode(product.barcode).firstOrNull()
                 if (originalProduct != null) {
-                    val restoredProduct = originalProduct.copy(stockQuantity = originalProduct.stockQuantity + product.stockQuantity)
+                    val restoredProduct =
+                        originalProduct.copy(stockQuantity = originalProduct.stockQuantity + product.stockQuantity)
                     productUseCases.save(restoredProduct)
                 }
                 temporaryProductUseCases.delete(
@@ -285,18 +297,26 @@ class GuiaRemisionViewModel(
                     userId = "",
                     clientId = ""
                 )
-                
+
                 completeSaleUseCase(ticket, state.products)
                 temporaryProductUseCases.clearAll()
 
                 _uiState.update {
-                    it.copy(isLoading = false, downloadStatus = "Venta finalizada y stock actualizado")
+                    it.copy(
+                        isLoading = false,
+                        downloadStatus = "Venta finalizada y stock actualizado"
+                    )
                 }
                 Log.d("GuiaRemisionViewModel", "Venta y Stock sincronizados globalmente")
 
             } catch (e: Exception) {
                 Log.e("GuiaRemisionViewModel", "Error al finalizar venta", e)
-                _uiState.update { it.copy(errorMessage = "Error al guardar: ${e.message}", isLoading = false) }
+                _uiState.update {
+                    it.copy(
+                        errorMessage = "Error al guardar: ${e.message}",
+                        isLoading = false
+                    )
+                }
             }
         }
     }
@@ -312,8 +332,22 @@ class GuiaRemisionViewModel(
             )
 
             pdfService.generateAndSaveTicket(ticket, state.products)
-                .onSuccess { _uiState.update { it.copy(isLoading = false, downloadStatus = "PDF guardado exitosamente") } }
-                .onFailure { e -> _uiState.update { it.copy(isLoading = false, errorMessage = "Error PDF: ${e.message}") } }
+                .onSuccess {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            downloadStatus = "PDF guardado exitosamente"
+                        )
+                    }
+                }
+                .onFailure { e ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Error PDF: ${e.message}"
+                        )
+                    }
+                }
         }
     }
 

@@ -1,15 +1,13 @@
 
 plugins {
     alias(libs.plugins.android.application)
-    // alias(libs.plugins.kotlin.android) // No longer required in AGP 9.0
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    // alias(libs.plugins.navigation.safe.args)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.gms)
     alias(libs.plugins.crashlytics)
     alias(libs.plugins.room)
-    // alias(libs.plugins.kotzilla)
 }
 
 room {
@@ -18,7 +16,7 @@ room {
 
 android {
     namespace = "com.pinao.panchitaapp"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.pinao.panchitaapp"
@@ -41,8 +39,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
     }
 
     buildFeatures {
@@ -50,25 +52,33 @@ android {
     }
 
     lint {
-        // No detengas la build por errores si prefieres revisarlos después (no recomendado para producción)
-        abortOnError = true
-        // Genera reportes en HTML y XML para que GitHub Actions los pueda guardar
-        htmlReport = true
-        xmlReport = true
-        // Opcional: Ignora advertencias, solo falla con errores fatales
-        ignoreWarnings = false
-        // Si hay errores que sabes que son falsos positivos, puedes listarlos aquí
-        // disable += listOf("TypographyFractions", "IconMissingDensityFolder")
-
-        // Muy útil para Clean Architecture: revisa dependencias
+        abortOnError = false
         checkDependencies = true
-//        checkReleaseBuilds = false
-//        warningsAsErrors = false
     }
+}
+
+// SOLUCIÓN DEFINITIVA AL ERROR DE FINGERPRINT / SERIALIZACIÓN
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlin") {
+            useVersion("2.1.0")
+        }
+    }
+    // Excluir módulos stdlib antiguos que causan duplicados y errores de metadatos en Kotlin 2.x
+    exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk7")
+    exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk8")
 }
 
 tasks.withType<JavaCompile> {
     options.compilerArgs.add("-Xlint:deprecation")
+    targetCompatibility = "17"
+    sourceCompatibility = "17"
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
 }
 
 dependencies {

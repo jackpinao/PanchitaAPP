@@ -2,7 +2,6 @@ package com.pinao.panchitaapp.presentation.ui.inventoryList
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -16,7 +15,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.android.annotation.KoinViewModel
 
+@KoinViewModel
 class InventoryListViewModel(
     private val productUseCases: ProductUseCases
 ) : ViewModel() {
@@ -67,7 +68,7 @@ class InventoryListViewModel(
             }
         }
     }
-    
+
     fun onDeleteClick(productId: String) {
         viewModelScope.launch {
             val product = uiState.value.inventoryList.find { it.productId == productId }
@@ -77,8 +78,8 @@ class InventoryListViewModel(
         }
     }
 
-    fun onNavigateToAddItem(){
-        
+    fun onNavigateToAddItem() {
+
     }
 
     sealed class InventoryListEvent {

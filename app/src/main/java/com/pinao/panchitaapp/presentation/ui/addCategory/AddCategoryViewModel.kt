@@ -11,11 +11,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.android.annotation.KoinViewModel
 import java.util.UUID
 
 /**
  * ViewModel para gestionar la lógica de crear una nueva Categoría.
  */
+@KoinViewModel
 class AddCategoryViewModel(
     private val saveCategoryUseCase: SaveCategoryUseCase,
     private val checkCategoryNameUseCase: CheckCategoryNameUseCase
@@ -30,15 +32,12 @@ class AddCategoryViewModel(
         _uiState.update { cureentState ->
             val updatedCategory = reduce(cureentState.category)
 
-            (if (cureentState is AddCategoryUiState.Error) {
-                AddCategoryUiState.Idle(category = updatedCategory)
-            } else {
-                when (cureentState) {
-                    is AddCategoryUiState.Idle -> cureentState.copy(category = updatedCategory)
-                    is AddCategoryUiState.Loading -> cureentState.copy(category = updatedCategory)
-                    is AddCategoryUiState.Success -> cureentState.copy(category = updatedCategory)
-                }
-            })
+            when (cureentState) {
+                is AddCategoryUiState.Idle -> cureentState.copy(category = updatedCategory)
+                is AddCategoryUiState.Loading -> cureentState.copy(category = updatedCategory)
+                is AddCategoryUiState.Success -> cureentState.copy(category = updatedCategory)
+                is AddCategoryUiState.Error -> AddCategoryUiState.Idle(category = updatedCategory)
+            }
         }
     }
 
@@ -55,13 +54,7 @@ class AddCategoryViewModel(
 
     fun saveCategory() {
         val category = _uiState.value.category
-//        val currentState = _uiState.value
-//
-//        val category = when (currentState) {
-//            is AddCategoryUiState.Idle -> currentState.category
-//            is AddCategoryUiState.Error -> currentState.category
-//            else -> return
-//        }
+
         if (category.name.isBlank()) {
             _uiState.value = AddCategoryUiState.Error(
                 category = category,
