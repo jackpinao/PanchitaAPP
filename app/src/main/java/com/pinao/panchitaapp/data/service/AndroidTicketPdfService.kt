@@ -41,8 +41,7 @@ class AndroidTicketPdfService(
             pdfDocument.finishPage(page)
 
             val fileName = "Ticket_${ticket.saleId}_${System.currentTimeMillis()}.pdf"
-            
-            // Llamamos al nuevo método de guardado robusto
+
             savePdf(pdfDocument, fileName)
 
             Result.success(Unit)
