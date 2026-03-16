@@ -19,7 +19,7 @@
     <string name="ticket_document">Documento: </string>
     <string name="ticket_product">Producto</string>
     <string name="ticket_price">Precio</string>
-    <string name="ticket_quantity">Cant</string>
+    <string name="ticket_quantity">Canti.</string>
     <string name="ticket_total">Total</string>
     <string name="ticket_total_title">Total a Pagar:</string>
     <string name="ticket_thanks">¡¡GRACIAS POR SU COMPRA!!</string>
@@ -81,20 +81,20 @@
     <string name="stock_count_label">Stock: %1$d</string>
 
     <!-- Login Screen -->
-    <string name="syncing_data">Sincronizando datos...</string>
+    <string name="syncing_data">Sincronizando datos</string>
     <string name="syncing_subtitle">Esto puede tardar unos segundos</string>
 
     <!-- Guia Remision Screen -->
     <string name="add_product_title">Añadir Producto</string>
     <string name="scan_code_action">Escanear Código</string>
     <string name="manual_search_action">Búsqueda Manual</string>
-    <string name="processing_action">Procesando...</string>
+    <string name="processing_action">Procesando</string>
     <string name="finish_sale_action">Finalizar Venta</string>
     <string name="minimarket_sale_title">Venta Minimarket</string>
     <string name="client_name_label">Nombre del Cliente</string>
     <string name="client_doc_label">Documento (DNI/RUC)</string>
     <string name="cart_products_title">Productos en el Carrito</string>
-    <string name="product_details_format">Cant: %1$s | P. Unit: %2$s\nP. Sin IGV: %3$s\nSubtotal: %4$s</string>
+    <string name="product_details_format">Canti.: %1$s | P. Unit: %2$s\nP. Sin IGV: %3$s\nSubtotal: %4$s</string>
     <string name="total_to_pay_label">TOTAL A PAGAR</string>
     <string name="product_not_found_title">Producto no encontrado</string>
     <string name="product_not_found_text">El código [%1$s] no está registrado. ¿Deseas agregarlo al inventario?</string>
@@ -105,7 +105,7 @@
     <string name="quantity_label">Cantidad</string>
 
     <!-- Product Search Screen -->
-    <string name="product_search_placeholder">Nombre o código...</string>
+    <string name="product_search_placeholder">Nombre o código</string>
     <string name="clear_action">Limpiar</string>
     <string name="search_product_title">Buscar Producto</string>
     <string name="back_action">Atrás</string>
