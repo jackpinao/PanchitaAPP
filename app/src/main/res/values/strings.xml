@@ -36,4 +36,79 @@
     <string name="error_category_name_exists">La categoría ya existe.</string>
     <string name="inventary_center">Inventario Central</string>
     <string name="delete_produdct">Eliminar producto</string>
+    <string name="category_name">Nombre de categoria</string>
+    <string name="revenue">Ganancia</string>
+    <string name="save">Guardar</string>
+    <string name="new_category">Nueva categoria</string>
+    <string name="back">Regresar</string>
+
+    <!-- Add Product Screen -->
+    <string name="barcode_label">Código de barras</string>
+    <string name="qr_scanner_description">QR Scanner</string>
+    <string name="product_name_label">Nombre del Producto</string>
+    <string name="purchase_price_label">Precio de Compra</string>
+    <string name="category_label">Categoría</string>
+    <string name="no_categories">Sin categorías</string>
+    <string name="brand_label">Marca</string>
+    <string name="no_brands">Sin marcas</string>
+    <string name="stock_label">Stock</string>
+    <string name="update_action">Actualizar</string>
+    <string name="edit_product_title">Editar Producto</string>
+
+    <!-- Claro Recarga Screen -->
+    <string name="recharge_tab">Recarga</string>
+    <string name="history_tab">Historial</string>
+    <string name="history_title">Historial de recargas</string>
+    <string name="recharge_date">Fecha de recarga</string>
+    <string name="ok_button">OK</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="total_label">Total: %1$d</string>
+    <string name="no_recharges">No hay recargas</string>
+    <string name="phone_number_label">Número telefónico: %1$s</string>
+    <string name="amount_label">Monto: %1$d</string>
+    <string name="date_label">Fecha: %1$s</string>
+    <string name="enter_phone_number">Ingrese el número de telefono</string>
+    <string name="phone_placeholder">000000000</string>
+    <string name="delete_description">Delete</string>
+    <string name="enter_amount">Ingrese el número de monto</string>
+    <string name="amount_placeholder">00</string>
+    <string name="soles_label">Soles</string>
+    <string name="others_label">Otros</string>
+    <string name="recharge_button">RECARGAR</string>
+
+    <!-- Inventory List Screen -->
+    <string name="search_product_placeholder">Buscar producto</string>
+    <string name="stock_count_label">Stock: %1$d</string>
+
+    <!-- Login Screen -->
+    <string name="syncing_data">Sincronizando datos...</string>
+    <string name="syncing_subtitle">Esto puede tardar unos segundos</string>
+
+    <!-- Guia Remision Screen -->
+    <string name="add_product_title">Añadir Producto</string>
+    <string name="scan_code_action">Escanear Código</string>
+    <string name="manual_search_action">Búsqueda Manual</string>
+    <string name="processing_action">Procesando...</string>
+    <string name="finish_sale_action">Finalizar Venta</string>
+    <string name="minimarket_sale_title">Venta Minimarket</string>
+    <string name="client_name_label">Nombre del Cliente</string>
+    <string name="client_doc_label">Documento (DNI/RUC)</string>
+    <string name="cart_products_title">Productos en el Carrito</string>
+    <string name="product_details_format">Cant: %1$s | P. Unit: %2$s\nP. Sin IGV: %3$s\nSubtotal: %4$s</string>
+    <string name="total_to_pay_label">TOTAL A PAGAR</string>
+    <string name="product_not_found_title">Producto no encontrado</string>
+    <string name="product_not_found_text">El código [%1$s] no está registrado. ¿Deseas agregarlo al inventario?</string>
+    <string name="add_action">Agregar</string>
+    <string name="cancel_action">Cancelar</string>
+    <string name="edit_quantity_title">Editar Cantidad</string>
+    <string name="add_to_cart_title">Añadir al Carrito</string>
+    <string name="quantity_label">Cantidad</string>
+
+    <!-- Product Search Screen -->
+    <string name="product_search_placeholder">Nombre o código...</string>
+    <string name="clear_action">Limpiar</string>
+    <string name="search_product_title">Buscar Producto</string>
+    <string name="back_action">Atrás</string>
+    <string name="product_search_details_format">Código: %1$s | Stock: %2$d</string>
+    <string name="currency_format_soles">S/. %1$s</string>
 </resources>

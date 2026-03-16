@@ -31,11 +31,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.presentation.navigation.AppScreens
 import com.pinao.panchitaapp.presentation.ui.Screen
 import org.koin.androidx.compose.koinViewModel
@@ -118,7 +120,7 @@ fun AddProductContent(
                     TextField(
                         value = uiState.productCode,
                         onValueChange = onCodeChange,
-                        label = { Text("Código de barras") },
+                        label = { Text(stringResource(R.string.barcode_label)) },
                         modifier = Modifier.weight(4f),
                         singleLine = true,
                         enabled = !uiState.isEditMode
@@ -136,7 +138,7 @@ fun AddProductContent(
                             } else {
                                 Icon(
                                     imageVector = Icons.Default.QrCodeScanner,
-                                    contentDescription = "QR Scanner",
+                                    contentDescription = stringResource(R.string.qr_scanner_description),
                                     modifier = Modifier.size(ButtonDefaults.IconSize)
                                 )
                             }
@@ -147,7 +149,7 @@ fun AddProductContent(
                 TextField(
                     value = uiState.productName,
                     onValueChange = { onNameChange(it.uppercase()) },
-                    label = { Text("Nombre del Producto") },
+                    label = { Text(stringResource(R.string.product_name_label)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 30.dp, end = 30.dp)
@@ -156,7 +158,7 @@ fun AddProductContent(
                 TextField(
                     value = uiState.productPurchasePrice,
                     onValueChange = onPriceChange,
-                    label = { Text("Precio de Compra") },
+                    label = { Text(stringResource(R.string.purchase_price_label)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 30.dp, end = 30.dp),
@@ -182,7 +184,7 @@ fun AddProductContent(
                             value = uiState.productCategory,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Categoría") },
+                            label = { Text(stringResource(R.string.category_label)) },
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded)
                             },
@@ -198,7 +200,7 @@ fun AddProductContent(
                         ) {
                             if (listCategories.isEmpty()) {
                                 DropdownMenuItem(
-                                    text = { Text("Sin categorías") },
+                                    text = { Text(stringResource(R.string.no_categories)) },
                                     onClick = { categoryExpanded = false }
                                 )
                             } else {
@@ -245,7 +247,7 @@ fun AddProductContent(
                             value = uiState.productBrand,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Marca") },
+                            label = { Text(stringResource(R.string.brand_label)) },
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = brandExpanded)
                             },
@@ -261,7 +263,7 @@ fun AddProductContent(
                         ) {
                             if (listBrands.isEmpty()) {
                                 DropdownMenuItem(
-                                    text = { Text("Sin marcas") },
+                                    text = { Text(stringResource(R.string.no_brands)) },
                                     onClick = { brandExpanded = false }
                                 )
                             } else {
@@ -284,7 +286,7 @@ fun AddProductContent(
                 TextField(
                     value = uiState.productStock,
                     onValueChange = onStockChange,
-                    label = { Text("Stock") },
+                    label = { Text(stringResource(R.string.stock_label)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 30.dp, end = 30.dp),
@@ -297,7 +299,13 @@ fun AddProductContent(
                         .padding(start = 30.dp, end = 30.dp)
                         .fillMaxWidth()
                 ) {
-                    Text(text = if (uiState.isEditMode) "Actualizar" else "Guardar")
+                    Text(
+                        text = if (uiState.isEditMode) {
+                            stringResource(R.string.update_action)
+                        } else {
+                            stringResource(R.string.save)
+                        }
+                    )
                 }
 
             }
@@ -309,7 +317,15 @@ fun AddProductContent(
 @Composable
 private fun TopApp(isEditMode: Boolean) {
     TopAppBar(
-        title = { Text(text = if (isEditMode) "Editar Producto" else "Agregar Producto") },
+        title = {
+            Text(
+                text = if (isEditMode) {
+                    stringResource(R.string.edit_product_title)
+                } else {
+                    stringResource(R.string.add_produdct)
+                }
+            )
+        },
     )
 }
 

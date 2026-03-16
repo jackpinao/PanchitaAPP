@@ -132,13 +132,13 @@ fun SyncingOverlay() {
             CircularProgressIndicator(color = Color.White)
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Sincronizando datos...",
+                text = stringResource(R.string.syncing_data),
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Esto puede tardar unos segundos",
+                text = stringResource(R.string.syncing_subtitle),
                 color = Color.White.copy(alpha = 0.8f),
                 fontSize = 14.sp
             )

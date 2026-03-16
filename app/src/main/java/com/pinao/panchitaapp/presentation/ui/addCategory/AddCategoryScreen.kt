@@ -28,12 +28,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.domain.model.CategoryModel
 import com.pinao.panchitaapp.presentation.ui.Screen
 import org.koin.androidx.compose.koinViewModel
@@ -115,7 +117,7 @@ fun AddCategoryContent(
                 TextField(
                     value = category.name,
                     onValueChange = onNameChange,
-                    label = { Text("Nombre de Categoria") },
+                    label = { Text(stringResource(R.string.category_name)) },
                     modifier = Modifier
                         .padding(start = 30.dp, end = 30.dp)
                         .fillMaxWidth(),
@@ -131,7 +133,7 @@ fun AddCategoryContent(
                     TextField(
                         value = if (category.revenue == 0.0) "" else category.revenue.toString(),
                         onValueChange = onRevenueChange,
-                        label = { Text("Ganancia") },
+                        label = { Text(stringResource(R.string.revenue)) },
                         modifier = Modifier
                             .weight(1f)
                             .padding(end = 8.dp),
@@ -158,7 +160,7 @@ fun AddCategoryContent(
                     if (isLoading) {
                         CircularProgressIndicator()
                     } else {
-                        Text(text = "Guardar")
+                        Text(text = stringResource(R.string.save))
                     }
                 }
             }
@@ -170,11 +172,11 @@ fun AddCategoryContent(
 @Composable
 fun AddCategoryTopBar(onBackClick: () -> Unit) {
     TopAppBar(
-        title = { Text(text = "Nueva Categoria") },
+        title = { Text(text =  stringResource(R.string.new_category)) },
         navigationIcon = {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Regresar",
+                contentDescription = stringResource(R.string.back),
                 modifier = Modifier
                     .clickable { onBackClick() }
                     .padding(16.dp)

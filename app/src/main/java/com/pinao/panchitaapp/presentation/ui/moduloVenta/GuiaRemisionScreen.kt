@@ -46,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.presentation.common.toCurrency
 import com.pinao.panchitaapp.presentation.navigation.AppScreens
@@ -71,6 +73,7 @@ fun GuiaRemisionScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val sheetState = rememberModalBottomSheetState()
+    val okLabel = stringResource(R.string.ok_button)
 
     // Manejo de retorno de búsqueda manual
     val selectedProductCode = navController.currentBackStackEntry
@@ -86,7 +89,7 @@ fun GuiaRemisionScreen(
 
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let { message ->
-            snackbarHostState.showSnackbar(message = message, actionLabel = "OK")
+            snackbarHostState.showSnackbar(message = message, actionLabel = okLabel)
             viewModel.clearErrorMessage()
         }
     }
@@ -102,18 +105,18 @@ fun GuiaRemisionScreen(
                     .padding(bottom = 32.dp, top = 16.dp)
             ) {
                 Text(
-                    text = "Añadir Producto",
+                    text = stringResource(R.string.add_product_title),
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
                 ListItem(
                     modifier = Modifier.clickable { viewModel.startScanningProduct() },
-                    headlineContent = { Text("Escanear Código") },
+                    headlineContent = { Text(stringResource(R.string.scan_code_action)) },
                     leadingContent = {
                         Icon(
                             Icons.Default.QrCodeScanner,
-                            null,
+                            contentDescription = stringResource(R.string.scan_code_action),
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -123,11 +126,11 @@ fun GuiaRemisionScreen(
                         viewModel.closeDialogs()
                         navController.navigate(AppScreens.ProductSearch.route)
                     },
-                    headlineContent = { Text("Búsqueda Manual") },
+                    headlineContent = { Text(stringResource(R.string.manual_search_action)) },
                     leadingContent = {
                         Icon(
                             Icons.Default.Search,
-                            null,
+                            contentDescription = stringResource(R.string.manual_search_action),
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -192,7 +195,7 @@ fun GuiaRemisionContent(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             floatingActionButton = {
                 FloatingActionButton(onClick = onScanClick) {
-                    Icon(Icons.Default.QrCodeScanner, contentDescription = "Añadir Producto")
+                    Icon(Icons.Default.QrCodeScanner, contentDescription = stringResource(R.string.add_product_title))
                 }
             },
             bottomBar = {
@@ -203,7 +206,7 @@ fun GuiaRemisionContent(
                         .padding(16.dp),
                     enabled = uiState.products.isNotEmpty() && !uiState.isLoading
                 ) {
-                    Text(if (uiState.isLoading) "Procesando..." else "Finalizar Venta")
+                    Text(if (uiState.isLoading) stringResource(R.string.processing_action) else stringResource(R.string.finish_sale_action))
                 }
             }
         ) { padding ->
@@ -212,12 +215,12 @@ fun GuiaRemisionContent(
                     .padding(padding)
                     .padding(16.dp)
             ) {
-                Text("Venta Minimarket", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.minimarket_sale_title), fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
                 OutlinedTextField(
                     value = uiState.clientName,
                     onValueChange = onClientNameChange,
-                    label = { Text("Nombre del Cliente") },
+                    label = { Text(stringResource(R.string.client_name_label)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp)
@@ -226,7 +229,7 @@ fun GuiaRemisionContent(
                 OutlinedTextField(
                     value = uiState.clientDoc,
                     onValueChange = onClientDocChange,
-                    label = { Text("Documento (DNI/RUC)") },
+                    label = { Text(stringResource(R.string.client_doc_label)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp),
@@ -235,7 +238,7 @@ fun GuiaRemisionContent(
 
                 Spacer(modifier = Modifier.padding(12.dp))
 
-                Text("Productos en el Carrito", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                Text(stringResource(R.string.cart_products_title), fontSize = 18.sp, fontWeight = FontWeight.Medium)
 
                 OutlinedCard(
                     modifier = Modifier
@@ -248,7 +251,7 @@ fun GuiaRemisionContent(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 80.dp)
                     ) {
-                        items(uiState.products) { product ->
+                        items(uiState.products, key = { it.productId }) { product ->
                             ListItem(
                                 modifier = Modifier.combinedClickable(
                                     onClick = { /* Opcional */ },
@@ -262,15 +265,18 @@ fun GuiaRemisionContent(
                                 },
                                 supportingContent = {
                                     Text(
-                                        "Cant: ${product.stockQuantity} | " +
-                                                "P. Unit: ${product.priceSell.toCurrency()}\n" +
-                                                "P. Sin IGV: ${product.priceExcludingIGV.toCurrency()}\n" +
-                                                "Subtotal: ${(product.priceSell * product.stockQuantity).toCurrency()}"
+                                        stringResource(
+                                            R.string.product_details_format,
+                                            product.stockQuantity.toString(),
+                                            product.priceSell.toCurrency(),
+                                            product.priceExcludingIGV.toCurrency(),
+                                            (product.priceSell * product.stockQuantity).toCurrency()
+                                        )
                                     )
                                 },
                                 trailingContent = {
                                     IconButton(onClick = { onRemoveProduct(product) }) {
-                                        Icon(Icons.Default.Delete, null, tint = Color.Red)
+                                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_produdct), tint = Color.Red)
                                     }
                                 }
                             )
@@ -286,9 +292,9 @@ fun GuiaRemisionContent(
                                     .padding(16.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
-                            ) {
+                              ) {
                                 Text(
-                                    "TOTAL A PAGAR",
+                                    stringResource(R.string.total_to_pay_label),
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.ExtraBold
                                 )
@@ -311,10 +317,10 @@ fun GuiaRemisionContent(
 fun NotFoundErrorDialog(code: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Producto no encontrado") },
-        text = { Text("El código [$code] no está registrado. ¿Deseas agregarlo al inventario?") },
-        confirmButton = { TextButton(onClick = onConfirm) { Text("Agregar") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        title = { Text(stringResource(R.string.product_not_found_title)) },
+        text = { Text(stringResource(R.string.product_not_found_text, code)) },
+        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.add_action)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel_action)) } }
     )
 }
 
@@ -339,7 +345,7 @@ fun AddProductQuantityDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    if (isEditing) "Editar Cantidad" else "Añadir al Carrito",
+                    if (isEditing) stringResource(R.string.edit_quantity_title) else stringResource(R.string.add_to_cart_title),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -348,7 +354,7 @@ fun AddProductQuantityDialog(
                 OutlinedTextField(
                     value = quantity,
                     onValueChange = onQuantityChange,
-                    label = { Text("Cantidad") },
+                    label = { Text(stringResource(R.string.quantity_label)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 16.dp),
@@ -356,12 +362,12 @@ fun AddProductQuantityDialog(
                     singleLine = true
                 )
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = onDismiss) { Text("Cancelar") }
+                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel_action)) }
                     Button(
                         onClick = onConfirm,
                         enabled = quantity.isNotEmpty() && (quantity.toDoubleOrNull() ?: 0.0) > 0
                     ) {
-                        Text(if (isEditing) "Actualizar" else "Añadir")
+                        Text(if (isEditing) stringResource(R.string.update_action) else stringResource(R.string.add_action))
                     }
                 }
             }

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -31,7 +30,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
@@ -41,12 +39,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -55,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -62,9 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.domain.model.RechangeModel
 import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
@@ -75,33 +70,29 @@ fun ClaroRecargaScreen(
     claroRecargaViewModel: ClaroRecargaViewModel
 ) {
 
-//    val state by claroRecargaViewModel.state.collectAsState()
     var isEnabled by rememberSaveable { mutableStateOf(false) }
     var isValRechargeAmount by rememberSaveable { mutableStateOf("") }
     var isNumPhone by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
 
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-
-    val uiState by produceState<RechangeUiState>(
-        initialValue = RechangeUiState.Loading,
-        key1 = lifecycle,
-        key2 = claroRecargaViewModel
-    ) {
-        lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-            claroRecargaViewModel.uiState.collect {
-                value = it
-            }
-        }
-    }
+    val uiState by claroRecargaViewModel.uiState.collectAsStateWithLifecycle()
 
     when (uiState) {
         is RechangeUiState.Error -> {
-            Log.e("ClaroRecargaScreen","Error loading recargas: ${(uiState as RechangeUiState.Error).throwable}")
+            Log.e(
+                "ClaroRecargaScreen",
+                "Error loading recargas: ${(uiState as RechangeUiState.Error).throwable}"
+            )
         }
 
         RechangeUiState.Loading -> {
-            CircularProgressIndicator()
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator()
+            }
         }
 
         is RechangeUiState.Success -> {
@@ -118,13 +109,6 @@ fun ClaroRecargaScreen(
             )
         }
     }
-
-//    state.rechange?.let {
-//        isEnabled = it.amount != 0
-//        isValRechargeAmount = it.amount.toString()
-//        isNumPhone = it.numPhone
-//    }
-
 }
 
 @Composable
@@ -172,8 +156,14 @@ private fun TopBar(
 ) {
 
     val tabs = listOf(
-        TabData("Recarga", ImageVector.vectorResource(R.drawable.baseline_add_call_24)),
-        TabData("Historial", ImageVector.vectorResource(R.drawable.baseline_history_24))
+        TabData(
+            stringResource(R.string.recharge_tab),
+            ImageVector.vectorResource(R.drawable.baseline_add_call_24)
+        ),
+        TabData(
+            stringResource(R.string.history_tab),
+            ImageVector.vectorResource(R.drawable.baseline_history_24)
+        )
     )
     val selectedTab = remember { mutableIntStateOf(0) }
 
@@ -187,7 +177,7 @@ private fun TopBar(
                     icon = {
                         Icon(
                             imageVector = tab.icon,
-                            contentDescription = null
+                            contentDescription = tab.title
                         )
                     }
                 )
@@ -249,21 +239,24 @@ private fun CenterApp(
                         onNumPhone,
                     )
                 }
-                //item { Spacer(modifier = Modifier.padding(end = 16.dp)) }
                 item {
                     EraserText(
                         onText = onNumPhone,
-                        modifier = Modifier.padding(5.dp))
+                        modifier = Modifier.padding(5.dp)
+                    )
                 }
             }
         }
         item {
-            LazyRow {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
                 val numRec = listOf(3, 5, 7, 10, 15, 20)
-                items(numRec.size) { it ->
+                items(numRec, key = { it }) { amount ->
                     var isClick by rememberSaveable { mutableStateOf(false) }
                     AddButtonOutlined(
-                        numRec[it].toString(),
+                        amount.toString(),
                         isClick,
                         onClick = { isClick = it },
                         isValRechargeAmount,
@@ -311,8 +304,7 @@ private fun CenterApp2(
     var isDate by rememberSaveable { mutableStateOf(dateTime) }
     val onDate: (String) -> Unit = { isDate = it }
 
-    val rechanges by claroRecargaViewModel.dateFilterRechanges.collectAsState()
-//    var filterDate: String? = null
+    val rechanges by claroRecargaViewModel.dateFilterRechanges.collectAsStateWithLifecycle()
     var filterDate by rememberSaveable { mutableStateOf("") }
     val amountTotal: Int = listRechangeModel.sumOf { it.amount }
     val amountTotal2: Int = rechanges.sumOf { it.amount }
@@ -323,10 +315,8 @@ private fun CenterApp2(
             .padding(padding)
     ) {
 
-//        var filterDate by rememberSaveable { mutableStateOf("") }
-        Text(text = "Historial de recargas")
-        //DatePicker(state = datePickerState)
-        Text(text = "Fecha de recarga")
+        Text(text = stringResource(R.string.history_title))
+        Text(text = stringResource(R.string.recharge_date))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -345,13 +335,12 @@ private fun CenterApp2(
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.baseline_calendar_month_24),
-                    contentDescription = null
+                    contentDescription = stringResource(R.string.recharge_date)
                 )
             }
             if (openDialog.value) {
                 val confirmEnabled = remember {
                     derivedStateOf {
-                        //datePickerState.selectedDateMillis != null
                         true
                     }
                 }
@@ -375,7 +364,7 @@ private fun CenterApp2(
                             },
                             enabled = confirmEnabled.value
                         ) {
-                            Text("OK")
+                            Text(stringResource(R.string.ok_button))
                         }
                     },
                     dismissButton = {
@@ -384,7 +373,7 @@ private fun CenterApp2(
                                 openDialog.value = false
                             }
                         ) {
-                            Text("Cancel")
+                            Text(stringResource(R.string.cancel_button))
                         }
                     }
                 ) {
@@ -396,36 +385,38 @@ private fun CenterApp2(
             }
             if (filterDate == "") {
                 Text(
-                    text = "Total: $amountTotal"
+                    text = stringResource(R.string.total_label, amountTotal)
                 )
 
             } else {
                 Text(
-                    text = "Total: $amountTotal2"
+                    text = stringResource(R.string.total_label, amountTotal2)
                 )
             }
         }
 
 
-        LazyColumn {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(vertical = 8.dp)
+        ) {
             if (filterDate == "") {
                 if (listRechangeModel.isEmpty()) {
                     item {
-                        Text("No hay recargas")
+                        Text(stringResource(R.string.no_recharges))
                     }
                 } else {
                     items(listRechangeModel, key = { it.id }) { rechange ->
                         ItemRechange(rechange)
-                        rechange.amount
                     }
                 }
             } else {
                 if (rechanges.isEmpty()) {
                     item {
-                        Text("No hay recargas")
+                        Text(stringResource(R.string.no_recharges))
                     }
                 } else {
-                    items(rechanges) { rechange ->
+                    items(rechanges, key = { it.id }) { rechange ->
                         ItemRechange(rechange)
                     }
                 }
@@ -438,7 +429,6 @@ private fun CenterApp2(
 fun ItemRechange(rechangeModel: RechangeModel) {
     OutlinedCard(
         colors = CardDefaults.cardColors(
-            //containerColor = MaterialTheme.colors.surface,
             containerColor = MaterialTheme.colorScheme.surface,
         ),
         border = BorderStroke(
@@ -446,31 +436,31 @@ fun ItemRechange(rechangeModel: RechangeModel) {
             MaterialTheme.colorScheme.primary
         ),
         modifier = Modifier
-            //.size(width = 240.dp, height = 100.dp)
             .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
     ) {
 
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
         ) {
             Text(
-                text = "Número telefónico: " + rechangeModel.numPhone,
+                text = stringResource(R.string.phone_number_label, rechangeModel.numPhone),
                 modifier = Modifier
                     .padding(start = 8.dp, top = 8.dp),
                 textAlign = TextAlign.Center
             )
 
             Text(
-                text = "Monto: " + rechangeModel.amount,
+                text = stringResource(R.string.amount_label, rechangeModel.amount),
                 modifier = Modifier
                     .padding(start = 8.dp, top = 8.dp),
                 textAlign = TextAlign.Center
             )
 
             Text(
-                text = "Fecha: " + rechangeModel.date,
+                text = stringResource(R.string.date_label, rechangeModel.date),
                 modifier = Modifier
                     .padding(start = 8.dp, top = 8.dp),
                 textAlign = TextAlign.Center
@@ -485,14 +475,13 @@ private fun AddTextFieldPhone(
     isNumPhone: String,
     onNumPhone: (String) -> Unit
 ) {
-    val text = "telefono"
     val num = 9
     LimitedTextField(
         value = isNumPhone,
         onValueChange = { onNumPhone(it) },
-        label = { Text("Ingrese el número de $text") },
+        label = { Text(stringResource(R.string.enter_phone_number)) },
         modifier = Modifier.padding(16.dp),
-        placeholder = { Text("000000000") },
+        placeholder = { Text(stringResource(R.string.phone_placeholder)) },
         maxLength = num,
         enable = true
     )
@@ -507,13 +496,12 @@ private fun EraserText(
         onClick = {
             onText("")
         },
-        //modifier = Modifier.padding(5.dp),
         modifier = modifier,
         enabled = true
     ) {
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.outline_auto_delete_24),
-            contentDescription = "Delete"
+            contentDescription = stringResource(R.string.delete_description)
         )
     }
 }
@@ -524,14 +512,13 @@ private fun AddTextFieldAmount(
     isValRechargeAmount: String,
     onValRechargeAmount: (String) -> Unit
 ) {
-    val text = "monto"
     val num = 2
     LimitedTextField(
         value = isValRechargeAmount,
         onValueChange = { onValRechargeAmount(it) },
-        label = { Text("Ingrese el número de $text") },
+        label = { Text(stringResource(R.string.enter_amount)) },
         modifier = Modifier.padding(16.dp),
-        placeholder = { Text("00") },
+        placeholder = { Text(stringResource(R.string.amount_placeholder)) },
         maxLength = num,
         enable = isEnabled
     )
@@ -547,7 +534,6 @@ private fun AddButtonOutlined(
     onValRechargeAmount: (String) -> Unit,
     isEnabled: Boolean
 ) {
-    val text = "Soles"
     OutlinedButton(
         onClick = {
 
@@ -567,7 +553,7 @@ private fun AddButtonOutlined(
         enabled = !isEnabled
     ) {
         Text(
-            "$num\n$text",
+            text = num + "\n" + stringResource(R.string.soles_label),
             textAlign = TextAlign.Center
         )
     }
@@ -579,8 +565,6 @@ private fun AddButtonOutlinedOther(
     onEnableTextField: (Boolean) -> Unit,
     onValRechargeAmount: (String) -> Unit,
 ) {
-    val num = "Otros"
-    val text = ""
     OutlinedButton(
         onClick = {
             if (!isTextFieldEnabled) {
@@ -592,7 +576,7 @@ private fun AddButtonOutlinedOther(
         }
     ) {
         Text(
-            "$num\n$text",
+            text = stringResource(R.string.others_label),
             textAlign = TextAlign.Center
         )
     }
@@ -616,7 +600,6 @@ private fun AddButtonElevate(
             )
 
             claroRecargaViewModel.updateRechange(rechangeModel)
-            //claroRecargaViewModel.updateRechange2(isNumPhone, isValRechargeAmount.toInt(), date)
 
             val intent = Intent(Intent.ACTION_DIAL).apply {
                 data = "tel:*789*1*$isNumPhone*$isValRechargeAmount*1*1357#".toUri()
@@ -630,7 +613,7 @@ private fun AddButtonElevate(
         enabled = isValRechargeAmount.isNotEmpty() && isNumPhone.length == 9
     ) {
         Text(
-            text = "RECARGAR",
+            text = stringResource(R.string.recharge_button),
             modifier = Modifier.padding(16.dp),
             fontSize = 16.sp
         )
@@ -662,4 +645,3 @@ fun LimitedTextField(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )
 }
-

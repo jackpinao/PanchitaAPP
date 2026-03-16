@@ -131,8 +131,7 @@ fun InventoryListScreen(
                         },
                         onDeleteClick = { product ->
                             viewModel.onDeleteClick(product.productId)
-                        },
-                        //padding = innerPadding
+                        }
                     )
                 }
             }
@@ -149,7 +148,6 @@ fun InventoryListContent(
     onSearchQueryChange: (String) -> Unit = {},
     onItemClick: (ProductModel) -> Unit = {},
     onDeleteClick: (ProductModel) -> Unit = {},
-    //padding: PaddingValues
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -169,12 +167,12 @@ fun InventoryListContent(
                     onSearch = { expanded = false },
                     expanded = expanded,
                     onExpandedChange = { expanded = it },
-                    placeholder = { Text("Buscar producto") },
+                    placeholder = { Text(stringResource(R.string.search_product_placeholder)) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
                             IconButton(onClick = { onSearchQueryChange("") }) {
-                                Icon(Icons.Default.Close, contentDescription = null)
+                                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear_action))
                             }
                         }
                     }
@@ -188,7 +186,7 @@ fun InventoryListContent(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(products) { item ->
+                items(products, key = { it.productId }) { item ->
                     InventoryItemCard(
                         product = item,
                         onItemClick = {
@@ -206,7 +204,7 @@ fun InventoryListContent(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(products) { item ->
+                items(products, key = { it.productId }) { item ->
                     InventoryItemCard(
                         product = item,
                         onItemClick = { onItemClick(item) },
@@ -248,7 +246,7 @@ fun InventoryItemCard(
                     if (product.stockQuantity > product.stockMin)
                         MaterialTheme.colorScheme.primary else Color.Red
                 Text(
-                    text = "Stock: ${product.stockQuantity}",
+                    text = stringResource(R.string.stock_count_label, product.stockQuantity),
                     fontSize = 14.sp,
                     color = stockColor,
                     fontWeight = FontWeight.Medium
