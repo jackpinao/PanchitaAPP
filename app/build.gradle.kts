@@ -54,6 +54,9 @@ android {
     lint {
         abortOnError = false
         checkDependencies = true
+        // Muestra los errores directamente en la consola de CI
+        textReport = true
+        textOutput = file("stdout")
     }
 }
 

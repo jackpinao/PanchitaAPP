@@ -12,48 +12,52 @@ jobs:
 
     steps:
       - name: Checkout del codigo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-          #cache: gradle
-
-      - name: Cache Gradle
-        uses: actions/cache@v3
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
 
       - name: Grant execution permissions to Gradlew
         run: chmod +x gradlew
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v3
         with:
-          # Esta opción genera un reporte detallado en el resumen del Job
           generate-job-summary: true
 
-      # Nuevo paso para crear el archivo google-services.json
       - name: Create the google-services.json file
         run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > app/google-services.json
 
       - name: Ejecutar Análisis de Código (Lint)
-        run: ./gradlew lintDebug
+        run: ./gradlew lintDebug --continue
 
       - name: Upload Lint Report
-        if: always() # Esto asegura que se suba aunque el paso anterior falle
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lint-report
-          path: app/build/reports/lint-results-debug.html
+          name: lint-reports
+          path: app/build/reports/lint-results-debug.*
+          if-no-files-found: warn
 
-      - name: Ejecutar Tests Unitarios (SOLID Validation)
+      - name: Ejecutar Tests Unitarios
         run: ./gradlew testDebugUnitTest
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: app/build/test-results/testDebugUnitTest/*.xml
+          if-no-files-found: warn
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          report_paths: '**/build/test-results/testDebugUnitTest/*.xml'
 
       - name: Compilar APK de Debug
         run: ./gradlew assembleDebug
@@ -63,6 +67,3 @@ jobs:
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
-
-#      - name: Build app
-#        run: ./gradlew assemble
