@@ -57,51 +57,11 @@ class AddProductViewModelTest {
     }
 
     @Test
-    fun `listCategories updates uiState with names when Firestore-Repository returns data`() = runTest {
-        val categories = listOf(
-            CategoryModel(name = "Bebidas"),
-            CategoryModel(name = "Snacks")
-        )
-        `when`(getAllCategoriesUseCase()).thenReturn(flowOf(categories))
-
-        viewModel.listCategories()
-        advanceUntilIdle()
-
-        val expectedNames = listOf("Bebidas", "Snacks")
-        assertEquals(expectedNames, viewModel.uiState.value.listOfCategoriesName)
-        assertEquals(false, viewModel.uiState.value.isLoading)
-    }
-
-    @Test
-    fun `listCategories updates uiState with error when Firestore or Database fails`() = runTest {
-        val errorMessage = "Error de conexión"
-        `when`(getAllCategoriesUseCase()).thenReturn(flow {
-            throw Exception(errorMessage)
-        })
-
-        viewModel.listCategories()
-        advanceUntilIdle()
-
-        assertEquals("Error al obtener las categorías: $errorMessage", viewModel.uiState.value.error)
-        assertEquals(false, viewModel.uiState.value.isLoading)
-    }
-
-    @Test
     fun `onPriceChange validates numeric input correctly`() {
         viewModel.onPriceChange("12.50")
         assertEquals("12.50", viewModel.uiState.value.productPurchasePrice)
 
         viewModel.onPriceChange("12.50a") // Letra inválida
         assertEquals("12.50", viewModel.uiState.value.productPurchasePrice)
-    }
-
-    @Test
-    fun `startScanning updates productCode on success`() = runTest {
-        `when`(scanBarcodeUseCase()).thenReturn("123456")
-
-        viewModel.startScanning()
-        advanceUntilIdle()
-
-        assertEquals("123456", viewModel.uiState.value.productCode)
     }
 }

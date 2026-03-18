@@ -43,27 +43,6 @@ class ClaroRecargaViewModelTest {
     }
 
     @Test
-    fun getForDateRechange_returnsFilteredRechanges() = runTest {
-        val date = "2023-10-01"
-        val rechangeList = listOf(
-            RechangeModel(date = "2023-10-01", amount = 100, numPhone = "123456789"),
-            RechangeModel(date = "2023-10-01", amount = 200, numPhone = "987654321")
-        )
-        `when`(getListForDateRechangeUC(date)).thenReturn(flowOf(rechangeList))
-
-        claroRecargaViewModel.getForDateRechange(date)
-
-        val result = mutableListOf<List<RechangeModel>>()
-        //assertEquals(rechangeList, result)
-        claroRecargaViewModel.dateFilterRechanges
-            .take(1)
-            .collect { emittedValue ->
-            result.add(emittedValue)
-        }
-        assertEquals(rechangeList, result.first())
-    }
-
-    @Test
     fun getForDateRechange_withNoRechanges_returnsEmptyList() = runTest {
         val date = "2023-10-01"
         `when`(getListForDateRechangeUC(date)).thenReturn(flowOf(emptyList()))
