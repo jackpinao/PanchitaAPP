@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "test", "master2", "koin" ]
 
+permissions:
+  checks: write
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -58,6 +62,9 @@ jobs:
         if: always()
         with:
           report_paths: '**/build/test-results/testDebugUnitTest/*.xml'
+
+      - name: Build with Gradle
+        run: ./gradlew build --stacktrace
 
       - name: Compilar APK de Debug
         run: ./gradlew assembleDebug
