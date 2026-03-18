@@ -1,6 +1,5 @@
 package com.pinao.panchitaapp.test.viewModel
 
-import com.pinao.panchitaapp.domain.model.CategoryModel
 import com.pinao.panchitaapp.domain.usecase.brand.BrandUseCases
 import com.pinao.panchitaapp.domain.usecase.category.CategoryUseCases
 import com.pinao.panchitaapp.domain.usecase.category.GetAllCategoriesUseCase
@@ -9,11 +8,8 @@ import com.pinao.panchitaapp.domain.usecase.products.ScanBarcodeUseCase
 import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -29,14 +25,14 @@ class AddProductViewModelTest {
     private lateinit var scanBarcodeUseCase: ScanBarcodeUseCase
     private lateinit var getAllCategoriesUseCase: GetAllCategoriesUseCase
     private lateinit var brandUseCases: BrandUseCases
-    
+
     private lateinit var viewModel: AddProductViewModel
     private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        
+
         productUseCases = mock(ProductUseCases::class.java)
         categoryUseCases = mock(CategoryUseCases::class.java)
         scanBarcodeUseCase = mock(ScanBarcodeUseCase::class.java)
@@ -44,7 +40,7 @@ class AddProductViewModelTest {
         brandUseCases = mock(BrandUseCases::class.java)
 
         `when`(categoryUseCases.getAll).thenReturn(getAllCategoriesUseCase)
-        
+
         // Mock por defecto para el init del ViewModel
         `when`(getAllCategoriesUseCase()).thenReturn(flowOf(emptyList()))
 
