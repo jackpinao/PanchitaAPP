@@ -15,3 +15,5 @@
 local.properties
 # Ignorar la configuración de servicios de Google
 /app/google-services.json
+# Ignorar configuración de Kotzilla
+/app/kotzilla.json

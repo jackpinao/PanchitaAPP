@@ -1,4 +1,7 @@
 
+import java.util.Properties
+import java.io.File
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,6 +11,46 @@ plugins {
     alias(libs.plugins.gms)
     alias(libs.plugins.crashlytics)
     alias(libs.plugins.room)
+}
+
+// Cargar local.properties
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
+// Tarea para generar kotzilla.json automáticamente
+tasks.register("generateKotzillaJson") {
+    val appId = localProperties.getProperty("KOTZILLA_APP_ID") ?: ""
+    val keyId = localProperties.getProperty("KOTZILLA_KEY_ID") ?: ""
+    val apiKey = localProperties.getProperty("KOTZILLA_API_KEY") ?: ""
+    
+    val jsonContent = """
+    {
+      "sdkVersion": "1.1.0",
+      "keys": [
+        {
+          "appId": "$appId",
+          "applicationPackageName": "com.pinao.panchitaapp",
+          "keyId": "$keyId",
+          "apiKey": "$apiKey"
+        }
+      ]
+    }
+    """.trimIndent()
+
+    val outputFile = file("kotzilla.json")
+    outputs.file(outputFile)
+    
+    doLast {
+        if (appId.isNotEmpty()) {
+            outputFile.writeText(jsonContent)
+            println("Kotzilla JSON generado exitosamente.")
+        } else {
+            println("ADVERTENCIA: KOTZILLA_APP_ID no encontrado en local.properties")
+        }
+    }
 }
 
 room {
@@ -26,6 +69,19 @@ android {
         versionName = "2.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "KOTZILLA_APP_ID", "\"${localProperties.getProperty("KOTZILLA_APP_ID") ?: ""}\"")
+        buildConfigField("String", "KOTZILLA_KEY_ID", "\"${localProperties.getProperty("KOTZILLA_KEY_ID") ?: ""}\"")
+        buildConfigField("String", "KOTZILLA_API_KEY", "\"${localProperties.getProperty("KOTZILLA_API_KEY") ?: ""}\"")
+    }
+
+    // Asegurar que el JSON se genere antes de compilar
+    applicationVariants.all {
+        val variantName = name.replaceFirstChar { it.uppercase() }
+        val generateTask = tasks.named("generateKotzillaJson")
+        tasks.named("pre${variantName}Build").configure {
+            dependsOn(generateTask)
+        }
     }
 
     buildTypes {
@@ -49,25 +105,23 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     lint {
         abortOnError = false
         checkDependencies = true
-        // Muestra los errores directamente en la consola de CI
         textReport = true
         textOutput = file("stdout")
     }
 }
 
-// SOLUCIÓN DEFINITIVA AL ERROR DE FINGERPRINT / SERIALIZACIÓN
 configurations.all {
     resolutionStrategy.eachDependency {
         if (requested.group == "org.jetbrains.kotlin") {
             useVersion("2.1.0")
         }
     }
-    // Excluir módulos stdlib antiguos que causan duplicados y errores de metadatos en Kotlin 2.x
     exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk7")
     exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk8")
 }
@@ -149,6 +203,10 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.mockito)
+    testImplementation(libs.mockk)
+    testImplementation(platform(libs.koin.bom))
+    testImplementation(libs.koin.test)
+    testImplementation(libs.koin.junit4)
     testImplementation(libs.androidx.core.testing)
     testImplementation(libs.hamcrest)
     testImplementation(libs.kotlinx.coroutines.test)
