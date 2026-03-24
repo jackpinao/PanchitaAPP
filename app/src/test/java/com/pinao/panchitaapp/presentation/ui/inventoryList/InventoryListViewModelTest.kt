@@ -1,8 +1,8 @@
 package com.pinao.panchitaapp.presentation.ui.inventoryList
 
+import app.cash.turbine.test
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -10,14 +10,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
+/**
+ * Unit tests for [InventoryListViewModel] using Turbine for Flow testing.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class InventoryListViewModelTest {
 
@@ -25,11 +29,16 @@ class InventoryListViewModelTest {
     private val productUseCases: ProductUseCases = mockk(relaxed = true)
     private val testDispatcher = StandardTestDispatcher()
 
+    private val sampleProducts = listOf(
+        ProductModel(productId = "1", name = "Arroz", barcode = "775123"),
+        ProductModel(productId = "2", name = "Azúcar", barcode = "775456")
+    )
+
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        // Mock inicial para el init del ViewModel
-        every { productUseCases.getAll() } returns flowOf(emptyList())
+        // Default mock for init {} block
+        every { productUseCases.getAll() } returns flowOf(sampleProducts)
     }
 
     @After
@@ -38,58 +47,99 @@ class InventoryListViewModelTest {
     }
 
     @Test
-    fun `init should observe products and update state to Success`() = runTest {
-        // Given
-        val products = listOf(
-            ProductModel(productId = "1", name = "Product 1"),
-            ProductModel(productId = "2", name = "Product 2")
-        )
-        every { productUseCases.getAll() } returns flowOf(products)
-
-        // When
+    fun `init should load all products and update state to Success`() = runTest {
         viewModel = InventoryListViewModel(productUseCases)
-        advanceUntilIdle()
 
-        // Then
-        val currentState = viewModel.uiState.value
-        assert(currentState is InventoryListUiState.Success)
-        assert(currentState.inventoryList.size == 2)
-        assert(currentState.inventoryList[0].name == "Product 1")
+        viewModel.uiState.test {
+            // Inicia con Loading según el StateFlow inicial
+            assertTrue(awaitItem() is InventoryListUiState.Loading)
+
+            // Avanzamos el debounce del init
+            testScheduler.advanceTimeBy(301)
+
+            // Pasa a Success con los datos cargados
+            val state = awaitItem()
+            assertTrue("Debe estar en Success", state is InventoryListUiState.Success)
+            assertEquals(2, state.inventoryList.size)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
-    fun `onSearchQueryChange should update search query and trigger search use case`() = runTest {
-        // Given
+    fun `onSearchQueryChange should trigger search after debounce time`() = runTest {
+        val query = "Arroz"
+        every { productUseCases.search(query) } returns flowOf(listOf(sampleProducts[0]))
         viewModel = InventoryListViewModel(productUseCases)
-        val query = "Inka"
-        val filteredProducts = listOf(ProductModel(productId = "1", name = "Inka Kola"))
-        every { productUseCases.search(query) } returns flowOf(filteredProducts)
 
-        // When
-        viewModel.onSearchQueryChange(query)
-        advanceUntilIdle() // Necesario por el debounce(300L)
+        viewModel.uiState.test {
+            awaitItem() // Loading inicial
+            testScheduler.advanceTimeBy(301)
+            awaitItem() // Success inicial
 
-        // Then
-        assert(viewModel.searchQuery.value == query)
-        val currentState = viewModel.uiState.value
-        assert(currentState is InventoryListUiState.Success)
-        assert(currentState.inventoryList.any { it.name == "Inka Kola" })
-        coVerify { productUseCases.search(query) }
+            viewModel.onSearchQueryChange(query)
+
+            // No hay cambio antes de los 300ms
+            testScheduler.advanceTimeBy(200)
+
+            // Pasamos el umbral del debounce
+            testScheduler.advanceTimeBy(101)
+
+            val state = awaitItem()
+            assertTrue(state is InventoryListUiState.Success)
+            assertEquals(1, state.inventoryList.size)
+            assertEquals("Arroz", state.inventoryList[0].name)
+            coVerify { productUseCases.search(query) }
+        }
     }
 
     @Test
-    fun `onDeleteClick should call delete use case`() = runTest {
-        // Given
-        val product = ProductModel(productId = "1", name = "To Delete")
-        every { productUseCases.getAll() } returns flowOf(listOf(product))
+    fun `onRefresh should call refreshProducts and show Loading state`() = runTest {
         viewModel = InventoryListViewModel(productUseCases)
-        advanceUntilIdle()
 
-        // When
-        viewModel.onDeleteClick("1")
-        advanceUntilIdle()
+        viewModel.uiState.test {
+            awaitItem() // Loading inicial
+            testScheduler.advanceTimeBy(301)
+            awaitItem() // Success inicial
 
-        // Then
-        coVerify { productUseCases.delete(product) }
+            viewModel.onRefresh()
+
+            // Capturamos el Loading emitido por el refresh
+            val state = awaitItem()
+            assertTrue(
+                "Debe cambiar a Loading durante el refresh",
+                state is InventoryListUiState.Loading
+            )
+
+            coVerify { productUseCases.refreshProducts() }
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `onItemClick should emit NavigateToEdit event with correct barcode`() = runTest {
+        viewModel = InventoryListViewModel(productUseCases)
+        testScheduler.advanceTimeBy(301) // Dejamos que cargue la lista
+
+        viewModel.eventFlow.test {
+            viewModel.onItemClick("1")
+
+            val event = awaitItem()
+            assertTrue(event is InventoryListViewModel.InventoryListEvent.NavigateToEdit)
+            assertEquals(
+                "775123",
+                (event as InventoryListViewModel.InventoryListEvent.NavigateToEdit).barcode
+            )
+        }
+    }
+
+    @Test
+    fun `onDeleteClick should invoke delete use case with correct product`() = runTest {
+        viewModel = InventoryListViewModel(productUseCases)
+        testScheduler.advanceTimeBy(301)
+
+        viewModel.onDeleteClick("2")
+        testScheduler.runCurrent()
+
+        coVerify { productUseCases.delete(match { it.productId == "2" }) }
     }
 }

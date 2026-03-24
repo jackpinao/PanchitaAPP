@@ -32,6 +32,7 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -117,14 +118,16 @@ fun InventoryListScreen(
                     .padding(innerPadding),
                 contentAlignment = Alignment.Center
             ) {
-                when (uiState) {
-                    is InventoryListUiState.Loading -> CircularProgressIndicator(
+                if (uiState is InventoryListUiState.Loading && uiState.inventoryList.isEmpty()) {
+                    CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.primary
                     )
-
-                    else -> InventoryListContent(
+                } else {
+                    InventoryListContent(
                         products = uiState.inventoryList,
                         searchQuery = searchQuery,
+                        isRefreshing = uiState is InventoryListUiState.Loading,
+                        onRefresh = viewModel::onRefresh,
                         onSearchQueryChange = viewModel::onSearchQueryChange,
                         onItemClick = { product ->
                             viewModel.onItemClick(product.productId)
@@ -145,6 +148,8 @@ fun InventoryListScreen(
 fun InventoryListContent(
     products: List<ProductModel> = emptyList(),
     searchQuery: String = "",
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {},
     onSearchQueryChange: (String) -> Unit = {},
     onItemClick: (ProductModel) -> Unit = {},
     onDeleteClick: (ProductModel) -> Unit = {},
@@ -200,16 +205,23 @@ fun InventoryListContent(
         }
 
         if (!expanded) {
-            LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = onRefresh,
+                modifier = Modifier.fillMaxSize()
             ) {
-                items(products, key = { it.productId }) { item ->
-                    InventoryItemCard(
-                        product = item,
-                        onItemClick = { onItemClick(item) },
-                        onDeleteClick = { onDeleteClick(item) }
-                    )
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(products, key = { it.productId }) { item ->
+                        InventoryItemCard(
+                            product = item,
+                            onItemClick = { onItemClick(item) },
+                            onDeleteClick = { onDeleteClick(item) }
+                        )
+                    }
                 }
             }
         }

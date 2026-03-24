@@ -78,7 +78,7 @@
 
     <!-- Inventory List Screen -->
     <string name="search_product_placeholder">Buscar producto</string>
-    <string name="stock_count_label">Stock: %1$d</string>
+    <string name="stock_count_label">Stock: %1$.2f</string>
 
     <!-- Login Screen -->
     <string name="syncing_data">Sincronizando datos</string>
@@ -109,6 +109,6 @@
     <string name="clear_action">Limpiar</string>
     <string name="search_product_title">Buscar Producto</string>
     <string name="back_action">Atrás</string>
-    <string name="product_search_details_format">Código: %1$s | Stock: %2$d</string>
+    <string name="product_search_details_format">Código: %1$s | Stock: %2$.2f</string>
     <string name="currency_format_soles">S/. %1$s</string>
 </resources>

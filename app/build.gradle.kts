@@ -212,6 +212,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.truth)
+    testImplementation(libs.turbine)
 }
 
 ksp {

@@ -56,6 +56,17 @@ class InventoryListViewModel(
         }
     }
 
+    fun onRefresh() {
+        viewModelScope.launch {
+            _uiState.update { InventoryListUiState.Loading(it.inventoryList) }
+            try {
+                productUseCases.refreshProducts()
+            } catch (e: Exception) {
+                // Optionally handle the error here
+            }
+        }
+    }
+
     fun onSearchQueryChange(newQuery: String) {
         _searchQuery.value = newQuery
     }
