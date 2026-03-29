@@ -204,8 +204,9 @@ class DomainModule {
 
     @Factory
     fun provideRefrershProductsUseCase(
-        productRepository: ProductRepository
-    ) = RefreshProductsUseCase(productRepository)
+        productRepository: ProductRepository,
+        authRepository: AuthRepository
+    ) = RefreshProductsUseCase(productRepository, authRepository)
 
     @Factory
     fun provideCompleteSaleUseCase(

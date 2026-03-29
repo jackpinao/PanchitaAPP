@@ -35,6 +35,10 @@
         android:theme="@style/Theme.PanchitaAPP"
         tools:targetApi="31">
 
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode_ui"/>
+
         <activity
             android:name=".presentation.ui.main.MainActivity"
             android:exported="true"

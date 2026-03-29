@@ -10,4 +10,5 @@ plugins {
     alias(libs.plugins.crashlytics) apply false
     alias(libs.plugins.room) apply false
     alias(libs.plugins.kotzilla) apply false
+    alias(libs.plugins.kotlinx.kover) apply false
 }

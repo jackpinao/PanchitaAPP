@@ -1,6 +1,5 @@
 
 import java.util.Properties
-import java.io.File
 
 plugins {
     alias(libs.plugins.android.application)
@@ -11,6 +10,36 @@ plugins {
     alias(libs.plugins.gms)
     alias(libs.plugins.crashlytics)
     alias(libs.plugins.room)
+    alias(libs.plugins.kotlinx.kover)
+}
+
+// Configuración de Cobertura de Código (Kover 0.9.0)
+kover {
+    reports {
+        total {
+            filters {
+                excludes {
+                    // Ignorar clases de Inyección de Dependencias (Koin)
+                    classes("*.di.*", "*ModuleKt*")
+                    // Ignorar Actividades y código de UI puro
+                    classes("*Activity*", "*ScreenKt*", "*Composable*")
+                    // Ignorar clases generadas (Room, BuildConfigs, etc.)
+                    classes("*_ViewBinding*", "*BuildConfig*", "*_Factory*", "*_MembersInjector*", "*_**")
+                    // Ignorar modelos de datos y estados
+                    classes("*.domain.model.*", "*UiState*", "*Event*")
+                    // Ignorar clases de Firebase/GMS generadas
+                    packages("com.google.firebase.**", "com.google.android.gms.**")
+                }
+            }
+            
+            verify {
+                rule {
+                    // En Kover 0.9.0, minBound es la forma recomendada de establecer el límite mínimo
+                    minBound(70)
+                }
+            }
+        }
+    }
 }
 
 // Cargar local.properties
@@ -59,14 +88,14 @@ room {
 
 android {
     namespace = "com.pinao.panchitaapp"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.pinao.panchitaapp"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "2.2"
+        versionCode = 3
+        versionName = "3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -117,11 +146,11 @@ android {
 }
 
 configurations.all {
-    resolutionStrategy.eachDependency {
+    /*resolutionStrategy.eachDependency {
         if (requested.group == "org.jetbrains.kotlin") {
-            useVersion("2.1.0")
+            useVersion(libs.versions.kotlin.get())
         }
-    }
+    }*/
     exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk7")
     exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk8")
 }
