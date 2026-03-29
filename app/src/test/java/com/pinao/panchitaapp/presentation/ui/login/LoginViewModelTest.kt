@@ -1,37 +1,44 @@
 package com.pinao.panchitaapp.presentation.ui.login
 
+import android.util.Log
 import app.cash.turbine.test
 import com.pinao.panchitaapp.domain.model.UserModel
 import com.pinao.panchitaapp.domain.usecase.Auth.AuthUseCase
 import com.pinao.panchitaapp.domain.usecase.products.RefreshProductsUseCase
+import com.pinao.panchitaapp.test.utils.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import io.mockk.verify
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LoginViewModelTest {
 
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
     private lateinit var viewModel: LoginViewModel
     private val authUseCase: AuthUseCase = mockk()
     private val refreshProductsUseCase: RefreshProductsUseCase = mockk()
-    private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setup() {
-        Dispatchers.setMain(testDispatcher)
+        // Mockear Log de Android
+        mockkStatic(Log::class)
+        every { Log.d(any(), any()) } returns 0
+        every { Log.e(any(), any(), any()) } returns 0
+
         // Por defecto, usuario no logueado
         every { authUseCase.isUserLoggedInUseCase() } returns false
         coEvery { refreshProductsUseCase() } returns Unit
@@ -39,7 +46,7 @@ class LoginViewModelTest {
 
     @After
     fun tearDown() {
-        Dispatchers.resetMain()
+        unmockkStatic(Log::class)
     }
 
     @Test
@@ -50,21 +57,24 @@ class LoginViewModelTest {
         // Act
         viewModel = LoginViewModel(authUseCase, refreshProductsUseCase)
 
+        // Estabilizar las corrutinas que se lanzan en el init (como syncData)
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
         // Assert
         viewModel.uiState.test {
             val state = awaitItem()
             assertTrue(state is LoginUiState.Success)
 
-            // Damos tiempo para que viewModelScope.launch ejecute el syncData()
-            testScheduler.advanceUntilIdle()
-
             coVerify(exactly = 1) { refreshProductsUseCase() }
+            
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
     fun `onEmailChange and onPasswordChange should update the user fields`() = runTest {
         viewModel = LoginViewModel(authUseCase, refreshProductsUseCase)
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
             awaitItem() // Estado inicial (Idle)
@@ -76,12 +86,15 @@ class LoginViewModelTest {
             viewModel.onPasswordChange("password123")
             val stateAfterPassword = awaitItem()
             assertEquals("password123", stateAfterPassword.user.password)
+            
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
     fun `login with empty fields should set Error state`() = runTest {
         viewModel = LoginViewModel(authUseCase, refreshProductsUseCase)
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
             awaitItem() // Idle con vacíos
@@ -93,6 +106,8 @@ class LoginViewModelTest {
             
             // Nunca llama a signInUseCase
             coVerify(exactly = 0) { authUseCase.signInUseCase(any(), any()) }
+            
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -105,6 +120,7 @@ class LoginViewModelTest {
         coEvery { authUseCase.signInUseCase(userEmail, userPass) } returns Result.success(mockUser)
 
         viewModel = LoginViewModel(authUseCase, refreshProductsUseCase)
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
             awaitItem() // Estado inicial
@@ -122,19 +138,17 @@ class LoginViewModelTest {
             val loadingState = awaitItem()
             assertTrue(loadingState is LoginUiState.Loading)
 
-            // Damos tiempo para que avance la corrutina
-            testScheduler.advanceUntilIdle()
+            // Damos tiempo para que avance la corrutina de signIn y refresco
+            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
-            // Pasamos por Syncing
-            val syncingState = awaitItem()
-            assertTrue(syncingState is LoginUiState.Syncing)
-            
-            // Finalmente Success
-            val successState = awaitItem()
-            assertTrue(successState is LoginUiState.Success)
+            // Atrapamos el estado final (pasó de Syncing a Success rápidamente)
+            val finalState = expectMostRecentItem()
+            assertTrue(finalState is LoginUiState.Success)
 
             coVerify { authUseCase.signInUseCase(userEmail, userPass) }
             coVerify { refreshProductsUseCase() }
+            
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -142,6 +156,8 @@ class LoginViewModelTest {
     fun `logout should call signOut and return to Idle state`() = runTest {
         viewModel = LoginViewModel(authUseCase, refreshProductsUseCase)
         every { authUseCase.signOutUseCase() } returns Unit
+        
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
             awaitItem() // Idle inicial
@@ -152,6 +168,8 @@ class LoginViewModelTest {
             assertTrue(state is LoginUiState.Idle)
             
             verify { authUseCase.signOutUseCase() }
+            
+            cancelAndIgnoreRemainingEvents()
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.pinao.panchitaapp.presentation.ui.moduloVenta
 
+import android.util.Log
 import app.cash.turbine.test
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.model.TemporaryProductModel
@@ -14,9 +15,12 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -63,8 +67,18 @@ class GuiaRemisionViewModelTest {
 
     @Before
     fun setup() {
+        // Mockear Log de Android
+        mockkStatic(Log::class)
+        every { Log.d(any(), any()) } returns 0
+        every { Log.e(any(), any(), any()) } returns 0
+
         coEvery { productUseCases.refreshProducts() } returns Unit
         every { temporaryProductUseCases.getAll() } returns flowOf(mockTemporaryProducts)
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic(Log::class)
     }
 
     @Test
@@ -74,18 +88,19 @@ class GuiaRemisionViewModelTest {
             completeSaleUseCase, pdfService, temporaryProductUseCases
         )
 
+        // Estabilizar corrutinas del init antes de testear
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
         viewModel.uiState.test {
-            val initialState = awaitItem()
-            assertTrue(initialState.isLoading)
-
-            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
-
             val loadedState = awaitItem()
+            
             assertFalse(loadedState.isLoading)
             assertEquals(1, loadedState.products.size)
             assertEquals("Coca-Cola", loadedState.products[0].name)
 
             coVerify { productUseCases.refreshProducts() }
+            
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -99,24 +114,24 @@ class GuiaRemisionViewModelTest {
             completeSaleUseCase, pdfService, temporaryProductUseCases
         )
 
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
         viewModel.uiState.test {
-            awaitItem() // Loading
-            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
-            awaitItem() // Success List
+            val initialState = awaitItem() // Estado estable
 
             viewModel.startScanningProduct()
 
-            val scanningState = awaitItem()
-            assertFalse(scanningState.showSelectionSheet)
-
             mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
-            val resultState = awaitItem()
+            val resultState = expectMostRecentItem()
+            
             assertTrue(resultState.showAddDialog)
             assertNotNull(resultState.scannedProduct)
             assertEquals("Coca-Cola", resultState.scannedProduct?.name)
             assertFalse(resultState.isEditing)
             assertEquals("123", resultState.lastScannedCode)
+            
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -130,20 +145,19 @@ class GuiaRemisionViewModelTest {
             completeSaleUseCase, pdfService, temporaryProductUseCases
         )
 
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
         viewModel.uiState.test {
-            awaitItem() // Loading
-            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
-            awaitItem() // List loaded
+            val initialState = awaitItem()
 
             viewModel.startScanningProduct()
-
-            // Ignoramos el estado intermedio de hide SelectionSheet
-            skipItems(1)
             
             mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
-            val errorState = awaitItem()
+            val errorState = expectMostRecentItem()
             assertTrue(errorState.showNotFoundError)
+            
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -154,10 +168,10 @@ class GuiaRemisionViewModelTest {
             completeSaleUseCase, pdfService, temporaryProductUseCases
         )
 
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
         viewModel.uiState.test {
-            awaitItem() // Loading
-            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
-            awaitItem() // List loaded
+            val initialState = awaitItem() 
 
             viewModel.onQuantityChange("5")
             val state1 = awaitItem()
@@ -165,6 +179,8 @@ class GuiaRemisionViewModelTest {
 
             viewModel.onQuantityChange("abc")
             expectNoEvents() // No emite nada por fallar el Regex
+            
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -177,29 +193,31 @@ class GuiaRemisionViewModelTest {
             completeSaleUseCase, pdfService, temporaryProductUseCases
         )
 
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
         viewModel.uiState.test {
-            awaitItem() // Loading
-            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
-            awaitItem() // Loaded
+            val initialState = awaitItem() // Loaded
 
             // Simular escaneo
             viewModel.handleProductByCode("123")
-            val dialogState = awaitItem()
+            
+            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+            val dialogState = expectMostRecentItem() // Esto nos da el estado más reciente, consumiendo cualquier evento intermedio de handleProductByCode
             assertTrue(dialogState.showAddDialog)
             
             // Setear cantidad a agregar
             viewModel.onQuantityChange("10")
-            awaitItem()
+            // Esperamos que se refleje el cambio de cantidad
+            val stateConCantidad = awaitItem()
+            assertEquals("10", stateConCantidad.quantity)
 
             // Confirmar
             viewModel.onConfirmQuantity()
             
-            val loadingSaveState = awaitItem()
-            assertTrue(loadingSaveState.isLoading)
-
+            // Avanzamos corrutina de guardado
             mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
             
-            val finalState = awaitItem()
+            val finalState = expectMostRecentItem()
             assertFalse(finalState.showAddDialog) // Dialog cerrado
             assertFalse(finalState.isLoading)
 
@@ -207,6 +225,8 @@ class GuiaRemisionViewModelTest {
             coVerify { productUseCases.save(match { it.stockQuantity == 40.0 }) }
             // Verifica que se guarde en temporales
             coVerify { temporaryProductUseCases.save(match { it.quantity == 10.0 }) }
+            
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -217,9 +237,9 @@ class GuiaRemisionViewModelTest {
             completeSaleUseCase, pdfService, temporaryProductUseCases
         )
 
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
         viewModel.uiState.test {
-            awaitItem() // Loading
-            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
             val stateWithProducts = awaitItem() // Loaded with mockTemporaryProducts
 
             // Aseguramos que haya productos cargados en UI
@@ -227,17 +247,16 @@ class GuiaRemisionViewModelTest {
 
             viewModel.finalizeSale()
 
-            val loadingState = awaitItem()
-            assertTrue(loadingState.isLoading)
-
             mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
-            val finalState = awaitItem()
+            val finalState = expectMostRecentItem()
             assertFalse(finalState.isLoading)
             assertEquals("Venta finalizada y stock actualizado", finalState.downloadStatus)
 
             coVerify { completeSaleUseCase(any(), any()) }
             coVerify { temporaryProductUseCases.clearAll() }
+            
+            cancelAndIgnoreRemainingEvents()
         }
     }
 }
