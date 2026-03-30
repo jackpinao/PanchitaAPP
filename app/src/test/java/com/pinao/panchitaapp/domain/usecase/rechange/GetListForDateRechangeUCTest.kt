@@ -1,69 +1,50 @@
 package com.pinao.panchitaapp.domain.usecase.rechange
 
-import com.pinao.panchitaapp.data.repository.RechangeRepositoryImpl
+import app.cash.turbine.test
 import com.pinao.panchitaapp.domain.model.RechangeModel
+import com.pinao.panchitaapp.domain.repository.RechangeRepository
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.junit.jupiter.api.Assertions.*
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.times
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class GetListForDateRechangeUCTest {
 
-    private lateinit var getlist: GetListForDateRechangeUC
-    private val repository: RechangeRepositoryImpl = mock(RechangeRepositoryImpl::class.java)
+    private lateinit var useCase: GetListForDateRechangeUC
+    private val repository: RechangeRepository = mockk()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
-    fun setUp() {
-        kotlinx.coroutines.Dispatchers.setMain(UnconfinedTestDispatcher())
-        getlist = GetListForDateRechangeUC(repository)
+    fun setup() {
+        useCase = GetListForDateRechangeUC(repository)
     }
 
     @Test
-    fun returnsListOfRechangesFromRepository() {
-        runBlocking {
-            // Given
-            val fecha = "2023-10-01"
-            val rechangeList = listOf(
-                RechangeModel(date = "2023-10-01", amount = 100, numPhone = "123456789")
-            )
-            `when`(repository.listForDate(fecha)).thenReturn(flowOf(rechangeList))
+    fun `invoke should return mapped flow of rechanges for a specific date`() = runTest {
+        val testDate = "2023-11-01"
+        val expectedRechanges = listOf(
+            RechangeModel(id = "r1", date = testDate, amount = 100, numPhone = "123456789")
+        )
+        
+        every { repository.listForDate(testDate) } returns flowOf(expectedRechanges)
 
-            // When
-            val result = getlist("2023-10-01")
+        val resultFlow = useCase(testDate)
 
-            // Then
-            result.collect { rechanges ->
-                assertEquals(rechangeList, rechanges)
-            }
-            //assertEquals(rechangeList, result)
-            verify(repository, times(1)).listForDate(fecha)
+        resultFlow.test {
+            val items = awaitItem()
+            assertEquals(1, items.size)
+            assertEquals("r1", items[0].id)
+            assertEquals(testDate, items[0].date)
+            assertEquals(100, items[0].amount)
+            
+            cancelAndIgnoreRemainingEvents()
         }
-    }
-
-    @Test
-    fun returnsEmptyListWhenNoRechangesExist() {
-        runBlocking {
-            // Given
-            val fecha = "2023-10-01"
-            `when`(repository.listForDate(fecha)).thenReturn(flowOf(emptyList()))
-
-            // When
-            val result = getlist("2023-10-01")
-
-            // Then
-            result.collect { rechanges ->
-                assertTrue(rechanges.isEmpty())
-            }
-            verify(repository, times(1)).listForDate(fecha)
-        }
+        
+        verify(exactly = 1) { repository.listForDate(testDate) }
     }
 }

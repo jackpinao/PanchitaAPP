@@ -4,29 +4,28 @@ import com.pinao.panchitaapp.domain.repository.ProductRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SyncUnsyncedProductsUseCaseTest {
 
-    private lateinit var syncUnsyncedProductsUseCase: SyncUnsyncedProductsUseCase
+    private lateinit var useCase: SyncUnsyncedProductsUseCase
     private val repository: ProductRepository = mockk()
 
     @Before
-    fun setUp() {
-        syncUnsyncedProductsUseCase = SyncUnsyncedProductsUseCase(repository)
+    fun setup() {
+        useCase = SyncUnsyncedProductsUseCase(repository)
     }
 
     @Test
-    fun `when invoke is called then repository syncUnsyncedProducts should be executed`() = runTest {
-        // Given
+    fun `invoke should call syncUnsyncedProducts on repository`() = runTest {
         coEvery { repository.syncUnsyncedProducts() } returns Unit
 
-        // When
-        syncUnsyncedProductsUseCase()
+        useCase()
 
-        // Then
         coVerify(exactly = 1) { repository.syncUnsyncedProducts() }
     }
 }

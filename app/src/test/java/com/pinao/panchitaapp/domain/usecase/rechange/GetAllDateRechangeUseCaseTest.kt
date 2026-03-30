@@ -1,75 +1,50 @@
 package com.pinao.panchitaapp.domain.usecase.rechange
 
-import com.pinao.panchitaapp.data.repository.RechangeRepositoryImpl
+import app.cash.turbine.test
 import com.pinao.panchitaapp.domain.model.RechangeModel
+import com.pinao.panchitaapp.domain.repository.RechangeRepository
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.junit.jupiter.api.Assertions.*
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class GetAllDateRechangeUseCaseTest {
 
-    private lateinit var getAllDateRechangeUseCase: GetAllDateRechangeUseCase
-    private val repository: RechangeRepositoryImpl = mock(RechangeRepositoryImpl::class.java)
+    private lateinit var useCase: GetAllDateRechangeUseCase
+    private val repository: RechangeRepository = mockk()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
-    fun setUp() {
-        kotlinx.coroutines.Dispatchers.setMain(UnconfinedTestDispatcher())
-        getAllDateRechangeUseCase = GetAllDateRechangeUseCase(repository)
+    fun setup() {
+        useCase = GetAllDateRechangeUseCase(repository)
     }
 
     @Test
-    fun returnsListOfRechangesFromRepository() {
-        runBlocking {
-            // Given
-            val rechangeList = listOf(
-                RechangeModel(date = "2023-10-01", amount = 100, numPhone = "123456789"),
-                RechangeModel(date = "2023-10-02", amount = 200, numPhone = "987654321")
-            )
-            `when`(repository.listAllDateRechangeFromDataBase()).thenReturn(flowOf(rechangeList))
-            //`when`(repository.listAllDateRechangeFromDataBase()).thenReturn(rechangeList.asFlow())
+    fun `invoke should return mapped flow of all rechanges from database`() = runTest {
+        val expectedRechanges = listOf(
+            RechangeModel(id = "r1", date = "2023-11-01", amount = 100, numPhone = "123456789"),
+            RechangeModel(id = "r2", date = "2023-11-02", amount = 200, numPhone = "987654321")
+        )
+        
+        every { repository.listAllDateRechangeFromDataBase() } returns flowOf(expectedRechanges)
 
-            // When
-            //val result = getAllDateRechangeUseCase().toList()
-            val result = getAllDateRechangeUseCase()
+        val resultFlow = useCase()
 
-            // Then
-            //assert(result == rechangeList)
-            //assertEquals(rechangeList, result)
-            result.collect { rechanges ->
-                assertEquals(rechangeList, rechanges)
-            }
-            verify(repository, times(1)).listAllDateRechangeFromDataBase()
+        resultFlow.test {
+            val items = awaitItem()
+            assertEquals(2, items.size)
+            assertEquals("r1", items[0].id)
+            assertEquals("r2", items[1].id)
+            assertEquals(200, items[1].amount)
+            
+            cancelAndIgnoreRemainingEvents()
         }
-    }
-
-    @Test
-    fun returnsEmptyListWhenNoRechangesExist() {
-        runBlocking {
-            // Given
-            `when`(repository.listAllDateRechangeFromDataBase()).thenReturn(flowOf(emptyList()))
-
-            // When
-            //val result = getAllDateRechangeUseCase().toList()
-            val result = getAllDateRechangeUseCase()
-
-            // Then
-            //assert(result.isEmpty())
-            result.collect { rechanges ->
-                //assertEquals(rechanges, emptyList<RechangeModel>())
-                assertTrue(rechanges.isEmpty())
-            }
-            verify(repository, times(1)).listAllDateRechangeFromDataBase()
-        }
+        
+        verify(exactly = 1) { repository.listAllDateRechangeFromDataBase() }
     }
 }

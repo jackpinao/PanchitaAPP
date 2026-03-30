@@ -1,0 +1,41 @@
+package com.pinao.panchitaapp.domain.usecase.Auth
+
+import com.pinao.panchitaapp.domain.repository.AuthRepository
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+
+class IsUserLoggedInUseCaseTest {
+
+    private lateinit var useCase: IsUserLoggedInUseCase
+    private val repository: AuthRepository = mockk()
+
+    @Before
+    fun setup() {
+        useCase = IsUserLoggedInUseCase(repository)
+    }
+
+    @Test
+    fun `invoke should return true when repository says user is logged in`() {
+        every { repository.isUserLoggedIn() } returns true
+
+        val result = useCase()
+
+        assertTrue(result)
+        verify(exactly = 1) { repository.isUserLoggedIn() }
+    }
+
+    @Test
+    fun `invoke should return false when repository says user is not logged in`() {
+        every { repository.isUserLoggedIn() } returns false
+
+        val result = useCase()
+
+        assertFalse(result)
+        verify(exactly = 1) { repository.isUserLoggedIn() }
+    }
+}
