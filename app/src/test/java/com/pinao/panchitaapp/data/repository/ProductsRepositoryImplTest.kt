@@ -6,10 +6,13 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import com.pinao.panchitaapp.data.local.dao.BrandDao
 import com.pinao.panchitaapp.data.local.dao.CategoryDao
 import com.pinao.panchitaapp.data.local.dao.ProductDao
 import com.pinao.panchitaapp.data.local.entity.ProductsEntity
+import com.pinao.panchitaapp.domain.model.BrandModel
+import com.pinao.panchitaapp.domain.model.CategoryModel
 import com.pinao.panchitaapp.domain.model.ProductModel
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -35,7 +38,10 @@ class ProductsRepositoryImplTest {
     private val mockBrandDao: BrandDao = mockk(relaxed = true)
     private val mockFirestore: FirebaseFirestore = mockk(relaxed = true)
 
-    private val mockCollection: CollectionReference = mockk(relaxed = true)
+    // Creamos Mocks separados para cada colección para que no colisionen
+    private val mockCategoryCollection: CollectionReference = mockk(relaxed = true)
+    private val mockBrandCollection: CollectionReference = mockk(relaxed = true)
+    private val mockProductCollection: CollectionReference = mockk(relaxed = true)
     private val mockDocument: DocumentReference = mockk(relaxed = true)
 
     @Before
@@ -44,8 +50,13 @@ class ProductsRepositoryImplTest {
         every { Log.d(any(), any()) } returns 0
         every { Log.e(any(), any(), any()) } returns 0
 
-        every { mockFirestore.collection(any()) } returns mockCollection
-        every { mockCollection.document(any()) } returns mockDocument
+        // Asignamos explícitamente a Firestore qué colección debe devolver en el init del repositorio
+        every { mockFirestore.collection("category") } returns mockCategoryCollection
+        every { mockFirestore.collection("brand") } returns mockBrandCollection
+        every { mockFirestore.collection("product") } returns mockProductCollection
+
+        // Todo lo que sea "product".document(...) devuelve el mockDocument
+        every { mockProductCollection.document(any()) } returns mockDocument
 
         repository = ProductsRepositoryImpl(mockProductDao, mockCategoryDao, mockBrandDao, mockFirestore)
     }
@@ -70,6 +81,27 @@ class ProductsRepositoryImplTest {
             val items = awaitItem()
             assertEquals(1, items.size)
             assertEquals("p1", items[0].productId)
+            assertEquals("Prod1", items[0].name)
+            
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+    
+    @Test
+    fun `searchProducts should return mapped flow based on query`() = runTest {
+        val query = "Prod"
+        val entities = listOf(
+            ProductsEntity(
+                productId = "p1", storeId = "s1", categoryId = "c1", brandId = "b1", detailTicketEntityId = "d1",
+                name = "Prod1", description = "Desc1", priceBuy = 10.0, priceSell = 15.0, priceExcludingIGV = 12.0,
+                stockQuantity = 100.0, stockMin = 5.0, barcode = "111", image = "img", lastUpdated = "date", isSynced = 1
+            )
+        )
+        every { mockProductDao.searchProducts(query) } returns flowOf(entities)
+
+        repository.searchProducts(query).test {
+            val items = awaitItem()
+            assertEquals(1, items.size)
             assertEquals("Prod1", items[0].name)
             
             cancelAndIgnoreRemainingEvents()
@@ -112,7 +144,6 @@ class ProductsRepositoryImplTest {
             image = "img", stockQuantity = 10.0, barcode = "333", lastUpdated = "date", stockMin = 5.0, isSynced = false
         )
         
-        // Simular éxito en Firebase
         every { mockDocument.set(model) } returns Tasks.forResult(null)
 
         repository.saveProduct(model)
@@ -134,7 +165,6 @@ class ProductsRepositoryImplTest {
             image = "img", stockQuantity = 10.0, barcode = "444", lastUpdated = "date", stockMin = 5.0, isSynced = true
         )
         
-        // Simular fallo en Firebase
         every { mockDocument.set(model) } returns Tasks.forException(Exception("Network error"))
 
         repository.saveProduct(model)
@@ -157,5 +187,106 @@ class ProductsRepositoryImplTest {
 
         coVerify(exactly = 1) { mockDocument.delete() }
         coVerify(exactly = 1) { mockProductDao.deleteProduct(any()) }
+    }
+    
+    @Test
+    fun `deleteProduct should delete from Room even if Firestore fails`() = runTest {
+        val model = ProductModel(productId = "p6", name = "Prod6")
+        every { mockDocument.delete() } returns Tasks.forException(Exception("Network error"))
+
+        repository.deleteProduct(model)
+
+        coVerify(exactly = 1) { mockDocument.delete() }
+        coVerify(exactly = 1) { mockProductDao.deleteProduct(any()) }
+    }
+
+    @Test
+    fun `syncUnsyncedProducts should sync and update local database`() = runTest {
+        val entityUnsynced = ProductsEntity(
+            productId = "pUnsynced", storeId = "s1", categoryId = "c1", brandId = "b1", detailTicketEntityId = "d1",
+            name = "ProdUnsynced", description = "Desc", priceBuy = 10.0, priceSell = 15.0, priceExcludingIGV = 12.0,
+            stockQuantity = 100.0, stockMin = 5.0, barcode = "111", image = "img", lastUpdated = "date", isSynced = 0
+        )
+        
+        coEvery { mockProductDao.getUnsyncedProducts() } returns listOf(entityUnsynced)
+        every { mockDocument.set(any()) } returns Tasks.forResult(null)
+        
+        repository.syncUnsyncedProducts()
+        
+        coVerify(exactly = 1) { mockProductDao.getUnsyncedProducts() }
+        coVerify(exactly = 1) { mockDocument.set(any()) }
+        coVerify(exactly = 1) { mockProductDao.insertProduct(withArg {
+            assertEquals("pUnsynced", it.productId)
+            assertEquals(1, it.isSynced) // Confirmamos que lo vuelve true
+        }) }
+    }
+    
+    @Test
+    fun `syncUnsyncedProducts should do nothing if no unsynced products`() = runTest {
+        coEvery { mockProductDao.getUnsyncedProducts() } returns emptyList()
+        
+        repository.syncUnsyncedProducts()
+        
+        coVerify(exactly = 1) { mockProductDao.getUnsyncedProducts() }
+        coVerify(exactly = 0) { mockDocument.set(any()) }
+        coVerify(exactly = 0) { mockProductDao.insertProduct(any()) }
+    }
+
+    @Test
+    fun `refreshProductsFromRemote should download categories, brands and products and update Room`() = runTest {
+        // Arrange
+        val remoteCategories = listOf(CategoryModel("cat1", name = "Cat 1"))
+        val mockCategorySnapshot: QuerySnapshot = mockk()
+        every { mockCategorySnapshot.toObjects(CategoryModel::class.java) } returns remoteCategories
+        
+        val remoteBrands = listOf(BrandModel("brand1", name = "Brand 1"))
+        val mockBrandSnapshot: QuerySnapshot = mockk()
+        every { mockBrandSnapshot.toObjects(BrandModel::class.java) } returns remoteBrands
+        
+        val remoteProducts = listOf(
+            ProductModel(productId = "pRemote1", categoryId = "cat1", brandId = "brand1", name = "Remote Prod")
+        )
+        val mockProductSnapshot: QuerySnapshot = mockk()
+        every { mockProductSnapshot.toObjects(ProductModel::class.java) } returns remoteProducts
+
+        // Aplicamos el Task sobre las colecciones separadas, no el general
+        every { mockCategoryCollection.get() } returns Tasks.forResult(mockCategorySnapshot)
+        every { mockBrandCollection.get() } returns Tasks.forResult(mockBrandSnapshot)
+        every { mockProductCollection.get() } returns Tasks.forResult(mockProductSnapshot)
+        
+        // Act
+        repository.refreshProductsFromRemote()
+        
+        // Assert
+        coVerify(exactly = 1) { mockCategoryDao.insertCategory(withArg { assertEquals("cat1", it.categoryId) }) }
+        coVerify(exactly = 1) { mockBrandDao.upsertAll(withArg { assertEquals("brand1", it.brandId) }) }
+        coVerify(exactly = 1) { mockProductDao.deleteProductsNotInList(listOf("pRemote1")) }
+        coVerify(exactly = 1) { mockProductDao.insertProduct(withArg { 
+            assertEquals("pRemote1", it.productId) 
+            assertEquals(1, it.isSynced)
+        }) }
+    }
+    
+    @Test
+    fun `refreshProductsFromRemote should clear room database if remote product list is empty`() = runTest {
+        val mockCategorySnapshot: QuerySnapshot = mockk()
+        every { mockCategorySnapshot.toObjects(CategoryModel::class.java) } returns emptyList()
+        
+        val mockBrandSnapshot: QuerySnapshot = mockk()
+        every { mockBrandSnapshot.toObjects(BrandModel::class.java) } returns emptyList()
+        
+        val mockProductSnapshot: QuerySnapshot = mockk()
+        every { mockProductSnapshot.toObjects(ProductModel::class.java) } returns emptyList()
+
+        every { mockCategoryCollection.get() } returns Tasks.forResult(mockCategorySnapshot)
+        every { mockBrandCollection.get() } returns Tasks.forResult(mockBrandSnapshot)
+        every { mockProductCollection.get() } returns Tasks.forResult(mockProductSnapshot)
+        
+        // Act
+        repository.refreshProductsFromRemote()
+        
+        // Assert
+        coVerify(exactly = 1) { mockProductDao.deleteAllProducts() }
+        coVerify(exactly = 0) { mockProductDao.deleteProductsNotInList(any()) }
     }
 }

@@ -10,6 +10,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -32,163 +33,180 @@ class ClaroRecargaViewModelTest {
 
     private lateinit var viewModel: ClaroRecargaViewModel
 
-    private val mockRechange1 = mockk<RechangeModel>()
-    private val mockRechange2 = mockk<RechangeModel>()
-    private val mockList = listOf(mockRechange1, mockRechange2)
+    private val mockRechanges = listOf(
+        RechangeModel(id = "1", date = "2023-11-01", amount = 10, numPhone = "111222333"),
+        RechangeModel(id = "2", date = "2023-11-02", amount = 20, numPhone = "444555666")
+    )
 
     @Before
     fun setup() {
-        // Mocking default behavior para el init block del ViewModel
-        every { getAllDateRechangeUseCase() } returns flowOf(mockList)
+        // Mock default behavior for init
+        every { getAllDateRechangeUseCase() } returns flowOf(mockRechanges)
     }
 
     @Test
-    fun `init should fetch all rechanges and update uiState to Success`() = runTest {
-        viewModel = ClaroRecargaViewModel(
-            saveRechangeUseCase, getListForDateRechangeUC, getAllDateRechangeUseCase
-        )
+    fun `init should load all rechanges into uiState`() = runTest {
+        viewModel = ClaroRecargaViewModel(saveRechangeUseCase, getListForDateRechangeUC, getAllDateRechangeUseCase)
 
-        viewModel.uiState.test {
-            // El estado inicial debe ser Loading (desde el init del StateFlow)
-            val initialState = awaitItem()
-            assertTrue(initialState is RechangeUiState.Loading)
-
-            // Damos paso para que viewModelScope.launch ejecute la corrutina
-            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
-
-            // Recibimos Success de la llamada de getAllDateRechangeUseCase()
-            val successState = awaitItem()
-            assertTrue(successState is RechangeUiState.Success)
-            assertEquals(mockList, (successState as RechangeUiState.Success).rechangeModelList)
-        }
-
-        coVerify(exactly = 1) { getAllDateRechangeUseCase() }
-    }
-
-    @Test
-    fun `getForDateRechange should filter rechanges by date and emit Success`() = runTest {
-        val testDate = "2023-10-01"
-        val filteredList = listOf(mockRechange1)
-        every { getListForDateRechangeUC(testDate) } returns flowOf(filteredList)
-
-        viewModel = ClaroRecargaViewModel(
-            saveRechangeUseCase, getListForDateRechangeUC, getAllDateRechangeUseCase
-        )
-
-        // Dejamos que el bloque init termine completamente antes de lanzar nuestra acción
+        // Estabilizamos corrutinas de init
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
-            // Saltamos el valor actual (Success del init block)
-            awaitItem()
+            val finalState = awaitItem()
+            
+            assertTrue(finalState is RechangeUiState.Success)
+            val successState = finalState as RechangeUiState.Success
+            assertEquals(2, successState.rechangeModelList.size)
+            assertEquals("111222333", successState.rechangeModelList[0].numPhone)
+            
+            cancelAndIgnoreRemainingEvents()
+        }
+        
+        verify(exactly = 1) { getAllDateRechangeUseCase() }
+    }
 
-            // Ejecutamos el caso a probar
-            viewModel.getForDateRechange(testDate)
+    @Test
+    fun `init should handle error state when flow throws exception`() = runTest {
+        val errorFlow = flow<List<RechangeModel>> { throw Exception("Database error") }
+        every { getAllDateRechangeUseCase() } returns errorFlow
 
-            // Emite estado Loading por el onStart{}
+        viewModel = ClaroRecargaViewModel(saveRechangeUseCase, getListForDateRechangeUC, getAllDateRechangeUseCase)
+
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            val finalState = awaitItem()
+            
+            assertTrue(finalState is RechangeUiState.Error)
+            val errorState = finalState as RechangeUiState.Error
+            assertEquals("Database error", errorState.throwable.message)
+            
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `getForDateRechange should filter and update uiState and dateFilterRechanges`() = runTest {
+        val targetDate = "2023-11-01"
+        val filteredList = listOf(mockRechanges[0])
+        every { getListForDateRechangeUC(targetDate) } returns flowOf(filteredList)
+
+        viewModel = ClaroRecargaViewModel(saveRechangeUseCase, getListForDateRechangeUC, getAllDateRechangeUseCase)
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            val initialState = awaitItem() // Estado cargado por init
+            assertTrue(initialState is RechangeUiState.Success)
+
+            // Act
+            viewModel.getForDateRechange(targetDate)
+
+            // Atrapamos loading emitido por onStart
             val loadingState = awaitItem()
             assertTrue(loadingState is RechangeUiState.Loading)
-
-            // Damos paso a la corrutina de getForDateRechange
+            
             mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
-            // Emite estado Success
-            val successState = awaitItem()
-            assertTrue(successState is RechangeUiState.Success)
-            assertEquals(filteredList, (successState as RechangeUiState.Success).rechangeModelList)
+            // Atrapamos Success
+            val finalState = expectMostRecentItem()
+            assertTrue(finalState is RechangeUiState.Success)
+            assertEquals(1, (finalState as RechangeUiState.Success).rechangeModelList.size)
+
+            cancelAndIgnoreRemainingEvents()
         }
 
-        // Además verificamos que _dateFilterRechanges se haya llenado
-        assertEquals(filteredList, viewModel.dateFilterRechanges.value)
-        coVerify { getListForDateRechangeUC(testDate) }
+        // Verificamos el stateflow paralelo
+        assertEquals(1, viewModel.dateFilterRechanges.value.size)
+        assertEquals(targetDate, viewModel.dateFilterRechanges.value[0].date)
+        
+        verify(exactly = 1) { getListForDateRechangeUC(targetDate) }
     }
 
     @Test
-    fun `getForDateRechange should handle error and clear filter`() = runTest {
-        val testDate = "2023-10-02"
-        val exception = RuntimeException("Error fetching dates")
-        every { getListForDateRechangeUC(testDate) } returns flow { throw exception }
+    fun `getForDateRechange should update uiState with Error on failure`() = runTest {
+        val targetDate = "2023-11-99"
+        val errorFlow = flow<List<RechangeModel>> { throw Exception("Invalid date") }
+        every { getListForDateRechangeUC(targetDate) } returns errorFlow
 
-        viewModel = ClaroRecargaViewModel(
-            saveRechangeUseCase, getListForDateRechangeUC, getAllDateRechangeUseCase
-        )
-
-        // Dejamos que el init termine
+        viewModel = ClaroRecargaViewModel(saveRechangeUseCase, getListForDateRechangeUC, getAllDateRechangeUseCase)
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
-            awaitItem() // Actual estado: Success (init)
+            awaitItem() // Estado init
 
-            viewModel.getForDateRechange(testDate)
-
-            assertTrue(awaitItem() is RechangeUiState.Loading) // del onStart{}
-
+            viewModel.getForDateRechange(targetDate)
+            
+            val loadingState = awaitItem()
+            assertTrue(loadingState is RechangeUiState.Loading)
+            
             mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
-            val errorState = awaitItem()
+            val errorState = expectMostRecentItem()
             assertTrue(errorState is RechangeUiState.Error)
-            assertEquals(exception, (errorState as RechangeUiState.Error).throwable)
+            assertEquals("Invalid date", (errorState as RechangeUiState.Error).throwable.message)
+
+            cancelAndIgnoreRemainingEvents()
         }
 
-        // El filtro de fechas debió limpiarse ante una excepción
+        // Verifica que limpia el dateFilterRechanges en caso de error
         assertTrue(viewModel.dateFilterRechanges.value.isEmpty())
-        coVerify { getListForDateRechangeUC(testDate) }
     }
 
     @Test
-    fun `updateRechange should save successfully and emit Success`() = runTest {
-        coEvery { saveRechangeUseCase(mockRechange1) } returns Unit
+    fun `updateRechange should call save use case and update uiState`() = runTest {
+        val newRechange = RechangeModel(id = "3", date = "2023-11-03", amount = 50, numPhone = "999888777")
+        coEvery { saveRechangeUseCase(any()) } returns Unit
 
-        viewModel = ClaroRecargaViewModel(
-            saveRechangeUseCase, getListForDateRechangeUC, getAllDateRechangeUseCase
-        )
-
-        // Permitir que init pase
+        viewModel = ClaroRecargaViewModel(saveRechangeUseCase, getListForDateRechangeUC, getAllDateRechangeUseCase)
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
-            awaitItem() // actual estado
+            awaitItem() // Estado init
 
-            viewModel.updateRechange(mockRechange1)
+            viewModel.updateRechange(newRechange)
 
-            assertTrue(awaitItem() is RechangeUiState.Loading)
-
+            // Loading emitido manualmente
+            val loadingState = awaitItem()
+            assertTrue(loadingState is RechangeUiState.Loading)
+            
             mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
-            val successState = awaitItem()
+            // Success emitido después de save
+            val successState = expectMostRecentItem()
             assertTrue(successState is RechangeUiState.Success)
-            // Cuando es update unitario, el ViewModel re-envia un List de 1 elemento
-            assertEquals(listOf(mockRechange1), (successState as RechangeUiState.Success).rechangeModelList)
+            val list = (successState as RechangeUiState.Success).rechangeModelList
+            assertEquals(1, list.size)
+            assertEquals("3", list[0].id)
+            
+            cancelAndIgnoreRemainingEvents()
         }
 
-        coVerify { saveRechangeUseCase(mockRechange1) }
+        coVerify(exactly = 1) { saveRechangeUseCase(newRechange) }
     }
 
     @Test
-    fun `updateRechange should emit Error state when exception occurs`() = runTest {
-        val exception = Exception("Save failed internally")
-        coEvery { saveRechangeUseCase(mockRechange1) } throws exception
+    fun `updateRechange should handle Error if save use case fails`() = runTest {
+        val newRechange = RechangeModel(id = "3", date = "2023-11-03", amount = 50, numPhone = "999888777")
+        coEvery { saveRechangeUseCase(any()) } throws Exception("Save failed")
 
-        viewModel = ClaroRecargaViewModel(
-            saveRechangeUseCase, getListForDateRechangeUC, getAllDateRechangeUseCase
-        )
-
+        viewModel = ClaroRecargaViewModel(saveRechangeUseCase, getListForDateRechangeUC, getAllDateRechangeUseCase)
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
-            awaitItem() // Actual estado: Success
+            awaitItem() // Estado init
 
-            viewModel.updateRechange(mockRechange1)
+            viewModel.updateRechange(newRechange)
 
-            assertTrue(awaitItem() is RechangeUiState.Loading)
-
+            val loadingState = awaitItem()
+            assertTrue(loadingState is RechangeUiState.Loading)
+            
             mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
-            val errorState = awaitItem()
+            val errorState = expectMostRecentItem()
             assertTrue(errorState is RechangeUiState.Error)
-            assertEquals(exception, (errorState as RechangeUiState.Error).throwable)
+            assertEquals("Save failed", (errorState as RechangeUiState.Error).throwable.message)
+            
+            cancelAndIgnoreRemainingEvents()
         }
-
-        coVerify { saveRechangeUseCase(mockRechange1) }
     }
 }

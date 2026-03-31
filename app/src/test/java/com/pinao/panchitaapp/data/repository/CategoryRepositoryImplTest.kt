@@ -70,6 +70,40 @@ class CategoryRepositoryImplTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+    
+    @Test
+    fun `refreshCategoriesFromRemote should download categories from Firestore and update Room`() = runTest {
+        // Arrange
+        val remoteCategories = listOf(
+            CategoryModel("cat1", name = "Cat 1"),
+            CategoryModel("cat2", name = "Cat 2")
+        )
+        val mockQuerySnapshot: QuerySnapshot = mockk()
+        every { mockQuerySnapshot.toObjects(CategoryModel::class.java) } returns remoteCategories
+        
+        every { mockCollection.get() } returns Tasks.forResult(mockQuerySnapshot)
+        
+        coEvery { mockDao.insertCategory(any()) } returns 1L
+
+        // Act
+        repository.refreshCategoriesFromRemote()
+        
+        // Assert
+        coVerify(exactly = 1) { mockCollection.get() }
+        coVerify(exactly = 2) { mockDao.insertCategory(any()) }
+    }
+    
+    @Test
+    fun `refreshCategoriesFromRemote should catch Exception if Firestore fails`() = runTest {
+        // Arrange
+        every { mockCollection.get() } returns Tasks.forException(Exception("Network error"))
+
+        // Act
+        repository.refreshCategoriesFromRemote()
+        
+        // Assert
+        coVerify(exactly = 0) { mockDao.insertCategory(any()) }
+    }
 
     @Test
     fun `findCodeCategory should return mapped category from Dao`() = runTest {
@@ -99,7 +133,6 @@ class CategoryRepositoryImplTest {
     fun `saveCategory should save in Firestore and Room`() = runTest {
         val model = CategoryModel("cat1", "store1", "Carnes", 15.0, true)
 
-        // Mockeamos la tarea de Firestore usando la utilidad nativa Tasks de Google
         val mockTask = Tasks.forResult<Void>(null)
         every { mockDocument.set(model) } returns mockTask
 
@@ -114,6 +147,19 @@ class CategoryRepositoryImplTest {
                 assertEquals("Carnes", entity.name)
             })
         }
+    }
+    
+    @Test
+    fun `saveCategory should catch Exception if Firestore fails`() = runTest {
+        val model = CategoryModel("cat1", "store1", "Carnes", 15.0, true)
+
+        every { mockDocument.set(model) } returns Tasks.forException(Exception("Firestore locked"))
+
+        repository.saveCategory(model)
+
+        coVerify(exactly = 1) { mockDocument.set(model) }
+        // Si Firestore falla, actualmente no llega a ejecutar Room (por el try/catch que engloba a ambos)
+        coVerify(exactly = 0) { mockDao.insertCategory(any()) }
     }
 
     @Test
@@ -133,5 +179,17 @@ class CategoryRepositoryImplTest {
                 assertEquals("cat_to_delete", entity.categoryId)
             }) 
         }
+    }
+    
+    @Test
+    fun `deleteCategory should catch Exception if Firestore fails`() = runTest {
+        val model = CategoryModel("cat_to_delete", "store1", "Borrar", 0.0, true)
+
+        every { mockDocument.delete() } returns Tasks.forException(Exception("Delete failed"))
+
+        repository.deleteCategory(model)
+
+        coVerify(exactly = 1) { mockDocument.delete() }
+        coVerify(exactly = 0) { mockDao.deleteCategory(any()) }
     }
 }
