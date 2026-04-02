@@ -2,8 +2,8 @@ package com.pinao.panchitaapp.data.repository
 
 import android.util.Log
 import app.cash.turbine.test
-import com.pinao.panchitaapp.data.local.dao.BrandDao
-import com.pinao.panchitaapp.data.local.entity.BrandEntity
+import com.pinao.panchitaapp.data.source.local.dao.BrandDao
+import com.pinao.panchitaapp.data.source.local.entity.BrandEntity
 import com.pinao.panchitaapp.domain.model.BrandModel
 import io.mockk.coEvery
 import io.mockk.coVerify

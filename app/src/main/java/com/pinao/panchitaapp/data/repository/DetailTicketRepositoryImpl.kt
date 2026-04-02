@@ -2,7 +2,7 @@ package com.pinao.panchitaapp.data.repository
 
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
-import com.pinao.panchitaapp.data.local.dao.SaleDetailDao
+import com.pinao.panchitaapp.data.source.local.dao.SaleDetailDao
 import com.pinao.panchitaapp.data.mapper.SaleDetailMapper
 import com.pinao.panchitaapp.domain.model.SaleDetailModel
 import com.pinao.panchitaapp.domain.repository.DetailTicketRepository

@@ -1,8 +1,8 @@
 package com.pinao.panchitaapp.data.repository
 
 import app.cash.turbine.test
-import com.pinao.panchitaapp.data.local.dao.UserDao
-import com.pinao.panchitaapp.data.local.entity.UserEntity
+import com.pinao.panchitaapp.data.source.local.dao.UserDao
+import com.pinao.panchitaapp.data.source.local.entity.UserEntity
 import com.pinao.panchitaapp.domain.model.UserModel
 import io.mockk.coEvery
 import io.mockk.coVerify

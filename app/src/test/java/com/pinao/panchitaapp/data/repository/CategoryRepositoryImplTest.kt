@@ -2,13 +2,10 @@ package com.pinao.panchitaapp.data.repository
 
 import android.util.Log
 import app.cash.turbine.test
-import com.google.android.gms.tasks.Tasks
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
-import com.pinao.panchitaapp.data.local.dao.CategoryDao
-import com.pinao.panchitaapp.data.local.entity.CategoryEntity
+import com.google.common.truth.Truth.assertThat
+import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
+import com.pinao.panchitaapp.data.source.local.entity.CategoryEntity
+import com.pinao.panchitaapp.data.source.remote.RemoteDataSource
 import com.pinao.panchitaapp.domain.model.CategoryModel
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -29,10 +26,8 @@ import org.junit.Test
 class CategoryRepositoryImplTest {
 
     private lateinit var repository: CategoryRepositoryImpl
-    private val mockDao: CategoryDao = mockk(relaxed = true)
-    private val mockFirestore: FirebaseFirestore = mockk()
-    private val mockCollection: CollectionReference = mockk()
-    private val mockDocument: DocumentReference = mockk()
+    private val mockDao: CategoryDao = mockk(relaxUnitFun = true)
+    private val mockRemoteDataSource: RemoteDataSource = mockk(relaxed = true)
 
     @Before
     fun setup() {
@@ -40,10 +35,10 @@ class CategoryRepositoryImplTest {
         every { Log.d(any(), any()) } returns 0
         every { Log.e(any(), any(), any()) } returns 0
 
-        every { mockFirestore.collection("category") } returns mockCollection
-        every { mockCollection.document(any()) } returns mockDocument
-
-        repository = CategoryRepositoryImpl(mockDao, mockFirestore)
+        repository = CategoryRepositoryImpl(
+            categoryDao = mockDao,
+            remoteDataSource = mockRemoteDataSource
+        )
     }
 
     @After
@@ -66,41 +61,41 @@ class CategoryRepositoryImplTest {
             assertEquals(true, models[0].isSynced)
             assertEquals("Dulces", models[1].name)
             assertEquals(false, models[1].isSynced)
-            
+
             cancelAndIgnoreRemainingEvents()
         }
     }
-    
-    @Test
-    fun `refreshCategoriesFromRemote should download categories from Firestore and update Room`() = runTest {
-        // Arrange
-        val remoteCategories = listOf(
-            CategoryModel("cat1", name = "Cat 1"),
-            CategoryModel("cat2", name = "Cat 2")
-        )
-        val mockQuerySnapshot: QuerySnapshot = mockk()
-        every { mockQuerySnapshot.toObjects(CategoryModel::class.java) } returns remoteCategories
-        
-        every { mockCollection.get() } returns Tasks.forResult(mockQuerySnapshot)
-        
-        coEvery { mockDao.insertCategory(any()) } returns 1L
 
-        // Act
-        repository.refreshCategoriesFromRemote()
-        
-        // Assert
-        coVerify(exactly = 1) { mockCollection.get() }
-        coVerify(exactly = 2) { mockDao.insertCategory(any()) }
-    }
-    
+    @Test
+    fun `refreshCategoriesFromRemote should download categories from Firestore and update Room`() =
+        runTest {
+            // Arrange
+            val remoteCategories = listOf(
+                CategoryModel("cat1", name = "Cat 1"),
+                CategoryModel("cat2", name = "Cat 2")
+            )
+            coEvery { mockRemoteDataSource.categoryRemoteDataSource.getCategories() } returns remoteCategories
+            coEvery { mockDao.insertCategory(any()) } returns 1L
+
+            // Act
+            repository.refreshCategoriesFromRemote()
+
+            // Assert
+            coVerify(exactly = 1) { mockRemoteDataSource.categoryRemoteDataSource.getCategories() }
+            
+            // Verificamos los insert individualmente usando match en lugar de withArg para evitar AssertionErrors internos de MockK
+            coVerify(exactly = 1) { mockDao.insertCategory(match { it.categoryId == "cat1" }) }
+            coVerify(exactly = 1) { mockDao.insertCategory(match { it.categoryId == "cat2" }) }
+        }
+
     @Test
     fun `refreshCategoriesFromRemote should catch Exception if Firestore fails`() = runTest {
         // Arrange
-        every { mockCollection.get() } returns Tasks.forException(Exception("Network error"))
+        coEvery { mockRemoteDataSource.categoryRemoteDataSource.getCategories() } throws Exception("Firestore locked")
 
         // Act
         repository.refreshCategoriesFromRemote()
-        
+
         // Assert
         coVerify(exactly = 0) { mockDao.insertCategory(any()) }
     }
@@ -114,7 +109,7 @@ class CategoryRepositoryImplTest {
             val model = awaitItem()
             assertEquals("cat_code", model?.categoryId)
             assertEquals("Bebidas", model?.name)
-            
+
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -133,63 +128,50 @@ class CategoryRepositoryImplTest {
     fun `saveCategory should save in Firestore and Room`() = runTest {
         val model = CategoryModel("cat1", "store1", "Carnes", 15.0, true)
 
-        val mockTask = Tasks.forResult<Void>(null)
-        every { mockDocument.set(model) } returns mockTask
-
-        coEvery { mockDao.insertCategory(any()) } returns 1L // Room insert
+        coEvery { mockRemoteDataSource.categoryRemoteDataSource.saveCategory(any()) } returns true
+        coEvery { mockDao.insertCategory(any()) } returns 1L
 
         repository.saveCategory(model)
 
-        coVerify(exactly = 1) { mockDocument.set(model) }
-        coVerify(exactly = 1) { 
-            mockDao.insertCategory(withArg { entity -> 
-                assertEquals("cat1", entity.categoryId)
-                assertEquals("Carnes", entity.name)
-            })
-        }
+        coVerify(exactly = 1) { mockRemoteDataSource.categoryRemoteDataSource.saveCategory(any()) }
+        coVerify(exactly = 1) { mockDao.insertCategory(match { it.categoryId == "cat1" && it.name == "Carnes" && it.isSynced == 1 }) }
     }
-    
+
     @Test
     fun `saveCategory should catch Exception if Firestore fails`() = runTest {
         val model = CategoryModel("cat1", "store1", "Carnes", 15.0, true)
 
-        every { mockDocument.set(model) } returns Tasks.forException(Exception("Firestore locked"))
+        coEvery { mockRemoteDataSource.categoryRemoteDataSource.saveCategory(any()) } returns false
+        coEvery { mockDao.insertCategory(any()) } returns 1L
 
         repository.saveCategory(model)
 
-        coVerify(exactly = 1) { mockDocument.set(model) }
-        // Si Firestore falla, actualmente no llega a ejecutar Room (por el try/catch que engloba a ambos)
-        coVerify(exactly = 0) { mockDao.insertCategory(any()) }
+        coVerify(exactly = 1) { mockRemoteDataSource.categoryRemoteDataSource.saveCategory(any()) }
+        coVerify(exactly = 1) { mockDao.insertCategory(match { it.categoryId == "cat1" && it.isSynced == 0 }) }
     }
 
     @Test
     fun `deleteCategory should delete from Firestore and Room`() = runTest {
         val model = CategoryModel("cat_to_delete", "store1", "Borrar", 0.0, true)
 
-        val mockTask = Tasks.forResult<Void>(null)
-        every { mockDocument.delete() } returns mockTask
-        
+        coEvery { mockRemoteDataSource.categoryRemoteDataSource.deleteCategory(any()) } returns true
         coEvery { mockDao.deleteCategory(any()) } returns Unit
 
         repository.deleteCategory(model)
 
-        coVerify(exactly = 1) { mockDocument.delete() }
-        coVerify(exactly = 1) { 
-            mockDao.deleteCategory(withArg { entity -> 
-                assertEquals("cat_to_delete", entity.categoryId)
-            }) 
-        }
+        coVerify(exactly = 1) { mockRemoteDataSource.categoryRemoteDataSource.deleteCategory(any()) }
+        coVerify(exactly = 1) { mockDao.deleteCategory(match { it.categoryId == "cat_to_delete" }) }
     }
-    
+
     @Test
     fun `deleteCategory should catch Exception if Firestore fails`() = runTest {
         val model = CategoryModel("cat_to_delete", "store1", "Borrar", 0.0, true)
 
-        every { mockDocument.delete() } returns Tasks.forException(Exception("Delete failed"))
+        coEvery { mockRemoteDataSource.categoryRemoteDataSource.deleteCategory(any()) } returns false
 
         repository.deleteCategory(model)
 
-        coVerify(exactly = 1) { mockDocument.delete() }
+        coVerify(exactly = 1) { mockRemoteDataSource.categoryRemoteDataSource.deleteCategory(any()) }
         coVerify(exactly = 0) { mockDao.deleteCategory(any()) }
     }
 }

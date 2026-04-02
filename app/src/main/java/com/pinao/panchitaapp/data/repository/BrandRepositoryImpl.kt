@@ -1,7 +1,7 @@
 package com.pinao.panchitaapp.data.repository
 
 import android.util.Log
-import com.pinao.panchitaapp.data.local.dao.BrandDao
+import com.pinao.panchitaapp.data.source.local.dao.BrandDao
 import com.pinao.panchitaapp.data.mapper.BrandMapper
 import com.pinao.panchitaapp.domain.model.BrandModel
 import com.pinao.panchitaapp.domain.repository.BrandRepository

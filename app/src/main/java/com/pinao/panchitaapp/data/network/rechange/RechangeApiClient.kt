@@ -1,7 +1,6 @@
 package com.pinao.panchitaapp.data.network.rechange
 
-import com.pinao.panchitaapp.data.local.entity.RechangeEntity
-import com.pinao.panchitaapp.domain.model.RechangeModel
+import com.pinao.panchitaapp.data.source.local.entity.RechangeEntity
 import retrofit2.Response
 import retrofit2.http.GET
 

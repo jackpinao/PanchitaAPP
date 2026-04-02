@@ -1,10 +1,8 @@
 package com.pinao.panchitaapp.data.mapper
 
-import com.pinao.panchitaapp.data.local.entity.ClientEntity
+import com.pinao.panchitaapp.data.source.local.entity.ClientEntity
 import com.pinao.panchitaapp.domain.model.ClientModel
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ClientMapperTest {

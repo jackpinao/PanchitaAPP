@@ -6,10 +6,9 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.pinao.panchitaapp.data.local.dao.SaleDetailDao
-import com.pinao.panchitaapp.data.local.entity.SaleDetailEntity
+import com.pinao.panchitaapp.data.source.local.dao.SaleDetailDao
+import com.pinao.panchitaapp.data.source.local.entity.SaleDetailEntity
 import com.pinao.panchitaapp.domain.model.SaleDetailModel
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk

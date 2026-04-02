@@ -2,8 +2,9 @@ package com.pinao.panchitaapp.data.repository
 
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
-import com.pinao.panchitaapp.data.local.dao.CategoryDao
+import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
 import com.pinao.panchitaapp.data.mapper.CategoryMapper
+import com.pinao.panchitaapp.data.source.remote.RemoteDataSource
 import com.pinao.panchitaapp.domain.model.CategoryModel
 import com.pinao.panchitaapp.domain.repository.CategoryRepository
 import kotlinx.coroutines.Dispatchers
@@ -14,10 +15,8 @@ import kotlinx.coroutines.withContext
 
 class CategoryRepositoryImpl(
     private val categoryDao: CategoryDao,
-    private val firestore: FirebaseFirestore
+    private val remoteDataSource: RemoteDataSource
 ) : CategoryRepository {
-
-    private val categoriesCollection = firestore.collection("category")
 
     override fun getAllCategoriesFromDataBase(): Flow<List<CategoryModel>> {
         Log.d("CategoryRepositoryImpl", "Getting all categories from Room")
@@ -32,8 +31,7 @@ class CategoryRepositoryImpl(
         withContext(Dispatchers.IO) {
             try {
                 Log.d("CategoryRepositoryImpl", "Fetching categories from Firestore")
-                val snapshot = categoriesCollection.get().await()
-                val categories = snapshot.toObjects(CategoryModel::class.java)
+                val categories = remoteDataSource.categoryRemoteDataSource.getCategories()
                 Log.d("CategoryRepositoryImpl", "Got ${categories.size} categories from Firestore")
 
                 // Guardar las categorías obtenidas en Room
@@ -56,36 +54,26 @@ class CategoryRepositoryImpl(
 
     override suspend fun saveCategory(categoryModel: CategoryModel) {
         withContext(Dispatchers.IO) {
-            try {
-                Log.d("CategoryRepositoryImpl", "Saving category to Firestore: $categoryModel")
-                // 1. Guardar en Firestore
-                categoriesCollection.document(categoryModel.categoryId).set(categoryModel).await()
 
-                // 2. Guardar en Room
-                Log.d("CategoryRepositoryImpl", "Saving category to Room: $categoryModel")
+            var isSync = remoteDataSource.categoryRemoteDataSource.saveCategory(categoryModel)
+            if (isSync) {
+                categoryModel.isSynced = true
                 categoryDao.insertCategory(CategoryMapper.toDatabase(categoryModel))
-                Log.d("CategoryRepositoryImpl", "Category saved successfully in both sources")
-
-            } catch (e: Exception) {
-                Log.e("CategoryRepositoryImpl", "Error saving category", e)
+            } else{
+                categoryModel.isSynced = false
+                categoryDao.insertCategory(CategoryMapper.toDatabase(categoryModel))
+                Log.d("CategoryRepositoryImpl", "Error saving category to Firestore")
             }
         }
     }
 
     override suspend fun deleteCategory(categoryModel: CategoryModel) {
         withContext(Dispatchers.IO) {
-            try {
-                Log.d("CategoryRepositoryImpl", "Deleting category from Firestore: $categoryModel")
-                // 1. Borrar de Firestore
-                categoriesCollection.document(categoryModel.categoryId).delete().await()
-
-                // 2. Borrar de Room
-                Log.d("CategoryRepositoryImpl", "Deleting category from Room: $categoryModel")
+            val isDeleted = remoteDataSource.categoryRemoteDataSource.deleteCategory(categoryModel)
+            if (isDeleted) {
                 categoryDao.deleteCategory(CategoryMapper.toDatabase(categoryModel))
-                Log.d("CategoryRepositoryImpl", "Category deleted successfully from both sources")
-
-            } catch (e: Exception) {
-                Log.e("CategoryRepositoryImpl", "Error deleting category", e)
+            } else {
+                Log.d("CategoryRepositoryImpl", "Error deleting category from Firestore")
             }
         }
     }

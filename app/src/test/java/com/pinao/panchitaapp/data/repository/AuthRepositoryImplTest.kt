@@ -8,8 +8,7 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.pinao.panchitaapp.data.local.SessionManager
-import com.pinao.panchitaapp.domain.model.UserModel
+import com.pinao.panchitaapp.data.source.local.SessionManager
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

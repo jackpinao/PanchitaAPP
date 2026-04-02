@@ -4,10 +4,13 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.pinao.panchitaapp.data.local.database.AppDatabase
-import com.pinao.panchitaapp.data.local.entity.BrandEntity
-import com.pinao.panchitaapp.data.local.entity.CategoryEntity
-import com.pinao.panchitaapp.data.local.entity.ProductsEntity
+import com.pinao.panchitaapp.data.source.local.database.AppDatabase
+import com.pinao.panchitaapp.data.source.local.entity.BrandEntity
+import com.pinao.panchitaapp.data.source.local.entity.CategoryEntity
+import com.pinao.panchitaapp.data.source.local.dao.BrandDao
+import com.pinao.panchitaapp.data.source.local.entity.ProductsEntity
+import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
+import com.pinao.panchitaapp.data.source.local.dao.ProductDao
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After

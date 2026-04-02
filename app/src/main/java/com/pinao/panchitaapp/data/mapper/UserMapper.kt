@@ -1,6 +1,6 @@
 package com.pinao.panchitaapp.data.mapper
 
-import com.pinao.panchitaapp.data.local.entity.UserEntity
+import com.pinao.panchitaapp.data.source.local.entity.UserEntity
 import com.pinao.panchitaapp.domain.model.UserModel
 
 object UserMapper {

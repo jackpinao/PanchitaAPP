@@ -2,7 +2,7 @@ package com.pinao.panchitaapp.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.pinao.panchitaapp.data.local.SessionManager
+import com.pinao.panchitaapp.data.source.local.SessionManager
 import com.pinao.panchitaapp.domain.model.UserModel
 import com.pinao.panchitaapp.domain.repository.AuthRepository
 import kotlinx.coroutines.tasks.await

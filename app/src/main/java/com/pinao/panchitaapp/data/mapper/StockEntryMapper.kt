@@ -1,4 +1,4 @@
-import com.pinao.panchitaapp.data.local.entity.StockEntryEntity
+import com.pinao.panchitaapp.data.source.local.entity.StockEntryEntity
 import com.pinao.panchitaapp.domain.model.StockEntryModel
 
 /**

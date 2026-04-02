@@ -1,33 +1,26 @@
 package com.pinao.panchitaapp.data.repository
 
 import android.util.Log
-import com.google.firebase.firestore.FirebaseFirestore
-import com.pinao.panchitaapp.data.local.dao.BrandDao
-import com.pinao.panchitaapp.data.local.dao.CategoryDao
-import com.pinao.panchitaapp.data.local.dao.ProductDao
 import com.pinao.panchitaapp.data.mapper.BrandMapper
 import com.pinao.panchitaapp.data.mapper.CategoryMapper
 import com.pinao.panchitaapp.data.mapper.ProductMapper
-import com.pinao.panchitaapp.domain.model.BrandModel
-import com.pinao.panchitaapp.domain.model.CategoryModel
+import com.pinao.panchitaapp.data.source.local.dao.BrandDao
+import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
+import com.pinao.panchitaapp.data.source.local.dao.ProductDao
+import com.pinao.panchitaapp.data.source.remote.RemoteDataSource
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.repository.ProductRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 class ProductsRepositoryImpl(
     private val productDao: ProductDao,
     private val categoryDao: CategoryDao,
     private val brandDao: BrandDao,
-    private val firestore: FirebaseFirestore
+    private val remoteDataSource: RemoteDataSource
 ) : ProductRepository {
-
-    private val productsCollection = firestore.collection("product")
-    private val categoriesCollection = firestore.collection("category")
-    private val brandsCollection = firestore.collection("brand")
 
     override fun getAllProductsFromDataBase(): Flow<List<ProductModel>> {
         Log.d("ProductsRepositoryImpl", "Getting all products from Room")
@@ -45,24 +38,22 @@ class ProductsRepositoryImpl(
     override suspend fun refreshProductsFromRemote() {
         withContext(Dispatchers.IO) {
             try {
-                val categorySnapshot = categoriesCollection.get().await()
-                val categories = categorySnapshot.toObjects(CategoryModel::class.java)
+
+                val categories = remoteDataSource.categoryRemoteDataSource.getCategories()
                 val categoryIds = categories.map { it.categoryId }.toSet()
 
                 categories.forEach { categoryModel ->
                     categoryDao.insertCategory(CategoryMapper.toDatabase(categoryModel))
                 }
 
-                val brandSnapshot = brandsCollection.get().await()
-                val brands = brandSnapshot.toObjects(BrandModel::class.java)
+                val brands = remoteDataSource.brandRemoteDataSource.getBrands()
                 val brandIds = brands.map { it.brandId }.toSet()
 
                 brands.forEach { brandModel ->
                     brandDao.upsertAll(BrandMapper.toDatabase(brandModel))
                 }
 
-                val snapshot = productsCollection.get().await()
-                val remoteProducts = snapshot.toObjects(ProductModel::class.java)
+                val remoteProducts = remoteDataSource.productRemoteDataSource.getProducts()
 
                 if (remoteProducts.isEmpty()) {
                     productDao.deleteAllProducts()
@@ -95,15 +86,7 @@ class ProductsRepositoryImpl(
 
     override suspend fun saveProduct(productModel: ProductModel) {
         withContext(Dispatchers.IO) {
-            var isSynced = false
-            try {
-                // Try to save to Firestore
-                productsCollection.document(productModel.productId).set(productModel).await()
-                isSynced = true
-            } catch (e: Exception) {
-                Log.e("ProductsRepositoryImpl", "Error saving to Firestore, saving locally as unsynced", e)
-                isSynced = false
-            }
+            val isSynced = remoteDataSource.productRemoteDataSource.saveProduct(productModel)
 
             // Save to Room with the calculated sync status
             val productToSave = productModel.copy(isSynced = isSynced)
@@ -119,13 +102,21 @@ class ProductsRepositoryImpl(
 
                 unsyncedEntities.forEach { entity ->
                     val productModel = ProductMapper.toDomain(entity)
-                    try {
-                        productsCollection.document(productModel.productId).set(productModel).await()
-                        // Update local status to synced
+
+                    val isSynced =
+                        remoteDataSource.productRemoteDataSource.saveProduct(productModel)
+
+                    if (isSynced) {
                         productDao.insertProduct(ProductMapper.toDatabase(productModel.copy(isSynced = true)))
-                        Log.d("ProductsRepositoryImpl", "Product ${productModel.name} synced successfully")
-                    } catch (e: Exception) {
-                        Log.e("ProductsRepositoryImpl", "Failed to sync product ${productModel.name}", e)
+                        Log.d(
+                            "ProductsRepositoryImpl",
+                            "Product ${productModel.name} synced successfully"
+                        )
+                    } else {
+                        Log.w(
+                            "ProductsRepositoryImpl",
+                            "Failed to sync product ${productModel.name}",
+                        )
                     }
                 }
             } catch (e: Exception) {
@@ -136,13 +127,11 @@ class ProductsRepositoryImpl(
 
     override suspend fun deleteProduct(productModel: ProductModel) {
         withContext(Dispatchers.IO) {
-            try {
-                productsCollection.document(productModel.productId).delete().await()
+            val isDelete = remoteDataSource.productRemoteDataSource.deleteProduct(productModel)
+            if (isDelete) {
                 productDao.deleteProduct(ProductMapper.toDatabase(productModel))
-            } catch (e: Exception) {
-                Log.e("ProductsRepositoryImpl", "Error deleting product", e)
-                // If remote delete fails, we might still want to delete locally or mark for deletion
-                productDao.deleteProduct(ProductMapper.toDatabase(productModel))
+            } else {
+                Log.d("ProductsRepositoryImpl", "Error deleting product from Firestore")
             }
         }
     }

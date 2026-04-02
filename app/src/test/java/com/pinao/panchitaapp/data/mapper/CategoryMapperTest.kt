@@ -1,6 +1,6 @@
 package com.pinao.panchitaapp.data.mapper
 
-import com.pinao.panchitaapp.data.local.entity.CategoryEntity
+import com.pinao.panchitaapp.data.source.local.entity.CategoryEntity
 import com.pinao.panchitaapp.domain.model.CategoryModel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

@@ -1,6 +1,6 @@
 package com.pinao.panchitaapp.data.network.rechange
 
-import com.pinao.panchitaapp.data.local.entity.RechangeEntity
+import com.pinao.panchitaapp.data.source.local.entity.RechangeEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

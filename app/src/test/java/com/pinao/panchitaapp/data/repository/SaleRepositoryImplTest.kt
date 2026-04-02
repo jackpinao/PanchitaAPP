@@ -6,8 +6,8 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.WriteBatch
-import com.pinao.panchitaapp.data.local.dao.SaleDao
-import com.pinao.panchitaapp.data.local.dao.SaleDetailDao
+import com.pinao.panchitaapp.data.source.local.dao.SaleDao
+import com.pinao.panchitaapp.data.source.local.dao.SaleDetailDao
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.model.SaleModel
 import io.mockk.coEvery

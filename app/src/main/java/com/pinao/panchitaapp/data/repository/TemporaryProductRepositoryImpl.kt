@@ -1,6 +1,6 @@
 package com.pinao.panchitaapp.data.repository
 
-import com.pinao.panchitaapp.data.local.dao.TemporaryProductDao
+import com.pinao.panchitaapp.data.source.local.dao.TemporaryProductDao
 import com.pinao.panchitaapp.data.mapper.TemporaryProductMapper
 import com.pinao.panchitaapp.domain.model.TemporaryProductModel
 import com.pinao.panchitaapp.domain.repository.TemporaryProductRepository

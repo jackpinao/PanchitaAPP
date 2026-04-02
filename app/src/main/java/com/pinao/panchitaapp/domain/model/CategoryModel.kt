@@ -7,5 +7,5 @@ data class CategoryModel (
     val storeId: String = "",
     val name: String = "",
     val revenue: Double = 0.0,
-    val isSynced: Boolean = false
+    var isSynced: Boolean = false
 )
