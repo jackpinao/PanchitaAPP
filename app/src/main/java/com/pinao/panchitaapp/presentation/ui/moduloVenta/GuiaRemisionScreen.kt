@@ -195,7 +195,10 @@ fun GuiaRemisionContent(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             floatingActionButton = {
                 FloatingActionButton(onClick = onScanClick) {
-                    Icon(Icons.Default.QrCodeScanner, contentDescription = stringResource(R.string.add_product_title))
+                    Icon(
+                        Icons.Default.QrCodeScanner,
+                        contentDescription = stringResource(R.string.add_product_title)
+                    )
                 }
             },
             bottomBar = {
@@ -206,7 +209,11 @@ fun GuiaRemisionContent(
                         .padding(16.dp),
                     enabled = uiState.products.isNotEmpty() && !uiState.isLoading
                 ) {
-                    Text(if (uiState.isLoading) stringResource(R.string.processing_action) else stringResource(R.string.finish_sale_action))
+                    Text(
+                        if (uiState.isLoading) stringResource(R.string.processing_action) else stringResource(
+                            R.string.finish_sale_action
+                        )
+                    )
                 }
             }
         ) { padding ->
@@ -215,7 +222,11 @@ fun GuiaRemisionContent(
                     .padding(padding)
                     .padding(16.dp)
             ) {
-                Text(stringResource(R.string.minimarket_sale_title), fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    stringResource(R.string.minimarket_sale_title),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
 
                 OutlinedTextField(
                     value = uiState.clientName,
@@ -238,7 +249,11 @@ fun GuiaRemisionContent(
 
                 Spacer(modifier = Modifier.padding(12.dp))
 
-                Text(stringResource(R.string.cart_products_title), fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                Text(
+                    stringResource(R.string.cart_products_title),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium
+                )
 
                 OutlinedCard(
                     modifier = Modifier
@@ -276,7 +291,11 @@ fun GuiaRemisionContent(
                                 },
                                 trailingContent = {
                                     IconButton(onClick = { onRemoveProduct(product) }) {
-                                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_produdct), tint = Color.Red)
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            contentDescription = stringResource(R.string.delete_produdct),
+                                            tint = Color.Red
+                                        )
                                     }
                                 }
                             )
@@ -292,7 +311,7 @@ fun GuiaRemisionContent(
                                     .padding(16.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
-                              ) {
+                            ) {
                                 Text(
                                     stringResource(R.string.total_to_pay_label),
                                     fontSize = 18.sp,
@@ -345,7 +364,9 @@ fun AddProductQuantityDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    if (isEditing) stringResource(R.string.edit_quantity_title) else stringResource(R.string.add_to_cart_title),
+                    if (isEditing) stringResource(R.string.edit_quantity_title) else stringResource(
+                        R.string.add_to_cart_title
+                    ),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -367,7 +388,11 @@ fun AddProductQuantityDialog(
                         onClick = onConfirm,
                         enabled = quantity.isNotEmpty() && (quantity.toDoubleOrNull() ?: 0.0) > 0
                     ) {
-                        Text(if (isEditing) stringResource(R.string.update_action) else stringResource(R.string.add_action))
+                        Text(
+                            if (isEditing) stringResource(R.string.update_action) else stringResource(
+                                R.string.add_action
+                            )
+                        )
                     }
                 }
             }

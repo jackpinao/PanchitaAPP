@@ -56,10 +56,15 @@ class InventoryListViewModel(
         }
     }
 
+    /**
+     * Refreshes the products list by first trying to sync any unsaved products
+     * and then fetching the latest data from the remote source.
+     */
     fun onRefresh() {
         viewModelScope.launch {
             _uiState.update { InventoryListUiState.Loading(it.inventoryList) }
             try {
+                productUseCases.syncUnsyncedProducts()
                 productUseCases.refreshProducts()
             } catch (e: Exception) {
                 // Optionally handle the error here
@@ -87,10 +92,6 @@ class InventoryListViewModel(
                 productUseCases.delete(it)
             }
         }
-    }
-
-    fun onNavigateToAddItem() {
-
     }
 
     sealed class InventoryListEvent {

@@ -6,16 +6,101 @@
     <string name="home">Home</string>
     <string name="settings">Settings</string>
     <string name="recarga">Recarga</string>
-    <string name="guia_remision">Guia Remision</string>
+    <string name="guia_remision">Punto de venta</string>
     <string name="detalles">Detalles</string>
     <string name="add_produdct">Agregar Producto</string>
 
     <string name="bussines_name">Bodega El Chasqui</string>
     <string name="bussines_address">Av. Antigua Panamericana Nª451, Mala, Cañete, Lima</string>
     <string name="bussines_phone">Telefono: 123456789</string>
+
+    <!-- General Actions -->
+    <string name="save">Guardar</string>
+    <string name="cancel_action">Cancelar</string>
+    <string name="add_action">Agregar</string>
+    <string name="update_action">Actualizar</string>
+    <string name="edit_action">Editar</string>
+    <string name="delete_action">Eliminar</string>
+    <string name="scan_code_action">Escanear Código</string>
+    <string name="manual_search_action">Búsqueda Manual</string>
+    <string name="finish_sale_action">Finalizar Venta</string>
+    <string name="processing_action">Procesando...</string>
+    <string name="ok_button">OK</string>
+    <string name="cancel_button">Cancel</string>
+
+    <!-- Labels -->
+    <string name="barcode_label">Código de barras</string>
+    <string name="product_name_label">Nombre del producto</string>
+    <string name="purchase_price_label">Precio de compra</string>
+    <string name="stock_label">Stock</string>
+    <string name="category_label">Categoría</string>
+    <string name="brand_label">Marca</string>
+    <string name="client_name_label">Nombre del Cliente</string>
+    <string name="client_doc_label">DNI / RUC del Cliente</string>
+    <string name="quantity_label">Cantidad</string>
+    <string name="search_label">Buscar producto...</string>
+
+    <!-- Content Descriptions -->
+    <string name="qr_scanner_description">Escanear código QR</string>
+    <string name="delete_produdct">Eliminar producto</string>
+
+    <!-- Inventory List Screen -->
+    <string name="inventory_title">Inventario</string>
+    <string name="no_products_message">No hay productos disponibles. Escanea un código para agregar uno.</string>
+    <string name="empty_search_message">No se encontraron productos.</string>
+    <string name="loading_message">Cargando...</string>
+
+    <!-- Add Product Screen -->
+    <string name="edit_product_title">Editar Producto</string>
+    <string name="no_categories">No hay categorías disponibles</string>
+    <string name="no_brands">No hay marcas disponibles</string>
+
+    <!-- Add Category Screen -->
+    <string name="add_category_title">Agregar Categoría</string>
+    <string name="category_name_label">Nombre de la categoría</string>
+    <string name="margin_label">Margen de ganancia (%)</string>
+
+    <!-- Add Brand Screen -->
+    <string name="add_brand_title">Agregar Marca</string>
+    <string name="brand_name_label">Nombre de la Marca</string>
+
+    <!-- Guia Remision Screen -->
+    <string name="add_product_title">Añadir Producto</string>
+    <string name="product_not_found_title">Producto no encontrado</string>
+    <string name="product_not_found_text">No se encontró un producto con el código: %1$s. ¿Deseas agregarlo al inventario?</string>
+    <string name="add_to_cart_title">Agregar al Carrito</string>
+    <string name="edit_quantity_title">Editar Cantidad</string>
+    <string name="minimarket_sale_title">Venta Minimarket</string>
+    <string name="cart_products_title">Productos en Carrito</string>
+    <string name="total_to_pay_label">Total a Pagar:</string>
+    <string name="product_details_format">Cant: %1$s | P.U: %2$s | S.Igv: %3$s | Total: %4$s</string>
+
+    <!-- Product Search Screen -->
+    <string name="search_product_title">Buscar Producto</string>
+    <string name="select_product_action">Seleccionar</string>
+
+    <!-- Preview Ticket Screen -->
+    <string name="ticket_preview_title">Ticket de Venta</string>
+    <string name="business_name">Abarrotes Panchita</string>
+    <string name="business_ruc">RUC: 10452668583</string>
+    <string name="business_address">Av. Santa Rosa Mz N Lt 25</string>
+    <string name="ticket_date">Fecha: %1$s</string>
+    <string name="ticket_client">Cliente: %1$s</string>
+    <string name="ticket_doc">DNI/RUC: %1$s</string>
+    <string name="ticket_col_cant">CANT</string>
+    <string name="ticket_col_desc">DESCRIPCIÓN</string>
+    <string name="ticket_col_price">PRECIO</string>
+    <string name="ticket_col_total">TOTAL</string>
+    <string name="ticket_item_format">%1$s</string>
+    <string name="ticket_item_price_format">S/ %.2f</string>
+    <string name="ticket_total_label">TOTAL A PAGAR</string>
+    <string name="ticket_total_format">S/ %.2f</string>
+    <string name="ticket_footer">¡Gracias por su compra!</string>
+    <string name="complete_sale_action">Confirmar Venta</string>
+    <string name="sale_completed_message">¡Venta registrada con éxito!</string>
+
+    <!-- Restored Missing Strings -->
     <string name="ticket_title">Ticket Nº </string>
-    <string name="ticket_date">Fecha: </string>
-    <string name="ticket_client">Cliente: </string>
     <string name="ticket_document">Documento: </string>
     <string name="ticket_product">Producto</string>
     <string name="ticket_price">Precio</string>
@@ -35,33 +120,15 @@
     <string name="logout">Cerrar Sesión</string>
     <string name="error_category_name_exists">La categoría ya existe.</string>
     <string name="inventary_center">Inventario Central</string>
-    <string name="delete_produdct">Eliminar producto</string>
     <string name="category_name">Nombre de categoria</string>
     <string name="revenue">Ganancia</string>
-    <string name="save">Guardar</string>
     <string name="new_category">Nueva categoria</string>
     <string name="back">Regresar</string>
 
-    <!-- Add Product Screen -->
-    <string name="barcode_label">Código de barras</string>
-    <string name="qr_scanner_description">QR Scanner</string>
-    <string name="product_name_label">Nombre del Producto</string>
-    <string name="purchase_price_label">Precio de Compra</string>
-    <string name="category_label">Categoría</string>
-    <string name="no_categories">Sin categorías</string>
-    <string name="brand_label">Marca</string>
-    <string name="no_brands">Sin marcas</string>
-    <string name="stock_label">Stock</string>
-    <string name="update_action">Actualizar</string>
-    <string name="edit_product_title">Editar Producto</string>
-
-    <!-- Claro Recarga Screen -->
     <string name="recharge_tab">Recarga</string>
     <string name="history_tab">Historial</string>
     <string name="history_title">Historial de recargas</string>
     <string name="recharge_date">Fecha de recarga</string>
-    <string name="ok_button">OK</string>
-    <string name="cancel_button">Cancel</string>
     <string name="total_label">Total: %1$d</string>
     <string name="no_recharges">No hay recargas</string>
     <string name="phone_number_label">Número telefónico: %1$s</string>
@@ -76,38 +143,13 @@
     <string name="others_label">Otros</string>
     <string name="recharge_button">RECARGAR</string>
 
-    <!-- Inventory List Screen -->
+    <string name="product_search_placeholder">Nombre o código</string>
     <string name="search_product_placeholder">Buscar producto</string>
     <string name="stock_count_label">Stock: %1$.2f</string>
-
-    <!-- Login Screen -->
     <string name="syncing_data">Sincronizando datos</string>
     <string name="syncing_subtitle">Esto puede tardar unos segundos</string>
 
-    <!-- Guia Remision Screen -->
-    <string name="add_product_title">Añadir Producto</string>
-    <string name="scan_code_action">Escanear Código</string>
-    <string name="manual_search_action">Búsqueda Manual</string>
-    <string name="processing_action">Procesando</string>
-    <string name="finish_sale_action">Finalizar Venta</string>
-    <string name="minimarket_sale_title">Venta Minimarket</string>
-    <string name="client_name_label">Nombre del Cliente</string>
-    <string name="client_doc_label">Documento (DNI/RUC)</string>
-    <string name="cart_products_title">Productos en el Carrito</string>
-    <string name="product_details_format">Canti.: %1$s | P. Unit: %2$s\nP. Sin IGV: %3$s\nSubtotal: %4$s</string>
-    <string name="total_to_pay_label">TOTAL A PAGAR</string>
-    <string name="product_not_found_title">Producto no encontrado</string>
-    <string name="product_not_found_text">El código [%1$s] no está registrado. ¿Deseas agregarlo al inventario?</string>
-    <string name="add_action">Agregar</string>
-    <string name="cancel_action">Cancelar</string>
-    <string name="edit_quantity_title">Editar Cantidad</string>
-    <string name="add_to_cart_title">Añadir al Carrito</string>
-    <string name="quantity_label">Cantidad</string>
-
-    <!-- Product Search Screen -->
-    <string name="product_search_placeholder">Nombre o código</string>
     <string name="clear_action">Limpiar</string>
-    <string name="search_product_title">Buscar Producto</string>
     <string name="back_action">Atrás</string>
     <string name="product_search_details_format">Código: %1$s | Stock: %2$.2f</string>
     <string name="currency_format_soles">S/. %1$s</string>

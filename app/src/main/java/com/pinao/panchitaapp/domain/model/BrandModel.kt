@@ -6,5 +6,5 @@ data class BrandModel(
     val brandId: String = UUID.randomUUID().toString(),
     val storeId: String = "",
     val name: String = "",
-    val isSynced: Boolean = false
+    var isSynced: Boolean = false
 )

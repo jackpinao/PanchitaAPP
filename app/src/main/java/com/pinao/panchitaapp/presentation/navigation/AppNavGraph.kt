@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -66,9 +67,27 @@ fun AppNavGraph(
 ) {
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentNavBackStackEntry?.destination?.route ?: ""
+    val currentRouteBase = currentRoute.substringBefore("?")
 
-    // Determinar si debemos mostrar el Scaffold (TopBar/Drawer)
-    val showMainUI = currentRoute != AppScreens.Login.route
+    // Determinar si debemos mostrar el Drawer
+    val showMainUI = currentRouteBase != AppScreens.Login.route
+
+    // Determinar si debemos mostrar el TopAppBar global
+    val screensWithGlobalTopBar = listOf(
+        AppScreens.Home.route,
+        AppScreens.Recarga.route,
+        AppScreens.GuiaRemision.route,
+        AppScreens.InventoryList.route
+    )
+    val showGlobalTopBar = currentRouteBase in screensWithGlobalTopBar
+
+    val titleText = when (currentRouteBase) {
+        AppScreens.Home.route -> stringResource(R.string.home)
+        AppScreens.Recarga.route -> stringResource(R.string.recarga)
+        AppScreens.GuiaRemision.route -> stringResource(R.string.guia_remision)
+        AppScreens.InventoryList.route -> stringResource(R.string.inventory_title)
+        else -> "PanchitaAPP"
+    }
 
     val navigationActions = remember(navController) {
         AppNavigationActions(navController = navController)
@@ -78,7 +97,7 @@ fun AppNavGraph(
         drawerContent = {
             if (showMainUI) {
                 AppDrawer(
-                    route = currentRoute,
+                    route = currentRouteBase,
                     navigationToHome = { navigationActions.navigateToHome() },
                     navigationToRecarga = { navigationActions.navigateToRecarga() },
                     navigationToGuiaRemision = { navigationActions.navigateToGuiaRemision() },
@@ -99,11 +118,11 @@ fun AppNavGraph(
     ) {
         Scaffold(
             topBar = {
-                if (showMainUI) {
+                if (showGlobalTopBar) {
                     TopAppBar(
                         title = {
                             Text(
-                                text = currentRoute,
+                                text = titleText,
                                 style = MaterialTheme.typography.titleLarge,
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
@@ -138,7 +157,7 @@ fun AppNavGraph(
                 navController = navController,
                 startDestination = AppScreens.Login.route,
                 modifier = modifier.padding(
-                    if (showMainUI) paddingValues else PaddingValues(0.dp)
+                    if (showGlobalTopBar) paddingValues else if (showMainUI) PaddingValues(0.dp) else PaddingValues(0.dp)
                 )
             ) {
                 composable(route = AppScreens.Login.route) {
@@ -170,8 +189,15 @@ fun AppNavGraph(
                         navController = navController
                     )
                 }
+                composable(route = AppScreens.InventoryList.route) {
+                    InventoryListScreen(
+                        navController = navController,
+                        viewModel = inventaryViewModel
+                    )
+                }
+
                 composable(
-                    route = AppScreens.AddProduct.route + "?barcode={barcode}",
+                    route = "${AppScreens.AddProduct.route}?barcode={barcode}",
                     arguments = listOf(
                         navArgument("barcode") {
                             type = NavType.StringType
@@ -186,21 +212,13 @@ fun AppNavGraph(
                         initialBarcode = barcode
                     )
                 }
+
                 composable(route = AppScreens.AddCategory.route) {
-                    AddCategoryScreen(
-                        navController = navController
-                    )
+                    AddCategoryScreen(navController = navController)
                 }
+
                 composable(route = AppScreens.ProductSearch.route) {
-                    ProductSearchScreen(
-                        navController = navController
-                    )
-                }
-                composable(route = AppScreens.InventoryList.route) {
-                    InventoryListScreen(
-                        navController = navController,
-                        viewModel = inventaryViewModel
-                    )
+                    ProductSearchScreen(navController = navController)
                 }
             }
         }

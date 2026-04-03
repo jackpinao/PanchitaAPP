@@ -8,29 +8,29 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
-import com.pinao.panchitaapp.data.source.local.SessionManager
-import com.pinao.panchitaapp.data.source.local.dao.BrandDao
-import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
-import com.pinao.panchitaapp.data.source.local.dao.ClientDao
-import com.pinao.panchitaapp.data.source.local.dao.SaleDetailDao
-import com.pinao.panchitaapp.data.source.local.dao.ProductDao
-import com.pinao.panchitaapp.data.source.local.dao.RechangeDao
-import com.pinao.panchitaapp.data.source.local.dao.TemporaryProductDao
-import com.pinao.panchitaapp.data.source.local.dao.SaleDao
-import com.pinao.panchitaapp.data.source.local.database.AppDatabase
 import com.pinao.panchitaapp.data.network.rechange.RechangeApiClient
 import com.pinao.panchitaapp.data.network.rechange.RechangeService
 import com.pinao.panchitaapp.data.repository.AuthRepositoryImpl
+import com.pinao.panchitaapp.data.repository.BrandRepositoryImpl
 import com.pinao.panchitaapp.data.repository.CategoryRepositoryImpl
 import com.pinao.panchitaapp.data.repository.ClientRepositoryImpl
 import com.pinao.panchitaapp.data.repository.DetailTicketRepositoryImpl
 import com.pinao.panchitaapp.data.repository.GmsBarcodeScannerImpl
 import com.pinao.panchitaapp.data.repository.ProductsRepositoryImpl
 import com.pinao.panchitaapp.data.repository.RechangeRepositoryImpl
-import com.pinao.panchitaapp.data.repository.TemporaryProductRepositoryImpl
 import com.pinao.panchitaapp.data.repository.SaleRepositoryImpl
-import com.pinao.panchitaapp.data.repository.BrandRepositoryImpl
+import com.pinao.panchitaapp.data.repository.TemporaryProductRepositoryImpl
 import com.pinao.panchitaapp.data.service.AndroidTicketPdfService
+import com.pinao.panchitaapp.data.source.local.SessionManager
+import com.pinao.panchitaapp.data.source.local.dao.BrandDao
+import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
+import com.pinao.panchitaapp.data.source.local.dao.ClientDao
+import com.pinao.panchitaapp.data.source.local.dao.ProductDao
+import com.pinao.panchitaapp.data.source.local.dao.RechangeDao
+import com.pinao.panchitaapp.data.source.local.dao.SaleDao
+import com.pinao.panchitaapp.data.source.local.dao.SaleDetailDao
+import com.pinao.panchitaapp.data.source.local.dao.TemporaryProductDao
+import com.pinao.panchitaapp.data.source.local.database.AppDatabase
 import com.pinao.panchitaapp.data.source.remote.BrandRemoteDataSource
 import com.pinao.panchitaapp.data.source.remote.CategoryRemoteDataSource
 import com.pinao.panchitaapp.data.source.remote.ProductRemoteDataSource
@@ -46,8 +46,8 @@ import com.pinao.panchitaapp.domain.repository.ClientRepository
 import com.pinao.panchitaapp.domain.repository.DetailTicketRepository
 import com.pinao.panchitaapp.domain.repository.ProductRepository
 import com.pinao.panchitaapp.domain.repository.RechangeRepository
-import com.pinao.panchitaapp.domain.repository.TemporaryProductRepository
 import com.pinao.panchitaapp.domain.repository.SaleRepository
+import com.pinao.panchitaapp.domain.repository.TemporaryProductRepository
 import com.pinao.panchitaapp.domain.service.TicketPdfService
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
@@ -166,9 +166,13 @@ class DataModule {
 
     @Single(createdAtStart = true)
     fun provideBrandRepository(
-        brandDao: BrandDao
+        brandDao: BrandDao,
+        remoteDataSource: RemoteDataSource
     ): BrandRepository {
-        return BrandRepositoryImpl(brandDao)
+        return BrandRepositoryImpl(
+            brandDao,
+            remoteDataSource
+        )
     }
 
     @Single(createdAtStart = true)
@@ -223,12 +227,13 @@ class DataModule {
             temporaryProductDao
         )
     }
+
     @Single
     fun provideAuthRepository(
         firebaseAuth: FirebaseAuth,
         firestore: FirebaseFirestore,
         sessionManager: SessionManager
-    ): AuthRepository{
+    ): AuthRepository {
         return AuthRepositoryImpl(
             firebaseAuth,
             firestore,

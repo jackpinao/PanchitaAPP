@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -17,6 +18,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -41,6 +44,7 @@ import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.presentation.navigation.AppScreens
 import com.pinao.panchitaapp.presentation.ui.Screen
 import org.koin.androidx.compose.koinViewModel
+import java.util.Locale
 
 @Composable
 fun AddProductScreen(
@@ -80,6 +84,7 @@ fun AddProductScreen(
         onScannedClick = viewModel::startScanning,
         onCategoryClick = { navController.navigate(AppScreens.AddCategory.route) },
         onSavenClick = viewModel::saveProduct,
+        onBackClick = { navController.popBackStack() }
     )
 }
 
@@ -96,6 +101,7 @@ fun AddProductContent(
     onScannedClick: () -> Unit,
     onCategoryClick: () -> Unit,
     onSavenClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     val listCategories = uiState.listOfCategoriesName
     val listBrands = uiState.listOfBrandsName
@@ -105,7 +111,7 @@ fun AddProductContent(
     Screen {
         Scaffold(
             topBar = {
-                TopApp(isEditMode = uiState.isEditMode)
+                TopApp(isEditMode = uiState.isEditMode, onBackClick = onBackClick)
             }
         ) { innerPadding ->
             Column(
@@ -155,15 +161,66 @@ fun AddProductContent(
                         .padding(start = 30.dp, end = 30.dp)
                 )
                 Spacer(modifier = Modifier.padding(8.dp))
+                
+                // COSTO TOTAL DEPENDIENDO DEL MODO (NUEVO vs EDICIÓN/AÑADIR STOCK)
                 TextField(
-                    value = uiState.productPurchasePrice,
+                    value = uiState.productTotalCost,
                     onValueChange = onPriceChange,
-                    label = { Text(stringResource(R.string.purchase_price_label)) },
+                    label = { 
+                        Text(if (uiState.isEditMode) "Costo Total del Stock Añadido" else "Costo Total de Compra") 
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 30.dp, end = 30.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
+
+                Spacer(modifier = Modifier.padding(8.dp))
+
+                // STOCK DEPENDIENDO DEL MODO
+                TextField(
+                    value = uiState.productStock,
+                    onValueChange = onStockChange,
+                    label = { 
+                        Text(if (uiState.isEditMode) "Cantidad de Stock a Añadir" else stringResource(R.string.stock_label)) 
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 30.dp, end = 30.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                )
+
+                // TEXTO INFORMATIVO PARA MOSTRAR EL CÁLCULO PPP
+                if (uiState.isEditMode) {
+                    Text(
+                        text = String.format(Locale.getDefault(), "Stock Actual: %.2f | Costo Unitario Actual: S/%.2f", uiState.existingStock, uiState.existingPriceBuy),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 8.dp)
+                    )
+                    Text(
+                        text = String.format(Locale.getDefault(), "Stock Final: %.2f", uiState.finalCalculatedStock),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 4.dp)
+                    )
+                    Text(
+                        text = String.format(Locale.getDefault(), "Nuevo Costo Promedio (PPP): S/%.2f", uiState.calculatedUnitPrice),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 2.dp)
+                    )
+                } else {
+                    if (uiState.calculatedUnitPrice > 0) {
+                        Text(
+                            text = String.format(Locale.getDefault(), "Costo Unitario Calculado: S/%.2f", uiState.calculatedUnitPrice),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 8.dp)
+                        )
+                    }
+                }
+                
                 Spacer(modifier = Modifier.padding(8.dp))
 
                 // Categoría
@@ -282,16 +339,6 @@ fun AddProductContent(
                     }
                 }
 
-                Spacer(modifier = Modifier.padding(8.dp))
-                TextField(
-                    value = uiState.productStock,
-                    onValueChange = onStockChange,
-                    label = { Text(stringResource(R.string.stock_label)) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 30.dp, end = 30.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                )
                 Spacer(modifier = Modifier.padding(15.dp))
                 Button(
                     onClick = { onSavenClick() },
@@ -315,7 +362,7 @@ fun AddProductContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopApp(isEditMode: Boolean) {
+private fun TopApp(isEditMode: Boolean, onBackClick: () -> Unit) {
     TopAppBar(
         title = {
             Text(
@@ -326,6 +373,14 @@ private fun TopApp(isEditMode: Boolean) {
                 }
             )
         },
+        navigationIcon = {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.cancel_action)
+                )
+            }
+        }
     )
 }
 
@@ -333,5 +388,5 @@ private fun TopApp(isEditMode: Boolean) {
 @Composable
 fun AddProductScreenPreview() {
     val uiState = AddProductUiState(productName = "Producto Test", isEditMode = true)
-    AddProductContent(uiState, {}, {}, {}, {}, {}, {}, {}, {}, {})
+    AddProductContent(uiState, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
 }

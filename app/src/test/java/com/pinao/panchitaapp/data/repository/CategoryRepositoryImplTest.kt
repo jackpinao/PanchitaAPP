@@ -2,7 +2,6 @@ package com.pinao.panchitaapp.data.repository
 
 import android.util.Log
 import app.cash.turbine.test
-import com.google.common.truth.Truth.assertThat
 import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
 import com.pinao.panchitaapp.data.source.local.entity.CategoryEntity
 import com.pinao.panchitaapp.data.source.remote.RemoteDataSource
@@ -82,7 +81,7 @@ class CategoryRepositoryImplTest {
 
             // Assert
             coVerify(exactly = 1) { mockRemoteDataSource.categoryRemoteDataSource.getCategories() }
-            
+
             // Verificamos los insert individualmente usando match en lugar de withArg para evitar AssertionErrors internos de MockK
             coVerify(exactly = 1) { mockDao.insertCategory(match { it.categoryId == "cat1" }) }
             coVerify(exactly = 1) { mockDao.insertCategory(match { it.categoryId == "cat2" }) }
@@ -126,7 +125,13 @@ class CategoryRepositoryImplTest {
 
     @Test
     fun `saveCategory should save in Firestore and Room`() = runTest {
-        val model = CategoryModel("cat1", "store1", "Carnes", 15.0, true)
+        val model = CategoryModel(
+            "cat1",
+            "store1",
+            "Carnes",
+            15.0,
+            true
+        )
 
         coEvery { mockRemoteDataSource.categoryRemoteDataSource.saveCategory(any()) } returns true
         coEvery { mockDao.insertCategory(any()) } returns 1L
@@ -134,12 +139,22 @@ class CategoryRepositoryImplTest {
         repository.saveCategory(model)
 
         coVerify(exactly = 1) { mockRemoteDataSource.categoryRemoteDataSource.saveCategory(any()) }
-        coVerify(exactly = 1) { mockDao.insertCategory(match { it.categoryId == "cat1" && it.name == "Carnes" && it.isSynced == 1 }) }
+        coVerify(exactly = 1) {
+            mockDao.insertCategory(match {
+                it.categoryId == "cat1" && it.name == "Carnes" && it.isSynced == 1
+            })
+        }
     }
 
     @Test
     fun `saveCategory should catch Exception if Firestore fails`() = runTest {
-        val model = CategoryModel("cat1", "store1", "Carnes", 15.0, true)
+        val model = CategoryModel(
+            "cat1",
+            "store1",
+            "Carnes",
+            15.0,
+            true
+        )
 
         coEvery { mockRemoteDataSource.categoryRemoteDataSource.saveCategory(any()) } returns false
         coEvery { mockDao.insertCategory(any()) } returns 1L
@@ -147,12 +162,22 @@ class CategoryRepositoryImplTest {
         repository.saveCategory(model)
 
         coVerify(exactly = 1) { mockRemoteDataSource.categoryRemoteDataSource.saveCategory(any()) }
-        coVerify(exactly = 1) { mockDao.insertCategory(match { it.categoryId == "cat1" && it.isSynced == 0 }) }
+        coVerify(exactly = 1) {
+            mockDao.insertCategory(match {
+                it.categoryId == "cat1" && it.isSynced == 0
+            })
+        }
     }
 
     @Test
     fun `deleteCategory should delete from Firestore and Room`() = runTest {
-        val model = CategoryModel("cat_to_delete", "store1", "Borrar", 0.0, true)
+        val model = CategoryModel(
+            "cat_to_delete",
+            "store1",
+            "Borrar",
+            0.0,
+            true
+        )
 
         coEvery { mockRemoteDataSource.categoryRemoteDataSource.deleteCategory(any()) } returns true
         coEvery { mockDao.deleteCategory(any()) } returns Unit
@@ -160,12 +185,22 @@ class CategoryRepositoryImplTest {
         repository.deleteCategory(model)
 
         coVerify(exactly = 1) { mockRemoteDataSource.categoryRemoteDataSource.deleteCategory(any()) }
-        coVerify(exactly = 1) { mockDao.deleteCategory(match { it.categoryId == "cat_to_delete" }) }
+        coVerify(exactly = 1) {
+            mockDao.deleteCategory(match {
+                it.categoryId == "cat_to_delete"
+            })
+        }
     }
 
     @Test
     fun `deleteCategory should catch Exception if Firestore fails`() = runTest {
-        val model = CategoryModel("cat_to_delete", "store1", "Borrar", 0.0, true)
+        val model = CategoryModel(
+            "cat_to_delete",
+            "store1",
+            "Borrar",
+            0.0,
+            true
+        )
 
         coEvery { mockRemoteDataSource.categoryRemoteDataSource.deleteCategory(any()) } returns false
 

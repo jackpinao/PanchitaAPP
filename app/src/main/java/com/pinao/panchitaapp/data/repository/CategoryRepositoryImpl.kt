@@ -54,7 +54,6 @@ class CategoryRepositoryImpl(
 
     override suspend fun saveCategory(categoryModel: CategoryModel) {
         withContext(Dispatchers.IO) {
-
             var isSync = remoteDataSource.categoryRemoteDataSource.saveCategory(categoryModel)
             if (isSync) {
                 categoryModel.isSynced = true

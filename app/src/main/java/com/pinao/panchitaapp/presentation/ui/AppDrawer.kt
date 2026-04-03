@@ -137,7 +137,7 @@ fun AppDrawer(
         NavigationDrawerItem(
             label = {
                 Text(
-                    text = stringResource(id = R.string.inventary_center),
+                    text = stringResource(id = R.string.inventory_title),
                     style = MaterialTheme.typography.labelSmall
                 )
             },
@@ -149,7 +149,7 @@ fun AppDrawer(
             icon = {
                 Icon(
                     imageVector = Icons.Default.AddShoppingCart,
-                    contentDescription = stringResource(id = R.string.inventary_center)
+                    contentDescription = stringResource(id = R.string.inventory_title)
                 )
             }
 
