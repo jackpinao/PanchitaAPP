@@ -125,7 +125,7 @@ class AddProductViewModelTest {
             awaitItem()
             viewModel.onPriceChange("12.5")
             val state1 = awaitItem()
-            Assert.assertEquals("12.5", state1.productPurchasePrice)
+            Assert.assertEquals("12.5", state1.productTotalCost)
             viewModel.onPriceChange("abc")
             expectNoEvents()
             cancelAndIgnoreRemainingEvents()
