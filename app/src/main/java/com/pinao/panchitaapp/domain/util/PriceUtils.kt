@@ -13,9 +13,19 @@ object PriceUtils {
      * Ejemplo: 1.05 a 1.09 -> 1.1
      */
     fun roundSellingPrice(price: Double): Double {
+        if (price.isNaN() || price.isInfinite()) return 0.0
         val bdPrice = BigDecimal(price.toString())
         // setScale(1) significa 1 decimal. HALF_UP es el redondeo comercial estándar (>= 5 sube).
         return bdPrice.setScale(1, RoundingMode.HALF_UP).toDouble()
+    }
+
+    /**
+     * Redondea el precio de compra a 2 decimales para mostrar y guardar correctamente.
+     */
+    fun roundPurchasePrice(price: Double): Double {
+        if (price.isNaN() || price.isInfinite()) return 0.0
+        val bdPrice = BigDecimal(price.toString())
+        return bdPrice.setScale(2, RoundingMode.HALF_UP).toDouble()
     }
 
     /**
@@ -23,7 +33,7 @@ object PriceUtils {
      * Fórmula: Precio con IGV / 1.18
      */
     fun calculatePriceExcludingIGV(sellingPrice: Double): Double {
-        if (sellingPrice == 0.0) return 0.0
+        if (sellingPrice == 0.0 || sellingPrice.isNaN() || sellingPrice.isInfinite()) return 0.0
         
         val bdPrice = BigDecimal(sellingPrice.toString())
         // Dividimos limitando a 2 decimales exactos

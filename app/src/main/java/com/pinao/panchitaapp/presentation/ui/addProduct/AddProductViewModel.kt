@@ -264,7 +264,7 @@ class AddProductViewModel(
             _uiState.update { it.copy(isLoading = true) }
             
             // Tomamos el Costo Unitario calculado con PPP y el Stock final.
-            val unitPurchasePrice = state.calculatedUnitPrice
+            val unitPurchasePrice = PriceUtils.roundPurchasePrice(state.calculatedUnitPrice)
             val finalStock = state.finalCalculatedStock
             
             val revenueCategory = state.productRevenueCategory

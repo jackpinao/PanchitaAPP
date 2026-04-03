@@ -56,6 +56,7 @@ import com.pinao.panchitaapp.presentation.ui.Screen
 import com.pinao.panchitaapp.presentation.ui.login.UiText
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -252,7 +253,7 @@ fun InventoryItemCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = product.barcode, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text = product.priceBuy.toString(), fontSize = 14.sp)
+                Text(text = String.format(Locale.getDefault(), "S/ %.2f", product.priceBuy), fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(4.dp))
                 val stockColor =
                     if (product.stockQuantity > product.stockMin)
@@ -266,7 +267,7 @@ fun InventoryItemCard(
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = product.priceSell.toString(), fontSize = 16.sp,
+                    text = String.format(Locale.getDefault(), "S/ %.2f", product.priceSell), fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
                 IconButton(onClick = onDeleteClick) {
