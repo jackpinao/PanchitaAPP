@@ -379,6 +379,7 @@ class AddProductViewModelTest {
             awaitItem()
             viewModel.onNameChange("Producto Test")
             viewModel.onPriceChange("10.0")
+            viewModel.onStockChange("5.0")
             viewModel.onCodeChanged("111")
             viewModel.onCategoryChange("Bebidas")
 
@@ -407,6 +408,7 @@ class AddProductViewModelTest {
             awaitItem()
             viewModel.onNameChange("Producto Test")
             viewModel.onPriceChange("10.0")
+            viewModel.onStockChange("5.0")
             viewModel.onCodeChanged("111")
             viewModel.onCategoryChange("Bebidas")
 

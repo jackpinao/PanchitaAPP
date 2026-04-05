@@ -21,7 +21,8 @@ object ProductMapper {
             barcode = entity.barcode,
             lastUpdated = entity.lastUpdated,
             stockMin = entity.stockMin,
-            isSynced = entity.isSynced == 1
+            isSynced = entity.isSynced == 1,
+            isDeleted = entity.isDeleted == 1
         )
     }
 
@@ -42,7 +43,8 @@ object ProductMapper {
             barcode = model.barcode,
             lastUpdated = model.lastUpdated,
             stockMin = model.stockMin,
-            isSynced = if (model.isSynced) 1 else 0
+            isSynced = if (model.isSynced) 1 else 0,
+            isDeleted = if (model.isDeleted) 1 else 0
         )
     }
 }

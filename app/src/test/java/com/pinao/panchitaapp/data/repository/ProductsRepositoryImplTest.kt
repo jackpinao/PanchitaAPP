@@ -245,11 +245,19 @@ class ProductsRepositoryImplTest {
     fun `deleteProduct should delete from Room even if remote fails`() = runTest {
         val model = ProductModel(productId = "p6", name = "Prod6")
         coEvery { mockRemoteDataSource.productRemoteDataSource.deleteProduct(model) } returns false
+        coEvery { mockProductDao.updateProduct(any()) } returns 1
 
         repository.deleteProduct(model)
 
         coVerify(exactly = 1) { mockRemoteDataSource.productRemoteDataSource.deleteProduct(model) }
-        coVerify(exactly = 1) { mockProductDao.deleteProduct(any()) }
+        coVerify(exactly = 1) { 
+            mockProductDao.updateProduct(
+                withArg {
+                    assertEquals(1, it.isDeleted)
+                    assertEquals(0, it.isSynced)
+                }
+            )
+        }
     }
 
     @Test

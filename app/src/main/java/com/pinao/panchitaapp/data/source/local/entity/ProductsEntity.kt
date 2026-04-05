@@ -62,4 +62,6 @@ data class ProductsEntity(
     val lastUpdated: String,
     @ColumnInfo(name = "is_synced", defaultValue = "0")
     val isSynced: Int = 0,
+    @ColumnInfo(name = "is_deleted", defaultValue = "0")
+    val isDeleted: Int = 0
 )

@@ -65,6 +65,7 @@ class DataModule {
             AppDatabase::class.java,
             DATABASE_NAME
         )
+            .addMigrations(com.pinao.panchitaapp.data.source.local.database.Migration17To18())
             .fallbackToDestructiveMigration()
             .build()
     }

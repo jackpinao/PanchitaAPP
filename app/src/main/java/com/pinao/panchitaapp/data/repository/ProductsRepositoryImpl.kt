@@ -119,6 +119,21 @@ class ProductsRepositoryImpl(
                         )
                     }
                 }
+
+                // Sincronizar (Ejecutar) los borrados lógicos pendientes
+                val pendingDeletions = productDao.getPendingDeletedProducts()
+                pendingDeletions.forEach { entity ->
+                    val productModel = ProductMapper.toDomain(entity)
+                    val isDelete = remoteDataSource.productRemoteDataSource.deleteProduct(productModel)
+                    
+                    if (isDelete) {
+                        // Borrado en nube exitoso -> Borrado físico en Room
+                        productDao.deleteProduct(entity)
+                        Log.d("ProductsRepositoryImpl", "Product ${entity.name} permanently deleted.")
+                    } else {
+                        Log.w("ProductsRepositoryImpl", "Failed to sync delete for ${entity.name}")
+                    }
+                }
             } catch (e: Exception) {
                 Log.e("ProductsRepositoryImpl", "Error in syncUnsyncedProducts", e)
             }
@@ -128,10 +143,15 @@ class ProductsRepositoryImpl(
     override suspend fun deleteProduct(productModel: ProductModel) {
         withContext(Dispatchers.IO) {
             val isDelete = remoteDataSource.productRemoteDataSource.deleteProduct(productModel)
+            
             if (isDelete) {
+                // Borrado físico de la nube exitoso -> borramos localmente
                 productDao.deleteProduct(ProductMapper.toDatabase(productModel))
             } else {
-                Log.d("ProductsRepositoryImpl", "Error deleting product from Firestore")
+                // Falló en la nube -> soft delete en Room (Borrado Lógico)
+                val entity = ProductMapper.toDatabase(productModel.copy(isDeleted = true, isSynced = false))
+                productDao.updateProduct(entity)
+                Log.d("ProductsRepositoryImpl", "Error deleting from Firestore. Marked for deletion later.")
             }
         }
     }
