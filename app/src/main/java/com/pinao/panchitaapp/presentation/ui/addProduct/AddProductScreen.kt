@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -115,7 +117,9 @@ fun AddProductContent(
             }
         ) { innerPadding ->
             Column(
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
             ) {
                 Row(
                     modifier = Modifier
@@ -210,6 +214,14 @@ fun AddProductContent(
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 2.dp)
                     )
+                    if (uiState.calculatedSellingPrice > 0) {
+                        Text(
+                            text = String.format(Locale.getDefault(), "Precio de Venta Calculado: S/%.2f", uiState.calculatedSellingPrice),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 2.dp)
+                        )
+                    }
                 } else {
                     if (uiState.calculatedUnitPrice > 0) {
                         Text(
@@ -217,6 +229,14 @@ fun AddProductContent(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 8.dp)
+                        )
+                    }
+                    if (uiState.calculatedSellingPrice > 0) {
+                        Text(
+                            text = String.format(Locale.getDefault(), "Precio de Venta Calculado: S/%.2f", uiState.calculatedSellingPrice),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 2.dp)
                         )
                     }
                 }
@@ -283,6 +303,22 @@ fun AddProductContent(
                     ) {
                         Text(text = "+")
                     }
+                }
+
+                if (uiState.productCategory.isNotEmpty()) {
+                    Text(
+                        text = String.format(
+                            Locale.getDefault(), 
+                            "Precio de Venta Sugerido: S/%.2f (Margen: %.0f%%)", 
+                            uiState.calculatedSellingPrice, 
+                            uiState.productRevenueCategory
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 30.dp, end = 30.dp, top = 4.dp)
+                    )
                 }
 
                 Spacer(modifier = Modifier.padding(8.dp))

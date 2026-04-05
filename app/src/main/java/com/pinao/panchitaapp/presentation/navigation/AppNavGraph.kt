@@ -52,10 +52,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavGraph(
     modifier: Modifier = Modifier,
+    windowSize: WindowSizeClass,
     navController: NavHostController = rememberNavController(),
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
@@ -93,32 +97,35 @@ fun AppNavGraph(
         AppNavigationActions(navController = navController)
     }
 
-    ModalNavigationDrawer(
-        drawerContent = {
-            if (showMainUI) {
-                AppDrawer(
-                    route = currentRouteBase,
-                    navigationToHome = { navigationActions.navigateToHome() },
-                    navigationToRecarga = { navigationActions.navigateToRecarga() },
-                    navigationToGuiaRemision = { navigationActions.navigateToGuiaRemision() },
-                    navigationToAddProduct = { navigationActions.navigateToAddProduct() },
-                    navigationToInventoryList = { navigationActions.navigateToInventary() },
-                    onLogout = {
-                        loginViewModel.logout()
-                        navController.navigate(AppScreens.Login.route) {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    },
-                    closeDrawer = { coroutineScope.launch { drawerState.close() } },
-                    modifier = Modifier
-                )
-            }
-        },
-        drawerState = drawerState
-    ) {
+    val isExpandedScreen = windowSize.widthSizeClass == WindowWidthSizeClass.Expanded
+    val usePermanentDrawer = isExpandedScreen && showMainUI
+
+    val drawerContent = @Composable {
+        if (showMainUI) {
+            AppDrawer(
+                route = currentRouteBase,
+                navigationToHome = { navigationActions.navigateToHome() },
+                navigationToRecarga = { navigationActions.navigateToRecarga() },
+                navigationToGuiaRemision = { navigationActions.navigateToGuiaRemision() },
+                navigationToAddProduct = { navigationActions.navigateToAddProduct() },
+                navigationToInventoryList = { navigationActions.navigateToInventary() },
+                onLogout = {
+                    loginViewModel.logout()
+                    navController.navigate(AppScreens.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                closeDrawer = { coroutineScope.launch { drawerState.close() } },
+                modifier = Modifier,
+                isPermanent = usePermanentDrawer
+            )
+        }
+    }
+
+    val scaffoldContent = @Composable {
         Scaffold(
             topBar = {
-                if (showGlobalTopBar) {
+                if (showGlobalTopBar && !usePermanentDrawer) {
                     TopAppBar(
                         title = {
                             Text(
@@ -144,6 +151,22 @@ fun AppNavGraph(
                                 )
                             )
                         },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            titleContentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    )
+                } else if (showGlobalTopBar && usePermanentDrawer) {
+                    // En pantallas expandidas, solo mostramos título si quieres, sin menú de hamburguesa
+                    TopAppBar(
+                        title = {
+                            Text(
+                                text = titleText,
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
                         colors = TopAppBarDefaults.topAppBarColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             titleContentColor = MaterialTheme.colorScheme.onPrimary
@@ -221,6 +244,21 @@ fun AppNavGraph(
                     ProductSearchScreen(navController = navController)
                 }
             }
+        }
+    }
+
+    if (usePermanentDrawer) {
+        androidx.compose.material3.PermanentNavigationDrawer(
+            drawerContent = drawerContent
+        ) {
+            scaffoldContent()
+        }
+    } else {
+        ModalNavigationDrawer(
+            drawerContent = drawerContent,
+            drawerState = drawerState
+        ) {
+            scaffoldContent()
         }
     }
 }

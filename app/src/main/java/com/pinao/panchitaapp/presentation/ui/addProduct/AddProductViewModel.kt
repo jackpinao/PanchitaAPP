@@ -43,7 +43,14 @@ data class AddProductUiState(
     val error: String? = null,
     val navigateBack: Boolean = false,
     val isEditMode: Boolean = false
-)
+) {
+    val calculatedSellingPrice: Double
+        get() {
+            val unitPurchasePrice = com.pinao.panchitaapp.domain.util.PriceUtils.roundPurchasePrice(calculatedUnitPrice)
+            val rawSellingPrice = unitPurchasePrice + (unitPurchasePrice * (productRevenueCategory / 100.0))
+            return com.pinao.panchitaapp.domain.util.PriceUtils.roundSellingPrice(rawSellingPrice)
+        }
+}
 
 @KoinViewModel
 class AddProductViewModel(

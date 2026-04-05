@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -47,10 +48,9 @@ fun AppDrawer(
     navigationToInventoryList: () -> Unit = {},
     onLogout: () -> Unit = {},
     closeDrawer: () -> Unit = {},
+    isPermanent: Boolean = false
 ) {
-    ModalDrawerSheet(
-        modifier = Modifier
-    ) {
+    val drawerContent: @Composable ColumnScope.() -> Unit = {
         DrawerHeader(modifier)
         Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.spacer_padding)))
         NavigationDrawerItem(
@@ -178,6 +178,16 @@ fun AppDrawer(
             shape = MaterialTheme.shapes.small,
             modifier = Modifier.padding(bottom = 16.dp)
         )
+    }
+
+    if (isPermanent) {
+        androidx.compose.material3.PermanentDrawerSheet(modifier = Modifier) {
+            drawerContent()
+        }
+    } else {
+        androidx.compose.material3.ModalDrawerSheet(modifier = Modifier) {
+            drawerContent()
+        }
     }
 }
 
