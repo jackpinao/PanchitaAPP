@@ -98,7 +98,6 @@ class ProductsRepositoryImpl(
         withContext(Dispatchers.IO) {
             try {
                 val unsyncedEntities = productDao.getUnsyncedProducts()
-                if (unsyncedEntities.isEmpty()) return@withContext
 
                 unsyncedEntities.forEach { entity ->
                     val productModel = ProductMapper.toDomain(entity)

@@ -63,7 +63,13 @@ class UserRepositoryImplTest {
 
     @Test
     fun `getUser should return mapped user if exists`() = runTest {
-        val entity = UserEntity("u1", "s1", "User", "u@test.com", "p", "USER", 1)
+        val entity = UserEntity("u1",
+            "s1",
+            "User",
+            "u@test.com",
+            "p",
+            "USER",
+            1)
         coEvery { mockDao.getUser("u@test.com") } returns entity
 
         val result = repository.getUser("u@test.com")
@@ -71,6 +77,54 @@ class UserRepositoryImplTest {
         assertNotNull(result)
         assertEquals("u1", result?.userId)
         assertEquals("u@test.com", result?.email)
+    }
+
+    @Test
+    fun `getUserForId should return mapped user if exists`() = runTest {
+        val entity = UserEntity("u1",
+            "s1",
+            "User",
+            "u@test.com",
+            "p",
+            "USER",
+            1)
+        coEvery { mockDao.getUserForId("u1") } returns entity
+
+        val result = repository.getUserForId("u1")
+
+        assertNotNull(result)
+        assertEquals("u1", result?.userId)
+        assertEquals("u@test.com", result?.email)
+    }
+
+    @Test
+    fun `saveAccount should call saveAccount on Dao and return mapped user`() = runTest {
+        val model = UserModel(userId = "u1",
+            storeId = "s1",
+            name = "User",
+            email = "u@test.com",
+            password = "p",
+            role = "USER",
+            active = true )
+            
+        val entity = UserEntity(
+            userId = "u1",
+            storeId = "s1",
+            name = "User",
+            email = "u@test.com",
+            password = "p",
+            role = "USER",
+            isActive = 1
+        )
+            
+        coEvery { mockDao.saveAccount(any()) } returns entity
+
+        val result = repository.saveAccount(model)
+
+        assertNotNull(result)
+        assertEquals("u1", result?.userId)
+        coVerify(exactly = 1) { mockDao.saveAccount(any()) }
+
     }
 
     @Test

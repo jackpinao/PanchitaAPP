@@ -15,7 +15,7 @@ class BrandMapperTest {
             brandId = "brand_1",
             storeId = "store_1",
             name = "Coca-Cola",
-            isSynced = 1
+            isSynced = 1,
         )
 
         val model = BrandMapper.toDomain(entity)

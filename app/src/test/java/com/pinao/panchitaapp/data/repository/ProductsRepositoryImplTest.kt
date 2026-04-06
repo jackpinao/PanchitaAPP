@@ -297,12 +297,51 @@ class ProductsRepositoryImplTest {
     }
 
     @Test
-    fun `syncUnsyncedProducts should do nothing if no unsynced products`() = runTest {
+    fun `syncUnsyncedProducts should delete unsynced products`() = runTest {
+        val entityUnsynced = ProductsEntity(
+            productId = "pUnsynced",
+            storeId = "s1",
+            categoryId = "c1",
+            brandId = "b1",
+            detailTicketEntityId = "d1",
+            name = "ProdUnsynced",
+            description = "Desc",
+            priceBuy = 10.0,
+            priceSell = 15.0,
+            priceExcludingIGV = 12.0,
+            stockQuantity = 100.0,
+            stockMin = 5.0,
+            barcode = "111",
+            image = "img",
+            lastUpdated = "date",
+            isSynced = 0,
+            isDeleted = 1
+        )
+        coEvery { mockProductDao.getPendingDeletedProducts() } returns listOf(entityUnsynced)
+        coEvery { mockRemoteDataSource.productRemoteDataSource.deleteProduct(any()) } returns true
+
+        repository.syncUnsyncedProducts()
+
+        coVerify(exactly = 1) { mockProductDao.getPendingDeletedProducts() }
+        coVerify(exactly = 1) { mockRemoteDataSource.productRemoteDataSource.deleteProduct(any()) }
+        coVerify(exactly = 1) {
+            mockProductDao.deleteProduct(withArg {
+                assertEquals("pUnsynced", it.productId)
+                assertEquals(0, it.isSynced)
+            })
+        }
+    }
+
+
+    @Test
+    fun `syncUnsyncedProducts should do nothing if no unsynced products and no pending deletions`() = runTest {
         coEvery { mockProductDao.getUnsyncedProducts() } returns emptyList()
+        coEvery { mockProductDao.getPendingDeletedProducts() } returns emptyList()
 
         repository.syncUnsyncedProducts()
 
         coVerify(exactly = 1) { mockProductDao.getUnsyncedProducts() }
+        coVerify(exactly = 1) { mockProductDao.getPendingDeletedProducts() }
         coVerify(exactly = 0) { mockRemoteDataSource.productRemoteDataSource.saveProduct(any()) }
         coVerify(exactly = 0) { mockProductDao.insertProduct(any()) }
     }
@@ -364,4 +403,5 @@ class ProductsRepositoryImplTest {
             coVerify(exactly = 1) { mockProductDao.deleteAllProducts() }
             coVerify(exactly = 0) { mockProductDao.deleteProductsNotInList(any()) }
         }
+
 }
