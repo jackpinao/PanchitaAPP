@@ -232,7 +232,8 @@ fun AppNavGraph(
                     val barcode = backStackEntry.arguments?.getString("barcode")
                     AddProductScreen(
                         navController = navController,
-                        initialBarcode = barcode
+                        initialBarcode = barcode,
+                        windowSize = windowSize
                     )
                 }
 
