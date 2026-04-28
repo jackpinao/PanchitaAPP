@@ -556,4 +556,162 @@ class AddProductViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    // --- Tests IGV / Percepción ---
+
+    @Test
+    fun `onIgvToggle true should update flag and recalculate unit price excluding IGV`() = runTest {
+        viewModel = AddProductViewModel(
+            productUseCases, categoryUseCases, scanBarcodeUseCase, brandUseCases
+        )
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            awaitItem()
+            // Ponemos costo total = 118 y stock = 1 → precio unitario bruto = 118
+            viewModel.onPriceChange("118.0")
+            awaitItem()
+            viewModel.onStockChange("1")
+            val baseState = awaitItem()
+            // Sin flags: precio unitario ≈ 118
+            Assert.assertEquals(118.0, baseState.calculatedUnitPrice, 0.01)
+
+            // Activamos IGV → precio unitario neto = 118 / 1.18 ≈ 100
+            viewModel.onIgvToggle(true)
+            val igvState = awaitItem()
+            Assert.assertTrue(igvState.priceIncludesIgv)
+            Assert.assertEquals(100.0, igvState.calculatedUnitPrice, 0.01)
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `onIgvToggle false should restore original unit price`() = runTest {
+        viewModel = AddProductViewModel(
+            productUseCases, categoryUseCases, scanBarcodeUseCase, brandUseCases
+        )
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.onPriceChange("118.0")
+            awaitItem()
+            viewModel.onStockChange("1")
+            awaitItem()
+
+            viewModel.onIgvToggle(true)
+            val igvOn = awaitItem()
+            Assert.assertEquals(100.0, igvOn.calculatedUnitPrice, 0.01)
+
+            viewModel.onIgvToggle(false)
+            val igvOff = awaitItem()
+            Assert.assertFalse(igvOff.priceIncludesIgv)
+            Assert.assertEquals(118.0, igvOff.calculatedUnitPrice, 0.01)
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `onPercepcionToggle true should update flag and recalculate unit price excluding percepcion`() = runTest {
+        viewModel = AddProductViewModel(
+            productUseCases, categoryUseCases, scanBarcodeUseCase, brandUseCases
+        )
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            awaitItem()
+            // costo total = 102, stock = 1 → precio unitario bruto = 102
+            viewModel.onPriceChange("102.0")
+            awaitItem()
+            viewModel.onStockChange("1")
+            val baseState = awaitItem()
+            Assert.assertEquals(102.0, baseState.calculatedUnitPrice, 0.01)
+
+            viewModel.onPercepcionToggle(true)
+            val percState = awaitItem()
+            Assert.assertTrue(percState.priceIncludesPercepcion)
+            // 102 / 1.02 = 100
+            Assert.assertEquals(100.0, percState.calculatedUnitPrice, 0.01)
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `onIgvToggle and onPercepcionToggle together should divide by combined factor`() = runTest {
+        viewModel = AddProductViewModel(
+            productUseCases, categoryUseCases, scanBarcodeUseCase, brandUseCases
+        )
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            awaitItem()
+            // 100 * 1.18 * 1.02 = 120.36 → neto = 100
+            viewModel.onPriceChange("120.36")
+            awaitItem()
+            viewModel.onStockChange("1")
+            awaitItem()
+
+            viewModel.onIgvToggle(true)
+            awaitItem()
+            viewModel.onPercepcionToggle(true)
+            val state = awaitItem()
+
+            Assert.assertTrue(state.priceIncludesIgv)
+            Assert.assertTrue(state.priceIncludesPercepcion)
+            Assert.assertEquals(100.0, state.calculatedUnitPrice, 0.01)
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `onPriceChange should apply IGV flag when already active`() = runTest {
+        viewModel = AddProductViewModel(
+            productUseCases, categoryUseCases, scanBarcodeUseCase, brandUseCases
+        )
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.onStockChange("1")
+            awaitItem()
+            viewModel.onIgvToggle(true)
+            awaitItem()
+
+            // Ahora cambiamos el precio con el flag ya activo
+            viewModel.onPriceChange("59.0")
+            val state = awaitItem()
+            // 59 / 1.18 ≈ 50.0
+            Assert.assertEquals(50.0, state.calculatedUnitPrice, 0.01)
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `onStockChange should apply percepcion flag when already active`() = runTest {
+        viewModel = AddProductViewModel(
+            productUseCases, categoryUseCases, scanBarcodeUseCase, brandUseCases
+        )
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.onPriceChange("102.0")
+            awaitItem()
+            viewModel.onPercepcionToggle(true)
+            awaitItem()
+
+            // Cambiamos stock con el flag ya activo → PPP = (0*0 + 100) / 2 = 50
+            viewModel.onStockChange("2")
+            val state = awaitItem()
+            // costo neto = 102/1.02 = 100, stock total = 2 → precio unitario = 50
+            Assert.assertEquals(50.0, state.calculatedUnitPrice, 0.01)
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 }

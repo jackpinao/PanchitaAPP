@@ -98,8 +98,8 @@ android {
         applicationId = "com.pinao.panchitaapp"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "4.0"
+        versionCode = 6
+        versionName = "4.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -114,6 +114,10 @@ android {
         val generateTask = tasks.named("generateKotzillaJson")
         tasks.named("pre${variantName}Build").configure {
             dependsOn(generateTask)
+        }
+        outputs.all {
+            val output = this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            output?.outputFileName = "PanchitaApp-${defaultConfig.versionCode}-${defaultConfig.versionName}-${buildType.name}.apk"
         }
     }
 

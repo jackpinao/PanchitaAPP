@@ -41,6 +41,8 @@ data class AddProductUiState(
     val listOfBrandsName: List<String> = emptyList(),
     val listOfBrandsId: List<String> = emptyList(),
     val expanded: Boolean = false,
+    val priceIncludesIgv: Boolean = false,
+    val priceIncludesPercepcion: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null,
     val navigateBack: Boolean = false,
@@ -80,13 +82,52 @@ class AddProductViewModel(
         _uiState.update { it.copy(selectedTab = tabIndex) }
     }
 
+    fun onIgvToggle(value: Boolean) {
+        _uiState.update { state ->
+            val (finalStock, unitPrice) = calculatePPP(
+                addedCostStr = state.productTotalCost,
+                addedStockStr = state.productStock,
+                existingStock = state.existingStock,
+                existingPrice = state.existingPriceBuy,
+                includesIgv = value,
+                includesPercepcion = state.priceIncludesPercepcion
+            )
+            state.copy(
+                priceIncludesIgv = value,
+                calculatedUnitPrice = unitPrice,
+                finalCalculatedStock = finalStock
+            )
+        }
+    }
+
+    fun onPercepcionToggle(value: Boolean) {
+        _uiState.update { state ->
+            val (finalStock, unitPrice) = calculatePPP(
+                addedCostStr = state.productTotalCost,
+                addedStockStr = state.productStock,
+                existingStock = state.existingStock,
+                existingPrice = state.existingPriceBuy,
+                includesIgv = state.priceIncludesIgv,
+                includesPercepcion = value
+            )
+            state.copy(
+                priceIncludesPercepcion = value,
+                calculatedUnitPrice = unitPrice,
+                finalCalculatedStock = finalStock
+            )
+        }
+    }
+
     private fun calculatePPP(
         addedCostStr: String,
         addedStockStr: String,
         existingStock: Double,
-        existingPrice: Double
+        existingPrice: Double,
+        includesIgv: Boolean = false,
+        includesPercepcion: Boolean = false
     ): Pair<Double, Double> {
-        val addedCost = addedCostStr.toDoubleOrNull() ?: 0.0
+        val rawCost = addedCostStr.toDoubleOrNull() ?: 0.0
+        val addedCost = PriceUtils.extractNetCost(rawCost, includesIgv, includesPercepcion)
         val addedStock = addedStockStr.toDoubleOrNull() ?: 0.0
 
         val finalStock = existingStock + addedStock
@@ -103,7 +144,9 @@ class AddProductViewModel(
                     addedCostStr = newTotalCost,
                     addedStockStr = state.productStock,
                     existingStock = state.existingStock,
-                    existingPrice = state.existingPriceBuy
+                    existingPrice = state.existingPriceBuy,
+                    includesIgv = state.priceIncludesIgv,
+                    includesPercepcion = state.priceIncludesPercepcion
                 )
                 state.copy(
                     productTotalCost = newTotalCost,
@@ -121,7 +164,9 @@ class AddProductViewModel(
                     addedCostStr = state.productTotalCost,
                     addedStockStr = newStock,
                     existingStock = state.existingStock,
-                    existingPrice = state.existingPriceBuy
+                    existingPrice = state.existingPriceBuy,
+                    includesIgv = state.priceIncludesIgv,
+                    includesPercepcion = state.priceIncludesPercepcion
                 )
                 state.copy(
                     productStock = newStock,

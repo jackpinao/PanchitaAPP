@@ -1,6 +1,7 @@
 ﻿package com.pinao.panchitaapp.presentation.ui.addProduct
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -97,6 +99,8 @@ fun AddProductScreen(
         onSaveInfoClick = viewModel::saveProductInfo,
         onRegisterStockClick = viewModel::registerStockEntry,
         onBackClick = { navController.popBackStack() },
+        onIgvToggle = viewModel::onIgvToggle,
+        onPercepcionToggle = viewModel::onPercepcionToggle,
         isExpanded = windowSize?.widthSizeClass == WindowWidthSizeClass.Expanded
     )
 }
@@ -119,6 +123,8 @@ fun AddProductContent(
     onSaveInfoClick: () -> Unit,
     onRegisterStockClick: () -> Unit,
     onBackClick: () -> Unit,
+    onIgvToggle: (Boolean) -> Unit = {},
+    onPercepcionToggle: (Boolean) -> Unit = {},
     isExpanded: Boolean = false
 ) {
     Screen {
@@ -165,7 +171,9 @@ fun AddProductContent(
                                     uiState = uiState,
                                     onPriceChange = onPriceChange,
                                     onStockChange = onStockChange,
-                                    onRegisterStockClick = onRegisterStockClick
+                                    onRegisterStockClick = onRegisterStockClick,
+                                    onIgvToggle = onIgvToggle,
+                                    onPercepcionToggle = onPercepcionToggle
                                 )
                             }
                         }
@@ -197,7 +205,9 @@ fun AddProductContent(
                                     uiState = uiState,
                                     onPriceChange = onPriceChange,
                                     onStockChange = onStockChange,
-                                    onSaveClick = onSaveNewClick
+                                    onSaveClick = onSaveNewClick,
+                                    onIgvToggle = onIgvToggle,
+                                    onPercepcionToggle = onPercepcionToggle
                                 )
                             }
                         }
@@ -217,7 +227,9 @@ fun AddProductContent(
                                 uiState = uiState,
                                 onPriceChange = onPriceChange,
                                 onStockChange = onStockChange,
-                                onSaveClick = onSaveNewClick
+                                onSaveClick = onSaveNewClick,
+                                onIgvToggle = onIgvToggle,
+                                onPercepcionToggle = onPercepcionToggle
                             )
                         }
                     }
@@ -394,7 +406,9 @@ private fun StockTabContent(
     uiState: AddProductUiState,
     onPriceChange: (String) -> Unit,
     onStockChange: (String) -> Unit,
-    onRegisterStockClick: () -> Unit
+    onRegisterStockClick: () -> Unit,
+    onIgvToggle: (Boolean) -> Unit = {},
+    onPercepcionToggle: (Boolean) -> Unit = {}
 ) {
     TextField(
         value = uiState.productTotalCost,
@@ -405,6 +419,43 @@ private fun StockTabContent(
             .padding(horizontal = 30.dp),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
     )
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onIgvToggle(!uiState.priceIncludesIgv) }
+        ) {
+            Checkbox(
+                checked = uiState.priceIncludesIgv,
+                onCheckedChange = onIgvToggle
+            )
+            Text(
+                text = "Precio incluye IGV (18%)",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onPercepcionToggle(!uiState.priceIncludesPercepcion) }
+        ) {
+            Checkbox(
+                checked = uiState.priceIncludesPercepcion,
+                onCheckedChange = onPercepcionToggle
+            )
+            Text(
+                text = "Precio incluye Percepción (2%)",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
     Spacer(modifier = Modifier.padding(8.dp))
 
     TextField(
@@ -615,7 +666,9 @@ private fun NewProductRightContent(
     uiState: AddProductUiState,
     onPriceChange: (String) -> Unit,
     onStockChange: (String) -> Unit,
-    onSaveClick: () -> Unit
+    onSaveClick: () -> Unit,
+    onIgvToggle: (Boolean) -> Unit = {},
+    onPercepcionToggle: (Boolean) -> Unit = {}
 ) {
     TextField(
         value = uiState.productTotalCost,
@@ -626,6 +679,43 @@ private fun NewProductRightContent(
             .padding(horizontal = 30.dp),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
     )
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onIgvToggle(!uiState.priceIncludesIgv) }
+        ) {
+            Checkbox(
+                checked = uiState.priceIncludesIgv,
+                onCheckedChange = onIgvToggle
+            )
+            Text(
+                text = "Precio incluye IGV (18%)",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onPercepcionToggle(!uiState.priceIncludesPercepcion) }
+        ) {
+            Checkbox(
+                checked = uiState.priceIncludesPercepcion,
+                onCheckedChange = onPercepcionToggle
+            )
+            Text(
+                text = "Precio incluye Percepción (2%)",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
     Spacer(modifier = Modifier.padding(8.dp))
 
     TextField(

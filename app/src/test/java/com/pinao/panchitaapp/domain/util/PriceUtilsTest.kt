@@ -44,4 +44,45 @@ class PriceUtilsTest {
         val result = PriceUtils.calculatePriceExcludingIGV(0.0)
         assertEquals(0.0, result, 0.0)
     }
+
+    // --- extractNetCost ---
+
+    @Test
+    fun `extractNetCost should return same value when no flags are active`() {
+        val result = PriceUtils.extractNetCost(100.0, includesIgv = false, includesPercepcion = false)
+        assertEquals(100.0, result, 0.0)
+    }
+
+    @Test
+    fun `extractNetCost should divide by IGV factor when only includesIgv is true`() {
+        // 118.0 / 1.18 = 100.0
+        val result = PriceUtils.extractNetCost(118.0, includesIgv = true, includesPercepcion = false)
+        assertEquals(100.0, result, 0.0001)
+    }
+
+    @Test
+    fun `extractNetCost should divide by percepcion factor when only includesPercepcion is true`() {
+        // 102.0 / 1.02 = 100.0
+        val result = PriceUtils.extractNetCost(102.0, includesIgv = false, includesPercepcion = true)
+        assertEquals(100.0, result, 0.0001)
+    }
+
+    @Test
+    fun `extractNetCost should divide by combined factor when both flags are active`() {
+        // 100 * 1.18 * 1.02 = 120.36 → 120.36 / (1.18 * 1.02) = 100.0
+        val combined = 100.0 * 1.18 * 1.02
+        val result = PriceUtils.extractNetCost(combined, includesIgv = true, includesPercepcion = true)
+        assertEquals(100.0, result, 0.01)
+    }
+
+    @Test
+    fun `extractNetCost should return 0 when totalCost is 0`() {
+        val result = PriceUtils.extractNetCost(0.0, includesIgv = true, includesPercepcion = true)
+        assertEquals(0.0, result, 0.0)
+    }
+
+    @Test
+    fun `PERCEPCION_RATE constant should be 1_02`() {
+        assertEquals(0, java.math.BigDecimal("1.02").compareTo(PriceUtils.PERCEPCION_RATE))
+    }
 }

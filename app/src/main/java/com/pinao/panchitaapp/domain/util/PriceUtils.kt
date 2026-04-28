@@ -8,6 +8,12 @@ object PriceUtils {
     private val IGV_FACTOR = BigDecimal("1.18")
 
     /**
+     * Tasa de percepción vigente (2%). Definida como constante para facilitar ajuste futuro.
+     * Para cambiar la tasa, modificar solo este valor.
+     */
+    val PERCEPCION_RATE: BigDecimal = BigDecimal("1.02")
+
+    /**
      * Redondea el precio al décimo más cercano usando BigDecimal para máxima precisión.
      * Ejemplo: 1.01 a 1.04 -> 1.0
      * Ejemplo: 1.05 a 1.09 -> 1.1
@@ -38,5 +44,31 @@ object PriceUtils {
         val bdPrice = BigDecimal(sellingPrice.toString())
         // Dividimos limitando a 2 decimales exactos
         return bdPrice.divide(IGV_FACTOR, 2, RoundingMode.HALF_UP).toDouble()
+    }
+
+    /**
+     * Extrae el costo neto de compra descontando los impuestos incluidos en el precio.
+     *
+     * Si [includesIgv] es true, el precio ya incluye IGV (18%).
+     * Si [includesPercepcion] es true, el precio ya incluye percepción ([PERCEPCION_RATE]).
+     * Ambos flags son independientes y sus factores se multiplican.
+     *
+     * Ejemplo: totalCost=118.0, includesIgv=true → costoNeto=100.0
+     * Ejemplo: totalCost=120.36, includesIgv=true, includesPercepcion=true → costoNeto=100.0
+     */
+    fun extractNetCost(
+        totalCost: Double,
+        includesIgv: Boolean,
+        includesPercepcion: Boolean
+    ): Double {
+        if (totalCost == 0.0 || totalCost.isNaN() || totalCost.isInfinite()) return 0.0
+        if (!includesIgv && !includesPercepcion) return totalCost
+
+        var factor = BigDecimal.ONE
+        if (includesIgv) factor = factor.multiply(IGV_FACTOR)
+        if (includesPercepcion) factor = factor.multiply(PERCEPCION_RATE)
+
+        val bdCost = BigDecimal(totalCost.toString())
+        return bdCost.divide(factor, 4, RoundingMode.HALF_UP).toDouble()
     }
 }
