@@ -321,7 +321,7 @@ class AddProductViewModel(
             val addedCost = state.productTotalCost.toDoubleOrNull() ?: 0.0
 
             if (addedStock <= 0.0) {
-                _uiState.update { it.copy(error = "La cantidad de stock a aÃ±adir debe ser mayor a 0") }
+                _uiState.update { it.copy(error = "La cantidad de stock a anadir debe ser mayor a 0") }
                 return@launch
             }
             if (addedCost <= 0.0) {

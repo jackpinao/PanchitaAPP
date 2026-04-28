@@ -550,7 +550,7 @@ class AddProductViewModelTest {
             awaitItem()
             viewModel.registerStockEntry()
             val errorState = awaitItem()
-            Assert.assertEquals("La cantidad de stock a añadir debe ser mayor a 0", errorState.error)
+            Assert.assertEquals("La cantidad de stock a anadir debe ser mayor a 0", errorState.error)
             coVerify(exactly = 0) { productUseCases.save(any()) }
             coVerify(exactly = 0) { productUseCases.saveStockEntry(any()) }
             cancelAndIgnoreRemainingEvents()
