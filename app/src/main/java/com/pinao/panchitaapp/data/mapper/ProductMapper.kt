@@ -1,6 +1,7 @@
 package com.pinao.panchitaapp.data.mapper
 
 import com.pinao.panchitaapp.data.source.local.entity.ProductsEntity
+import com.pinao.panchitaapp.data.source.remote.dto.FirebaseProductDto
 import com.pinao.panchitaapp.domain.model.ProductModel
 
 object ProductMapper {
@@ -45,6 +46,47 @@ object ProductMapper {
             stockMin = model.stockMin,
             isSynced = if (model.isSynced) 1 else 0,
             isDeleted = if (model.isDeleted) 1 else 0
+        )
+    }
+
+    fun toDomain(dto: FirebaseProductDto): ProductModel {
+        return ProductModel(
+            productId = dto.productId,
+            storeId = dto.storeId,
+            categoryId = dto.categoryId,
+            brandId = dto.brandId,
+            name = dto.name,
+            description = dto.description,
+            priceBuy = dto.priceBuy,
+            priceSell = dto.priceSell,
+            priceExcludingIGV = dto.priceExcludingIGV,
+            stockQuantity = dto.stockQuantity,
+            stockMin = dto.stockMin,
+            barcode = dto.barcode,
+            image = dto.image,
+            lastUpdated = dto.lastUpdated,
+            isDeleted = dto.isDeleted,
+            isSynced = true
+        )
+    }
+
+    fun toFirebaseDto(model: ProductModel): FirebaseProductDto {
+        return FirebaseProductDto(
+            productId = model.productId,
+            storeId = model.storeId,
+            categoryId = model.categoryId,
+            brandId = model.brandId,
+            name = model.name,
+            description = model.description,
+            priceBuy = model.priceBuy,
+            priceSell = model.priceSell,
+            priceExcludingIGV = model.priceExcludingIGV,
+            stockQuantity = model.stockQuantity,
+            stockMin = model.stockMin,
+            barcode = model.barcode,
+            image = model.image,
+            lastUpdated = model.lastUpdated,
+            isDeleted = model.isDeleted
         )
     }
 }

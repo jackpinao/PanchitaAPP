@@ -4,11 +4,14 @@ import android.util.Log
 import com.pinao.panchitaapp.data.mapper.BrandMapper
 import com.pinao.panchitaapp.data.mapper.CategoryMapper
 import com.pinao.panchitaapp.data.mapper.ProductMapper
+import com.pinao.panchitaapp.data.mapper.StockEntryMapper
 import com.pinao.panchitaapp.data.source.local.dao.BrandDao
 import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
 import com.pinao.panchitaapp.data.source.local.dao.ProductDao
+import com.pinao.panchitaapp.data.source.local.dao.StockEntryDao
 import com.pinao.panchitaapp.data.source.remote.RemoteDataSource
 import com.pinao.panchitaapp.domain.model.ProductModel
+import com.pinao.panchitaapp.domain.model.StockEntryModel
 import com.pinao.panchitaapp.domain.repository.ProductRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +22,7 @@ class ProductsRepositoryImpl(
     private val productDao: ProductDao,
     private val categoryDao: CategoryDao,
     private val brandDao: BrandDao,
+    private val stockEntryDao: StockEntryDao,
     private val remoteDataSource: RemoteDataSource
 ) : ProductRepository {
 
@@ -152,6 +156,12 @@ class ProductsRepositoryImpl(
                 productDao.updateProduct(entity)
                 Log.d("ProductsRepositoryImpl", "Error deleting from Firestore. Marked for deletion later.")
             }
+        }
+    }
+
+    override suspend fun saveStockEntry(model: StockEntryModel) {
+        withContext(Dispatchers.IO) {
+            stockEntryDao.upsertStockEntry(StockEntryMapper.toDatabase(model))
         }
     }
 }

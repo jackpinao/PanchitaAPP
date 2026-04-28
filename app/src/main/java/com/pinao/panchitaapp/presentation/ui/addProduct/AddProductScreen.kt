@@ -1,5 +1,6 @@
-package com.pinao.panchitaapp.presentation.ui.addProduct
+﻿package com.pinao.panchitaapp.presentation.ui.addProduct
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,9 +23,11 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -46,7 +49,6 @@ import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.presentation.navigation.AppScreens
 import com.pinao.panchitaapp.presentation.ui.Screen
 import org.koin.androidx.compose.koinViewModel
-import java.util.Locale
 
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -87,9 +89,13 @@ fun AddProductScreen(
         onStockChange = viewModel::onStockChange,
         onCategoryChange = viewModel::onCategoryChange,
         onBrandChange = viewModel::onBrandChange,
+        onManualPriceChange = viewModel::onManualPriceChange,
+        onTabSelected = viewModel::onTabSelected,
         onScannedClick = viewModel::startScanning,
         onCategoryClick = { navController.navigate(AppScreens.AddCategory.route) },
-        onSavenClick = viewModel::saveProduct,
+        onSaveNewClick = viewModel::saveProduct,
+        onSaveInfoClick = viewModel::saveProductInfo,
+        onRegisterStockClick = viewModel::registerStockEntry,
         onBackClick = { navController.popBackStack() },
         isExpanded = windowSize?.widthSizeClass == WindowWidthSizeClass.Expanded
     )
@@ -105,326 +111,573 @@ fun AddProductContent(
     onStockChange: (String) -> Unit,
     onCategoryChange: (String) -> Unit,
     onBrandChange: (String) -> Unit,
+    onManualPriceChange: (String) -> Unit,
+    onTabSelected: (Int) -> Unit,
     onScannedClick: () -> Unit,
     onCategoryClick: () -> Unit,
-    onSavenClick: () -> Unit,
+    onSaveNewClick: () -> Unit,
+    onSaveInfoClick: () -> Unit,
+    onRegisterStockClick: () -> Unit,
     onBackClick: () -> Unit,
     isExpanded: Boolean = false
 ) {
-    val listCategories = uiState.listOfCategoriesName
-    val listBrands = uiState.listOfBrandsName
-    var categoryExpanded by remember { mutableStateOf(false) }
-    var brandExpanded by remember { mutableStateOf(false) }
-
-    val leftSideContent = @Composable {
-        Row(
-            modifier = Modifier
-                .padding(start = 30.dp, end = 30.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextField(
-                value = uiState.productCode,
-                onValueChange = onCodeChange,
-                label = { Text(stringResource(R.string.barcode_label)) },
-                modifier = Modifier.weight(4f),
-                singleLine = true,
-                enabled = !uiState.isEditMode
-            )
-            if (!uiState.isEditMode) {
-                Button(
-                    onClick = onScannedClick,
-                    modifier = Modifier
-                        .padding(2.dp)
-                        .weight(1f),
-                    enabled = !uiState.isLoading
-                ) {
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.size(20.dp))
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.QrCodeScanner,
-                            contentDescription = stringResource(R.string.qr_scanner_description),
-                            modifier = Modifier.size(ButtonDefaults.IconSize)
-                        )
-                    }
-                }
-            }
-        }
-        Spacer(modifier = Modifier.padding(8.dp))
-        TextField(
-            value = uiState.productName,
-            onValueChange = { onNameChange(it.uppercase()) },
-            label = { Text(stringResource(R.string.product_name_label)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 30.dp, end = 30.dp)
-        )
-        Spacer(modifier = Modifier.padding(8.dp))
-
-        // Categoría
-        Row(
-            modifier = Modifier
-                .padding(start = 30.dp, end = 30.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ExposedDropdownMenuBox(
-                expanded = categoryExpanded,
-                onExpandedChange = { categoryExpanded = !categoryExpanded },
-                modifier = Modifier
-                    .weight(2f)
-                    .padding(end = 8.dp)
-            ) {
-                TextField(
-                    value = uiState.productCategory,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(stringResource(R.string.category_label)) },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded)
-                    },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                    modifier = Modifier
-                        .menuAnchor(type = MenuAnchorType.PrimaryNotEditable, enabled = true)
-                        .fillMaxWidth()
-                )
-
-                ExposedDropdownMenu(
-                    expanded = categoryExpanded,
-                    onDismissRequest = { categoryExpanded = false }
-                ) {
-                    if (listCategories.isEmpty()) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.no_categories)) },
-                            onClick = { categoryExpanded = false }
-                        )
-                    } else {
-                        listCategories.forEach { categoryName ->
-                            DropdownMenuItem(
-                                text = { Text(text = categoryName) },
-                                onClick = {
-                                    onCategoryChange(categoryName)
-                                    categoryExpanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
-                        }
-                    }
-                }
-            }
-
-            Button(
-                onClick = onCategoryClick,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp)
-            ) {
-                Text(text = "+")
-            }
-        }
-        Spacer(modifier = Modifier.padding(8.dp))
-
-        // Marca (Brand)
-        Row(
-            modifier = Modifier
-                .padding(start = 30.dp, end = 30.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ExposedDropdownMenuBox(
-                expanded = brandExpanded,
-                onExpandedChange = { brandExpanded = !brandExpanded },
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                TextField(
-                    value = uiState.productBrand,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(stringResource(R.string.brand_label)) },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = brandExpanded)
-                    },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                    modifier = Modifier
-                        .menuAnchor(type = MenuAnchorType.PrimaryNotEditable, enabled = true)
-                        .fillMaxWidth()
-                )
-
-                ExposedDropdownMenu(
-                    expanded = brandExpanded,
-                    onDismissRequest = { brandExpanded = false }
-                ) {
-                    if (listBrands.isEmpty()) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.no_brands)) },
-                            onClick = { brandExpanded = false }
-                        )
-                    } else {
-                        listBrands.forEach { brandName ->
-                            DropdownMenuItem(
-                                text = { Text(text = brandName) },
-                                onClick = {
-                                    onBrandChange(brandName)
-                                    brandExpanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        Spacer(modifier = Modifier.padding(8.dp))
-    }
-
-    val rightSideContent = @Composable {
-        // COSTO TOTAL DEPENDIENDO DEL MODO (NUEVO vs EDICIÓN/AÑADIR STOCK)
-        TextField(
-            value = uiState.productTotalCost,
-            onValueChange = onPriceChange,
-            label = { 
-                Text(if (uiState.isEditMode) "Costo Total del Stock Añadido" else "Costo Total de Compra") 
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 30.dp, end = 30.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-        )
-
-        Spacer(modifier = Modifier.padding(8.dp))
-
-        // STOCK DEPENDIENDO DEL MODO
-        TextField(
-            value = uiState.productStock,
-            onValueChange = onStockChange,
-            label = { 
-                Text(if (uiState.isEditMode) "Cantidad de Stock a Añadir" else stringResource(R.string.stock_label)) 
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 30.dp, end = 30.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-        )
-
-        // TEXTO INFORMATIVO PARA MOSTRAR EL CÁLCULO PPP
-        if (uiState.isEditMode) {
-            Text(
-                text = String.format(Locale.getDefault(), "Stock Actual: %.2f | Costo Unitario Actual: S/%.2f", uiState.existingStock, uiState.existingPriceBuy),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 8.dp)
-            )
-            Text(
-                text = String.format(Locale.getDefault(), "Stock Final: %.2f", uiState.finalCalculatedStock),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 4.dp)
-            )
-            Text(
-                text = String.format(Locale.getDefault(), "Nuevo Costo Promedio (PPP): S/%.2f", uiState.calculatedUnitPrice),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 2.dp)
-            )
-            if (uiState.calculatedSellingPrice > 0) {
-                Text(
-                    text = String.format(Locale.getDefault(), "Precio de Venta Calculado: S/%.2f", uiState.calculatedSellingPrice),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 2.dp)
-                )
-            }
-        } else {
-            if (uiState.calculatedUnitPrice > 0) {
-                Text(
-                    text = String.format(Locale.getDefault(), "Costo Unitario Calculado: S/%.2f", uiState.calculatedUnitPrice),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 8.dp)
-                )
-            }
-            if (uiState.calculatedSellingPrice > 0) {
-                Text(
-                    text = String.format(Locale.getDefault(), "Precio de Venta Calculado: S/%.2f", uiState.calculatedSellingPrice),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 2.dp)
-                )
-            }
-        }
-        
-        if (uiState.productCategory.isNotEmpty()) {
-            Text(
-                text = String.format(
-                    Locale.getDefault(), 
-                    "Precio de Venta Sugerido: S/%.2f (Margen: %.0f%%)", 
-                    uiState.calculatedSellingPrice, 
-                    uiState.productRevenueCategory
-                ),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 30.dp, end = 30.dp, top = 4.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.padding(15.dp))
-        Button(
-            onClick = { onSavenClick() },
-            modifier = Modifier
-                .padding(start = 30.dp, end = 30.dp)
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = if (uiState.isEditMode) {
-                    stringResource(R.string.update_action)
-                } else {
-                    stringResource(R.string.save)
-                }
-            )
-        }
-        Spacer(modifier = Modifier.padding(15.dp))
-    }
-
     Screen {
         Scaffold(
             topBar = {
                 TopApp(isEditMode = uiState.isEditMode, onBackClick = onBackClick)
             }
         ) { innerPadding ->
-            if (isExpanded) {
-                Row(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .verticalScroll(rememberScrollState())
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Spacer(modifier = Modifier.padding(8.dp))
-                        leftSideContent()
+            Column(modifier = Modifier.padding(innerPadding)) {
+                if (uiState.isEditMode) {
+                    PrimaryTabRow(selectedTabIndex = uiState.selectedTab) {
+                        Tab(
+                            selected = uiState.selectedTab == 0,
+                            onClick = { onTabSelected(0) },
+                               text = { Text(stringResource(R.string.tab_info)) }
+                        )
+                        Tab(
+                            selected = uiState.selectedTab == 1,
+                            onClick = { onTabSelected(1) },
+                               text = { Text(stringResource(R.string.stock_label)) }
+                        )
                     }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Spacer(modifier = Modifier.padding(8.dp))
-                        rightSideContent()
+
+                    AnimatedContent(
+                        targetState = uiState.selectedTab,
+                        label = "edit_tab_content"
+                    ) { tab ->
+                        Column(
+                            modifier = Modifier.verticalScroll(rememberScrollState())
+                        ) {
+                            Spacer(modifier = Modifier.padding(8.dp))
+                            if (tab == 0) {
+                                InfoTabContent(
+                                    uiState = uiState,
+                                    onNameChange = onNameChange,
+                                    onCategoryChange = onCategoryChange,
+                                    onBrandChange = onBrandChange,
+                                    onManualPriceChange = onManualPriceChange,
+                                    onCategoryClick = onCategoryClick,
+                                    onSaveInfoClick = onSaveInfoClick
+                                )
+                            } else {
+                                StockTabContent(
+                                    uiState = uiState,
+                                    onPriceChange = onPriceChange,
+                                    onStockChange = onStockChange,
+                                    onRegisterStockClick = onRegisterStockClick
+                                )
+                            }
+                        }
                     }
-                }
-            } else {
-                Column(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    Spacer(modifier = Modifier.padding(8.dp))
-                    leftSideContent()
-                    rightSideContent()
+                } else {
+                    // Modo creaciÃ³n: formulario Ãºnico
+                    if (isExpanded) {
+                        Row(
+                            modifier = Modifier
+                                .verticalScroll(rememberScrollState())
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Spacer(modifier = Modifier.padding(8.dp))
+                                NewProductLeftContent(
+                                    uiState = uiState,
+                                    onNameChange = onNameChange,
+                                    onCodeChange = onCodeChange,
+                                    onCategoryChange = onCategoryChange,
+                                    onBrandChange = onBrandChange,
+                                    onScannedClick = onScannedClick,
+                                    onCategoryClick = onCategoryClick
+                                )
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Spacer(modifier = Modifier.padding(8.dp))
+                                NewProductRightContent(
+                                    uiState = uiState,
+                                    onPriceChange = onPriceChange,
+                                    onStockChange = onStockChange,
+                                    onSaveClick = onSaveNewClick
+                                )
+                            }
+                        }
+                    } else {
+                        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                            Spacer(modifier = Modifier.padding(8.dp))
+                            NewProductLeftContent(
+                                uiState = uiState,
+                                onNameChange = onNameChange,
+                                onCodeChange = onCodeChange,
+                                onCategoryChange = onCategoryChange,
+                                onBrandChange = onBrandChange,
+                                onScannedClick = onScannedClick,
+                                onCategoryClick = onCategoryClick
+                            )
+                            NewProductRightContent(
+                                uiState = uiState,
+                                onPriceChange = onPriceChange,
+                                onStockChange = onStockChange,
+                                onSaveClick = onSaveNewClick
+                            )
+                        }
+                    }
                 }
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun InfoTabContent(
+    uiState: AddProductUiState,
+    onNameChange: (String) -> Unit,
+    onCategoryChange: (String) -> Unit,
+    onBrandChange: (String) -> Unit,
+    onManualPriceChange: (String) -> Unit,
+    onCategoryClick: () -> Unit,
+    onSaveInfoClick: () -> Unit
+) {
+    val listCategories = uiState.listOfCategoriesName
+    val listBrands = uiState.listOfBrandsName
+    var categoryExpanded by remember { mutableStateOf(false) }
+    var brandExpanded by remember { mutableStateOf(false) }
+
+    TextField(
+        value = uiState.productName,
+        onValueChange = { onNameChange(it.uppercase()) },
+        label = { Text(stringResource(R.string.product_name_label)) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp)
+    )
+    Spacer(modifier = Modifier.padding(8.dp))
+
+    Row(
+        modifier = Modifier
+            .padding(horizontal = 30.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ExposedDropdownMenuBox(
+            expanded = categoryExpanded,
+            onExpandedChange = { categoryExpanded = !categoryExpanded },
+            modifier = Modifier
+                .weight(2f)
+                .padding(end = 8.dp)
+        ) {
+            TextField(
+                value = uiState.productCategory,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text(stringResource(R.string.category_label)) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+                colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                modifier = Modifier
+                    .menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = true)
+                    .fillMaxWidth()
+            )
+            ExposedDropdownMenu(
+                expanded = categoryExpanded,
+                onDismissRequest = { categoryExpanded = false }
+            ) {
+                if (listCategories.isEmpty()) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.no_categories)) },
+                        onClick = { categoryExpanded = false }
+                    )
+                } else {
+                    listCategories.forEach { categoryName ->
+                        DropdownMenuItem(
+                            text = { Text(categoryName) },
+                            onClick = { onCategoryChange(categoryName); categoryExpanded = false },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                        )
+                    }
+                }
+            }
+        }
+        Button(
+            onClick = onCategoryClick,
+            modifier = Modifier.weight(1f).padding(start = 8.dp)
+        ) { Text("+") }
+    }
+    Spacer(modifier = Modifier.padding(8.dp))
+
+    ExposedDropdownMenuBox(
+        expanded = brandExpanded,
+        onExpandedChange = { brandExpanded = !brandExpanded },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp)
+    ) {
+        TextField(
+            value = uiState.productBrand,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(stringResource(R.string.brand_label)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = brandExpanded) },
+            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            modifier = Modifier
+                .menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = true)
+                .fillMaxWidth()
+        )
+        ExposedDropdownMenu(
+            expanded = brandExpanded,
+            onDismissRequest = { brandExpanded = false }
+        ) {
+            if (listBrands.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.no_brands)) },
+                    onClick = { brandExpanded = false }
+                )
+            } else {
+                listBrands.forEach { brandName ->
+                    DropdownMenuItem(
+                        text = { Text(brandName) },
+                        onClick = { onBrandChange(brandName); brandExpanded = false },
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                    )
+                }
+            }
+        }
+    }
+    Spacer(modifier = Modifier.padding(8.dp))
+
+    if (uiState.productRevenueCategory > 0) {
+        Text(
+              text = stringResource(R.string.category_margin_format, uiState.productRevenueCategory),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp)
+        )
+        Spacer(modifier = Modifier.padding(4.dp))
+    }
+
+    TextField(
+        value = uiState.productManualPrice,
+        onValueChange = onManualPriceChange,
+            label = { Text(stringResource(R.string.manual_price_label)) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        supportingText = {
+            Text(
+                    stringResource(R.string.manual_price_helper),
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
+    )
+    Spacer(modifier = Modifier.padding(15.dp))
+
+    Button(
+        onClick = onSaveInfoClick,
+        enabled = !uiState.isLoading,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp)
+    ) {
+        if (uiState.isLoading) {
+            CircularProgressIndicator(modifier = Modifier.size(20.dp))
+        } else {
+            Text(stringResource(R.string.save_info_action))
+        }
+    }
+    Spacer(modifier = Modifier.padding(15.dp))
+}
+
+@Composable
+private fun StockTabContent(
+    uiState: AddProductUiState,
+    onPriceChange: (String) -> Unit,
+    onStockChange: (String) -> Unit,
+    onRegisterStockClick: () -> Unit
+) {
+    TextField(
+        value = uiState.productTotalCost,
+        onValueChange = onPriceChange,
+            label = { Text(stringResource(R.string.total_stock_cost_label)) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+    )
+    Spacer(modifier = Modifier.padding(8.dp))
+
+    TextField(
+        value = uiState.productStock,
+        onValueChange = onStockChange,
+           label = { Text(stringResource(R.string.stock_to_add_label)) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+    )
+
+    Text(
+        text = stringResource(R.string.current_stock_info_format, uiState.existingStock, uiState.existingPriceBuy),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 8.dp)
+    )
+    Text(
+        text = stringResource(R.string.final_stock_format, uiState.finalCalculatedStock),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp)
+    )
+    Text(
+        text = stringResource(R.string.new_avg_cost_format, uiState.calculatedUnitPrice),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 2.dp)
+    )
+    if (uiState.calculatedSellingPrice > 0) {
+        Text(
+            text = stringResource(R.string.calculated_sell_price_format, uiState.calculatedSellingPrice),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 2.dp)
+        )
+    }
+
+    Spacer(modifier = Modifier.padding(15.dp))
+
+    Button(
+        onClick = onRegisterStockClick,
+        enabled = !uiState.isLoading,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp)
+    ) {
+        if (uiState.isLoading) {
+            CircularProgressIndicator(modifier = Modifier.size(20.dp))
+        } else {
+            Text(stringResource(R.string.register_stock_entry_action))
+        }
+    }
+    Spacer(modifier = Modifier.padding(15.dp))
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NewProductLeftContent(
+    uiState: AddProductUiState,
+    onNameChange: (String) -> Unit,
+    onCodeChange: (String) -> Unit,
+    onCategoryChange: (String) -> Unit,
+    onBrandChange: (String) -> Unit,
+    onScannedClick: () -> Unit,
+    onCategoryClick: () -> Unit
+) {
+    val listCategories = uiState.listOfCategoriesName
+    val listBrands = uiState.listOfBrandsName
+    var categoryExpanded by remember { mutableStateOf(false) }
+    var brandExpanded by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier
+            .padding(horizontal = 30.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextField(
+            value = uiState.productCode,
+            onValueChange = onCodeChange,
+            label = { Text(stringResource(R.string.barcode_label)) },
+            modifier = Modifier.weight(4f),
+            singleLine = true,
+            enabled = !uiState.isEditMode
+        )
+        Button(
+            onClick = onScannedClick,
+            modifier = Modifier.padding(2.dp).weight(1f),
+            enabled = !uiState.isLoading
+        ) {
+            if (uiState.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+            } else {
+                Icon(
+                    imageVector = Icons.Default.QrCodeScanner,
+                    contentDescription = stringResource(R.string.qr_scanner_description),
+                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                )
+            }
+        }
+    }
+    Spacer(modifier = Modifier.padding(8.dp))
+
+    TextField(
+        value = uiState.productName,
+        onValueChange = { onNameChange(it.uppercase()) },
+        label = { Text(stringResource(R.string.product_name_label)) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp)
+    )
+    Spacer(modifier = Modifier.padding(8.dp))
+
+    Row(
+        modifier = Modifier
+            .padding(horizontal = 30.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ExposedDropdownMenuBox(
+            expanded = categoryExpanded,
+            onExpandedChange = { categoryExpanded = !categoryExpanded },
+            modifier = Modifier.weight(2f).padding(end = 8.dp)
+        ) {
+            TextField(
+                value = uiState.productCategory,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text(stringResource(R.string.category_label)) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+                colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                modifier = Modifier
+                    .menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = true)
+                    .fillMaxWidth()
+            )
+            ExposedDropdownMenu(
+                expanded = categoryExpanded,
+                onDismissRequest = { categoryExpanded = false }
+            ) {
+                if (listCategories.isEmpty()) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.no_categories)) },
+                        onClick = { categoryExpanded = false }
+                    )
+                } else {
+                    listCategories.forEach { categoryName ->
+                        DropdownMenuItem(
+                            text = { Text(categoryName) },
+                            onClick = { onCategoryChange(categoryName); categoryExpanded = false },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                        )
+                    }
+                }
+            }
+        }
+        Button(
+            onClick = onCategoryClick,
+            modifier = Modifier.weight(1f).padding(start = 8.dp)
+        ) { Text("+") }
+    }
+    Spacer(modifier = Modifier.padding(8.dp))
+
+    ExposedDropdownMenuBox(
+        expanded = brandExpanded,
+        onExpandedChange = { brandExpanded = !brandExpanded },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp)
+    ) {
+        TextField(
+            value = uiState.productBrand,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(stringResource(R.string.brand_label)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = brandExpanded) },
+            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            modifier = Modifier
+                .menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = true)
+                .fillMaxWidth()
+        )
+        ExposedDropdownMenu(
+            expanded = brandExpanded,
+            onDismissRequest = { brandExpanded = false }
+        ) {
+            if (listBrands.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.no_brands)) },
+                    onClick = { brandExpanded = false }
+                )
+            } else {
+                listBrands.forEach { brandName ->
+                    DropdownMenuItem(
+                        text = { Text(brandName) },
+                        onClick = { onBrandChange(brandName); brandExpanded = false },
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                    )
+                }
+            }
+        }
+    }
+    Spacer(modifier = Modifier.padding(8.dp))
+}
+
+@Composable
+private fun NewProductRightContent(
+    uiState: AddProductUiState,
+    onPriceChange: (String) -> Unit,
+    onStockChange: (String) -> Unit,
+    onSaveClick: () -> Unit
+) {
+    TextField(
+        value = uiState.productTotalCost,
+        onValueChange = onPriceChange,
+            label = { Text(stringResource(R.string.total_purchase_cost_label)) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+    )
+    Spacer(modifier = Modifier.padding(8.dp))
+
+    TextField(
+        value = uiState.productStock,
+        onValueChange = onStockChange,
+        label = { Text(stringResource(R.string.stock_label)) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+    )
+
+    if (uiState.calculatedUnitPrice > 0) {
+        Text(
+                text = stringResource(R.string.calculated_unit_cost_format, uiState.calculatedUnitPrice),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 8.dp)
+        )
+    }
+    if (uiState.calculatedSellingPrice > 0) {
+        Text(
+                text = stringResource(R.string.calculated_sell_price_format, uiState.calculatedSellingPrice),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, bottom = 4.dp)
+        )
+    }
+    if (uiState.productCategory.isNotEmpty()) {
+        Text(
+                text = stringResource(R.string.suggested_price_format, uiState.calculatedSellingPrice, uiState.productRevenueCategory),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, bottom = 4.dp)
+        )
+    }
+
+    Spacer(modifier = Modifier.padding(15.dp))
+    Button(
+        onClick = onSaveClick,
+        enabled = !uiState.isLoading,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp)
+    ) {
+        if (uiState.isLoading) {
+            CircularProgressIndicator(modifier = Modifier.size(20.dp))
+        } else {
+            Text(stringResource(R.string.save))
+        }
+    }
+    Spacer(modifier = Modifier.padding(15.dp))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -455,5 +708,13 @@ private fun TopApp(isEditMode: Boolean, onBackClick: () -> Unit) {
 @Composable
 fun AddProductScreenPreview() {
     val uiState = AddProductUiState(productName = "Producto Test", isEditMode = true)
-    AddProductContent(uiState, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+    AddProductContent(
+        uiState = uiState,
+        onNameChange = {}, onCodeChange = {}, onPriceChange = {}, onStockChange = {},
+        onCategoryChange = {}, onBrandChange = {}, onManualPriceChange = {},
+        onTabSelected = {}, onScannedClick = {}, onCategoryClick = {},
+        onSaveNewClick = {}, onSaveInfoClick = {}, onRegisterStockClick = {}, onBackClick = {}
+    )
 }
+
+

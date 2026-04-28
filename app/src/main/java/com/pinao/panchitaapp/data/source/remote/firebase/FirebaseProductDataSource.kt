@@ -2,7 +2,9 @@ package com.pinao.panchitaapp.data.source.remote.firebase
 
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
+import com.pinao.panchitaapp.data.mapper.ProductMapper
 import com.pinao.panchitaapp.data.source.remote.ProductRemoteDataSource
+import com.pinao.panchitaapp.data.source.remote.dto.FirebaseProductDto
 import com.pinao.panchitaapp.domain.model.ProductModel
 import kotlinx.coroutines.tasks.await
 
@@ -14,12 +16,12 @@ class FirebaseProductDataSource(
 
     override suspend fun getProducts(): List<ProductModel> {
         val snapshot = productsCollection.get().await()
-        return snapshot.toObjects(ProductModel::class.java)
+        return snapshot.toObjects(FirebaseProductDto::class.java).map { ProductMapper.toDomain(it) }
     }
 
     override suspend fun saveProduct(product: ProductModel): Boolean {
         return try {
-            productsCollection.document(product.productId).set(product).await()
+            productsCollection.document(product.productId).set(ProductMapper.toFirebaseDto(product)).await()
             true
         } catch (e: Exception){
             Log.e("FirebaseProductDataSource", "Error saving product", e)

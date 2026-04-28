@@ -40,5 +40,17 @@ data class StockEntryEntity(
     val documentNumber: String?,
 
     @ColumnInfo(name = "is_synced")
-    val isSynced: Int = 0
+    val isSynced: Int = 0,
+
+    @ColumnInfo(name = "product_id", defaultValue = "")
+    val productId: String = "",
+
+    @ColumnInfo(name = "quantity_added", defaultValue = "0.0")
+    val quantityAdded: Double = 0.0,
+
+    @ColumnInfo(name = "unit_cost_ppp", defaultValue = "0.0")
+    val unitCostPpp: Double = 0.0,
+
+    @ColumnInfo(name = "movement_type", defaultValue = "ENTRY")
+    val movementType: String = "ENTRY"
 )

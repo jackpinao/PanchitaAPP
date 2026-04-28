@@ -35,6 +35,7 @@ import com.pinao.panchitaapp.data.source.remote.BrandRemoteDataSource
 import com.pinao.panchitaapp.data.source.remote.CategoryRemoteDataSource
 import com.pinao.panchitaapp.data.source.remote.ProductRemoteDataSource
 import com.pinao.panchitaapp.data.source.remote.RemoteDataSource
+import com.pinao.panchitaapp.data.source.remote.RemoteDataSourceImpl
 import com.pinao.panchitaapp.data.source.remote.firebase.FirebaseBrandDataSource
 import com.pinao.panchitaapp.data.source.remote.firebase.FirebaseCategoryDataSource
 import com.pinao.panchitaapp.data.source.remote.firebase.FirebaseProductDataSource
@@ -65,8 +66,8 @@ class DataModule {
             AppDatabase::class.java,
             DATABASE_NAME
         )
-            .addMigrations(com.pinao.panchitaapp.data.source.local.database.Migration17To18())
-            .fallbackToDestructiveMigration()
+            .addMigrations(com.pinao.panchitaapp.data.source.local.database.Migration17To18(), com.pinao.panchitaapp.data.source.local.database.Migration18To19())
+            .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
     }
 
@@ -155,14 +156,20 @@ class DataModule {
         return RechangeRepositoryImpl(api, rechangeDao)
     }
 
+    @Single
+    fun provideStockEntryDao(database: AppDatabase): com.pinao.panchitaapp.data.source.local.dao.StockEntryDao {
+        return database.stockEntryDao()
+    }
+
     @Single(createdAtStart = true)
     fun provideProductRepository(
         productDao: ProductDao,
         categoryDao: CategoryDao,
         brandDao: BrandDao,
+        stockEntryDao: com.pinao.panchitaapp.data.source.local.dao.StockEntryDao,
         remoteDataSource: RemoteDataSource
     ): ProductRepository {
-        return ProductsRepositoryImpl(productDao, categoryDao, brandDao, remoteDataSource)
+        return ProductsRepositoryImpl(productDao, categoryDao, brandDao, stockEntryDao, remoteDataSource)
     }
 
     @Single(createdAtStart = true)
@@ -247,7 +254,7 @@ class DataModule {
         brandRemoteDataSource: BrandRemoteDataSource,
         categoryRemoteDataSource: CategoryRemoteDataSource,
         productRemoteDataSource: ProductRemoteDataSource
-    ) = RemoteDataSource(
+    ): RemoteDataSource = RemoteDataSourceImpl(
         brandRemoteDataSource = brandRemoteDataSource,
         categoryRemoteDataSource = categoryRemoteDataSource,
         productRemoteDataSource = productRemoteDataSource

@@ -33,7 +33,7 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -168,7 +168,7 @@ private fun TopBar(
     val selectedTab = remember { mutableIntStateOf(0) }
 
     Column {
-        TabRow(selectedTabIndex = selectedTab.intValue) {
+        PrimaryTabRow(selectedTabIndex = selectedTab.intValue) {
             tabs.forEachIndexed { index, tab ->
                 Tab(
                     selected = selectedTab.intValue == index,
@@ -547,8 +547,8 @@ private fun AddButtonOutlined(
 
         },
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = if (isClick && isValRechargeAmount == num) Color.Gray else Color.White,
-            contentColor = Color.Red
+            containerColor = if (isClick && isValRechargeAmount == num) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.error
         ),
         enabled = !isEnabled
     ) {
@@ -615,7 +615,7 @@ private fun AddButtonElevate(
         Text(
             text = stringResource(R.string.recharge_button),
             modifier = Modifier.padding(16.dp),
-            fontSize = 16.sp
+            style = MaterialTheme.typography.labelLarge
         )
     }
 }

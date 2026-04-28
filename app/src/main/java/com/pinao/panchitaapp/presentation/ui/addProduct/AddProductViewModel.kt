@@ -1,4 +1,4 @@
-package com.pinao.panchitaapp.presentation.ui.addProduct
+﻿package com.pinao.panchitaapp.presentation.ui.addProduct
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import android.util.Log
 import com.pinao.panchitaapp.domain.model.BrandModel
 import com.pinao.panchitaapp.domain.model.ProductModel
+import com.pinao.panchitaapp.domain.model.StockEntryModel
 import com.pinao.panchitaapp.domain.usecase.brand.BrandUseCases
 import com.pinao.panchitaapp.domain.util.PriceUtils
 import kotlinx.coroutines.flow.firstOrNull
@@ -33,6 +34,7 @@ data class AddProductUiState(
     val productBrandId: String = "",
     val productStock: String = "",
     val productRevenueCategory: Double = 0.0,
+    val productManualPrice: String = "",
     val listOfCategoriesName: List<String> = emptyList(),
     val listOfCategoriesId: List<String> = emptyList(),
     val listOfCategoriesRevenue: List<Double> = emptyList(),
@@ -42,7 +44,8 @@ data class AddProductUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val navigateBack: Boolean = false,
-    val isEditMode: Boolean = false
+    val isEditMode: Boolean = false,
+    val selectedTab: Int = 0
 ) {
     val calculatedSellingPrice: Double
         get() {
@@ -67,10 +70,16 @@ class AddProductViewModel(
         _uiState.update { it.copy(productName = newName) }
     }
 
-    /**
-     * Calcula el Precio Promedio Ponderado (PPP) basándose en el inventario
-     * existente y el nuevo stock que se está añadiendo.
-     */
+    fun onManualPriceChange(newPrice: String) {
+        if (newPrice.isEmpty() || newPrice.matches(Regex("^\\d*\\.?\\d*$"))) {
+            _uiState.update { it.copy(productManualPrice = newPrice) }
+        }
+    }
+
+    fun onTabSelected(tabIndex: Int) {
+        _uiState.update { it.copy(selectedTab = tabIndex) }
+    }
+
     private fun calculatePPP(
         addedCostStr: String,
         addedStockStr: String,
@@ -167,7 +176,7 @@ class AddProductViewModel(
                     val categoryIndex = state.listOfCategoriesId.indexOf(product.categoryId)
                     val categoryName = if (categoryIndex != -1) state.listOfCategoriesName[categoryIndex] else ""
                     val categoryRevenue = if (categoryIndex != -1) state.listOfCategoriesRevenue[categoryIndex] else 0.0
-                    
+
                     val brandIndex = state.listOfBrandsId.indexOf(product.brandId)
                     val brandName = if (brandIndex != -1) state.listOfBrandsName[brandIndex] else ""
 
@@ -175,18 +184,13 @@ class AddProductViewModel(
                         productId = product.productId,
                         productCode = product.barcode,
                         productName = product.name,
-                        
-                        // Para la edición, dejamos los campos vacíos para que el usuario 
-                        // ingrese solo la cantidad "extra" que está comprando.
                         productTotalCost = "",
                         productStock = "",
-                        
-                        // Guardamos los valores existentes para calcular el PPP
                         existingStock = product.stockQuantity,
                         existingPriceBuy = product.priceBuy,
                         finalCalculatedStock = product.stockQuantity,
                         calculatedUnitPrice = product.priceBuy,
-                        
+                        productManualPrice = if (product.priceSell > 0) product.priceSell.toString() else "",
                         productCategory = categoryName,
                         productCategoryId = product.categoryId,
                         productBrand = brandName,
@@ -243,12 +247,136 @@ class AddProductViewModel(
     private fun listBrands() {
         viewModelScope.launch {
             brandUseCases.getAll().collect { brands ->
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
                         listOfBrandsName = brands.map { b -> b.name },
                         listOfBrandsId = brands.map { b -> b.brandId }
-                    ) 
+                    )
                 }
+            }
+        }
+    }
+
+    /**
+     * Guarda solo la informaciÃ³n descriptiva del producto (nombre, categorÃ­a, marca, precio de venta).
+     * No modifica el stock ni el costo promedio ponderado (PPP).
+     */
+    fun saveProductInfo() {
+        viewModelScope.launch {
+            val state = _uiState.value
+
+            if (state.productName.isBlank() || state.productCategoryId.isBlank()) {
+                _uiState.update { it.copy(error = "El nombre y la categorÃ­a son obligatorios") }
+                return@launch
+            }
+
+            _uiState.update { it.copy(isLoading = true) }
+
+            val manualPrice = state.productManualPrice.toDoubleOrNull()
+            val finalPriceSell = if (manualPrice != null && manualPrice > 0) {
+                PriceUtils.roundSellingPrice(manualPrice)
+            } else {
+                val unitPurchasePrice = PriceUtils.roundPurchasePrice(state.existingPriceBuy)
+                val rawSellingPrice = unitPurchasePrice + (unitPurchasePrice * (state.productRevenueCategory / 100.0))
+                PriceUtils.roundSellingPrice(rawSellingPrice)
+            }
+            val priceWithoutIGV = PriceUtils.calculatePriceExcludingIGV(finalPriceSell)
+
+            try {
+                var brandId = state.productBrandId
+                if (brandId.isBlank() && state.listOfBrandsId.isNotEmpty()) {
+                    brandId = state.listOfBrandsId.first()
+                }
+
+                val product = ProductModel(
+                    productId = state.productId ?: UUID.randomUUID().toString(),
+                    name = state.productName,
+                    brandId = brandId,
+                    barcode = state.productCode,
+                    priceBuy = state.existingPriceBuy,
+                    priceSell = finalPriceSell,
+                    priceExcludingIGV = priceWithoutIGV,
+                    stockQuantity = state.existingStock,
+                    categoryId = state.productCategoryId
+                )
+
+                productUseCases.save(product)
+                _uiState.update { it.copy(isLoading = false, navigateBack = true) }
+            } catch (e: Exception) {
+                Log.e("AddProductViewModel", "Error saving product info", e)
+                _uiState.update { it.copy(error = "Error al guardar: ${e.message}", isLoading = false) }
+            }
+        }
+    }
+
+    /**
+     * Registra una entrada de stock: recalcula el PPP, actualiza el stock del producto
+     * y guarda el movimiento en StockEntry para trazabilidad.
+     */
+    fun registerStockEntry() {
+        viewModelScope.launch {
+            val state = _uiState.value
+
+            val addedStock = state.productStock.toDoubleOrNull() ?: 0.0
+            val addedCost = state.productTotalCost.toDoubleOrNull() ?: 0.0
+
+            if (addedStock <= 0.0) {
+                _uiState.update { it.copy(error = "La cantidad de stock a aÃ±adir debe ser mayor a 0") }
+                return@launch
+            }
+            if (addedCost <= 0.0) {
+                _uiState.update { it.copy(error = "El costo total debe ser mayor a 0") }
+                return@launch
+            }
+
+            _uiState.update { it.copy(isLoading = true) }
+
+            val unitPurchasePrice = PriceUtils.roundPurchasePrice(state.calculatedUnitPrice)
+            val finalStock = state.finalCalculatedStock
+
+            val revenueCategory = state.productRevenueCategory
+            val rawSellingPrice = unitPurchasePrice + (unitPurchasePrice * (revenueCategory / 100))
+            val finalSellingPrice = PriceUtils.roundSellingPrice(rawSellingPrice)
+            val priceWithoutIGV = PriceUtils.calculatePriceExcludingIGV(finalSellingPrice)
+
+            try {
+                var brandId = state.productBrandId
+                if (brandId.isBlank() && state.listOfBrandsId.isNotEmpty()) {
+                    brandId = state.listOfBrandsId.first()
+                }
+
+                val product = ProductModel(
+                    productId = state.productId ?: UUID.randomUUID().toString(),
+                    name = state.productName,
+                    brandId = brandId,
+                    barcode = state.productCode,
+                    priceBuy = unitPurchasePrice,
+                    priceSell = finalSellingPrice,
+                    priceExcludingIGV = priceWithoutIGV,
+                    stockQuantity = finalStock,
+                    categoryId = state.productCategoryId
+                )
+                productUseCases.save(product)
+
+                val stockEntry = StockEntryModel(
+                    entryId = UUID.randomUUID().toString(),
+                    storeId = "",
+                    supplierId = "",
+                    entryDate = System.currentTimeMillis(),
+                    totalCost = addedCost,
+                    documentNumber = null,
+                    isSynced = false,
+                    productId = product.productId,
+                    quantityAdded = addedStock,
+                    unitCostPpp = unitPurchasePrice,
+                    movementType = "ENTRY"
+                )
+                productUseCases.saveStockEntry(stockEntry)
+
+                _uiState.update { it.copy(isLoading = false, navigateBack = true) }
+            } catch (e: Exception) {
+                Log.e("AddProductViewModel", "Error registering stock entry", e)
+                _uiState.update { it.copy(error = "Error al registrar stock: ${e.message}", isLoading = false) }
             }
         }
     }
@@ -256,27 +384,24 @@ class AddProductViewModel(
     fun saveProduct() {
         viewModelScope.launch {
             val state = _uiState.value
-            
+
             if (state.productName.isBlank() || state.productCode.isBlank() || state.productCategoryId.isBlank()) {
                 _uiState.update { it.copy(error = "Por favor, completa los campos obligatorios") }
                 return@launch
             }
-            
-            // Si es un producto nuevo, el costo y el stock inicial no pueden estar vacíos
+
             if (!state.isEditMode && (state.productTotalCost.isBlank() || state.productStock.isBlank())) {
                 _uiState.update { it.copy(error = "El costo total y el stock son obligatorios para un nuevo producto") }
                 return@launch
             }
 
             _uiState.update { it.copy(isLoading = true) }
-            
-            // Tomamos el Costo Unitario calculado con PPP y el Stock final.
+
             val unitPurchasePrice = PriceUtils.roundPurchasePrice(state.calculatedUnitPrice)
             val finalStock = state.finalCalculatedStock
-            
-            val revenueCategory = state.productRevenueCategory
 
-            val rawSellingPrice = unitPurchasePrice + (unitPurchasePrice * (revenueCategory/100))
+            val revenueCategory = state.productRevenueCategory
+            val rawSellingPrice = unitPurchasePrice + (unitPurchasePrice * (revenueCategory / 100))
             val finalSellingPrice = PriceUtils.roundSellingPrice(rawSellingPrice)
             val priceWithoutIGV = PriceUtils.calculatePriceExcludingIGV(finalSellingPrice)
 
@@ -297,7 +422,7 @@ class AddProductViewModel(
                     name = state.productName,
                     brandId = brandId,
                     barcode = state.productCode,
-                    priceBuy = unitPurchasePrice, 
+                    priceBuy = unitPurchasePrice,
                     priceSell = finalSellingPrice,
                     priceExcludingIGV = priceWithoutIGV,
                     stockQuantity = finalStock,
@@ -319,3 +444,4 @@ class AddProductViewModel(
         _uiState.update { it.copy(error = null) }
     }
 }
+

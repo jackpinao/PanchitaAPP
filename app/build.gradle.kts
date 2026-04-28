@@ -26,7 +26,7 @@ kover {
                     // Ignorar clases generadas (Room, BuildConfigs, etc.)
                     classes("com.pinao.panchitaapp.data.source.local.entity.*")
                     classes("*.dto.*")
-                    // También es buena práctica excluir el código autogenerado por Room/Hilt
+                    // Excluir el código autogenerado por Room
                     classes("*_Impl*")
                     classes("*_ViewBinding*", "*BuildConfig*", "*_Factory*", "*_MembersInjector*", "*_**")
                     // Ignorar modelos de datos y estados
@@ -97,7 +97,7 @@ android {
     defaultConfig {
         applicationId = "com.pinao.panchitaapp"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 4
         versionName = "4.0"
 

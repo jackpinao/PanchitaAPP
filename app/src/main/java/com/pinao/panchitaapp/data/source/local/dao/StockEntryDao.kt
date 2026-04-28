@@ -35,6 +35,12 @@ interface StockEntryDao {
     suspend fun getUnsyncedEntries(): List<StockEntryEntity>
 
     /**
+     * Obtiene las entradas de stock de un producto específico.
+     */
+    @Query("SELECT * FROM StockEntry WHERE product_id = :productId ORDER BY entry_date DESC")
+    fun getEntriesByProductId(productId: String): Flow<List<StockEntryEntity>>
+
+    /**
      * Elimina una entrada de stock.
      */
     @Delete

@@ -35,6 +35,7 @@ import com.pinao.panchitaapp.domain.usecase.products.FindCodeProductUseCase
 import com.pinao.panchitaapp.domain.usecase.products.GetAllProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.RefreshProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.SaveProductsUseCase
+import com.pinao.panchitaapp.domain.usecase.products.SaveStockEntryUseCase
 import com.pinao.panchitaapp.domain.usecase.products.ScanBarcodeUseCase
 import com.pinao.panchitaapp.domain.usecase.products.SearchProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.SyncUnsyncedProductsUseCase
@@ -58,8 +59,7 @@ class DomainModule {
     /*
     RECHANGE USE CASES
     */
-    //@Factory
-    @Single
+    @Factory
     fun provideGetAllDateRechangeUseCase(
         rechangeRepository: RechangeRepository
     ) = GetAllDateRechangeUseCase(rechangeRepository)
@@ -111,6 +111,11 @@ class DomainModule {
     fun provideSyncUnsyncedProductsUseCase(
         productRepository: ProductRepository
     ) = SyncUnsyncedProductsUseCase(productRepository)
+
+    @Factory
+    fun provideSaveStockEntryUseCase(
+        productRepository: ProductRepository
+    ) = SaveStockEntryUseCase(productRepository)
 
     /*
     CATEGORY USE CASES
@@ -204,9 +209,8 @@ class DomainModule {
 
     @Factory
     fun provideRefrershProductsUseCase(
-        productRepository: ProductRepository,
-        authRepository: AuthRepository
-    ) = RefreshProductsUseCase(productRepository, authRepository)
+        productRepository: ProductRepository
+    ) = RefreshProductsUseCase(productRepository)
 
     @Factory
     fun provideCompleteSaleUseCase(

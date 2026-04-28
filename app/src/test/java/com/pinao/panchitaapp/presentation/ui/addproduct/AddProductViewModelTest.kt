@@ -445,4 +445,115 @@ class AddProductViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test
+    fun `saveProductInfo should not change existing stock or priceBuy`() = runTest {
+        coEvery { productUseCases.save(any()) } returns Unit
+
+        val mockProduct = ProductModel(
+            productId = "prod1", barcode = "775123", name = "Original Name",
+            categoryId = "cat1", brandId = "brand1", priceBuy = 3.0, priceSell = 5.0,
+            priceExcludingIGV = 4.24, stockQuantity = 20.0
+        )
+        every { productUseCases.findByCode("775123") } returns flowOf(mockProduct)
+
+        viewModel = AddProductViewModel(
+            productUseCases, categoryUseCases, scanBarcodeUseCase, brandUseCases
+        )
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.loadProduct("775123")
+            Assert.assertTrue(awaitItem().isLoading)
+            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+            val loadedState = awaitItem()
+            Assert.assertTrue(loadedState.isEditMode)
+
+            viewModel.onNameChange("NUEVO NOMBRE")
+            awaitItem()
+
+            viewModel.saveProductInfo()
+            Assert.assertTrue(awaitItem().isLoading)
+            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+            val saved = expectMostRecentItem()
+            Assert.assertTrue(saved.navigateBack)
+
+            coVerify {
+                productUseCases.save(match { product ->
+                    product.name == "NUEVO NOMBRE" &&
+                    product.stockQuantity == 20.0 &&
+                    product.priceBuy == 3.0
+                })
+            }
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `registerStockEntry should recalculate PPP and save StockEntry`() = runTest {
+        coEvery { productUseCases.save(any()) } returns Unit
+        coEvery { productUseCases.saveStockEntry(any()) } returns Unit
+
+        val mockProduct = ProductModel(
+            productId = "prod1", barcode = "775123", name = "Inca Kola",
+            categoryId = "cat1", brandId = "brand1", priceBuy = 2.0, priceSell = 3.0,
+            priceExcludingIGV = 2.54, stockQuantity = 10.0
+        )
+        every { productUseCases.findByCode("775123") } returns flowOf(mockProduct)
+
+        viewModel = AddProductViewModel(
+            productUseCases, categoryUseCases, scanBarcodeUseCase, brandUseCases
+        )
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.loadProduct("775123")
+            Assert.assertTrue(awaitItem().isLoading)
+            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+            awaitItem() // loaded state
+
+            // PPP: (10*2.0 + 10.0) / (10 + 5) = 30/15 = 2.0
+            viewModel.onPriceChange("10.0")  // totalCost para 5 unidades
+            awaitItem()
+            viewModel.onStockChange("5")
+            awaitItem()
+
+            viewModel.registerStockEntry()
+            Assert.assertTrue(awaitItem().isLoading)
+            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+            val successState = expectMostRecentItem()
+            Assert.assertTrue(successState.navigateBack)
+
+            coVerify { productUseCases.save(match { it.stockQuantity == 15.0 }) }
+            coVerify { productUseCases.saveStockEntry(match { entry ->
+                entry.productId == "prod1" &&
+                entry.quantityAdded == 5.0 &&
+                entry.movementType == "ENTRY"
+            }) }
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `registerStockEntry with zero stock should show error and not save`() = runTest {
+        viewModel = AddProductViewModel(
+            productUseCases, categoryUseCases, scanBarcodeUseCase, brandUseCases
+        )
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.registerStockEntry()
+            val errorState = awaitItem()
+            Assert.assertEquals("La cantidad de stock a añadir debe ser mayor a 0", errorState.error)
+            coVerify(exactly = 0) { productUseCases.save(any()) }
+            coVerify(exactly = 0) { productUseCases.saveStockEntry(any()) }
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 }

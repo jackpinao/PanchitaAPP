@@ -4,7 +4,7 @@ import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.pinao.panchitaapp.data.source.local.dao.SaleDetailDao
 import com.pinao.panchitaapp.data.source.local.dao.SaleDao
-import com.pinao.panchitaapp.data.source.local.entity.SaleDetailEntity
+import com.pinao.panchitaapp.data.mapper.SaleDetailMapper
 import com.pinao.panchitaapp.data.mapper.SaleMapper
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.model.SaleModel
@@ -30,21 +30,14 @@ class SaleRepositoryImpl(
      * Guarda una venta completa sincronizando localmente y en la nube.
      * Utiliza transacciones locales y WriteBatch remoto para garantizar la integridad.
      */
-    override suspend fun saveFullSale(sale: SaleModel, products: List<ProductModel>) {
+    override suspend fun saveFullSale(ticket: SaleModel, products: List<ProductModel>) {
         withContext(Dispatchers.IO) {
             try {
                 // 1. Persistencia Local (Room)
-                val saleEntity = SaleMapper.toEntity(sale)
+                val saleEntity = SaleMapper.toEntity(ticket)
                 val batch = firestore.batch()
                 val detailEntities = products.map { product ->
-                    SaleDetailEntity(
-                        saleDetailId = UUID.randomUUID().toString(),
-                        saleId = sale.saleId,
-                        productId = product.barcode,
-                        quantity = product.stockQuantity,
-                        priceAtSale = product.priceSell,
-                        subtotal = product.priceSell * product.stockQuantity
-                    )
+                    SaleDetailMapper.toEntity(product, ticket.saleId)
                 }
 
                 // Ejecutamos la transacción en Room
@@ -58,9 +51,9 @@ class SaleRepositoryImpl(
                 }
 
                 // 2. Persistencia Remota (Firestore) mediante WriteBatch
-                val saleRef = saleCollection.document(sale.saleId)
+                val saleRef = saleCollection.document(ticket.saleId)
                 // Guardar la cabecera del ticket
-                batch.set(saleRef, sale)
+                batch.set(saleRef, ticket)
 
                 // Guardar productos como subcolección para evitar límites de tamaño de documento
                 products.forEach { product ->

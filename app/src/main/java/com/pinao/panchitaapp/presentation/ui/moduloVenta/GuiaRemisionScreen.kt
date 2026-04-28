@@ -30,6 +30,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
@@ -107,8 +108,7 @@ fun GuiaRemisionScreen(
                 Text(
                     text = stringResource(R.string.add_product_title),
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.titleLarge
                 )
                 ListItem(
                     modifier = Modifier.clickable { viewModel.startScanningProduct() },
@@ -224,8 +224,7 @@ fun GuiaRemisionContent(
             ) {
                 Text(
                     stringResource(R.string.minimarket_sale_title),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.headlineMedium
                 )
 
                 OutlinedTextField(
@@ -251,8 +250,7 @@ fun GuiaRemisionContent(
 
                 Text(
                     stringResource(R.string.cart_products_title),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.titleSmall
                 )
 
                 OutlinedCard(
@@ -275,7 +273,7 @@ fun GuiaRemisionContent(
                                 headlineContent = {
                                     Text(
                                         product.name,
-                                        fontWeight = FontWeight.Bold
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                                     )
                                 },
                                 supportingContent = {
@@ -294,7 +292,7 @@ fun GuiaRemisionContent(
                                         Icon(
                                             Icons.Default.Delete,
                                             contentDescription = stringResource(R.string.delete_produdct),
-                                            tint = Color.Red
+                                            tint = MaterialTheme.colorScheme.error
                                         )
                                     }
                                 }
@@ -314,14 +312,12 @@ fun GuiaRemisionContent(
                             ) {
                                 Text(
                                     stringResource(R.string.total_to_pay_label),
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.ExtraBold
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold)
                                 )
                                 Text(
                                     text = total.toCurrency(),
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = Color(0xFF388E3C)
+                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                    color = MaterialTheme.colorScheme.tertiary
                                 )
                             }
                         }
@@ -367,11 +363,10 @@ fun AddProductQuantityDialog(
                     if (isEditing) stringResource(R.string.edit_quantity_title) else stringResource(
                         R.string.add_to_cart_title
                     ),
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.titleLarge
                 )
                 Spacer(modifier = Modifier.heightIn(8.dp))
-                Text(product.name, color = Color.Gray)
+                Text(product.name, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 OutlinedTextField(
                     value = quantity,
                     onValueChange = onQuantityChange,

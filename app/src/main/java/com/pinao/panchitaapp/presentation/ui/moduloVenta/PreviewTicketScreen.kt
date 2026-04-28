@@ -95,8 +95,7 @@ private fun TicketPreviewContent(
     ) {
         Text(
             text = "Vista Previa del Ticket",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -130,8 +129,7 @@ private fun TicketPreviewContent(
                 Text(
                     text = stringResource(R.string.ticket_thanks),
                     modifier = Modifier.padding(top = 16.dp),
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp
+                    style = MaterialTheme.typography.labelLarge
                 )
             }
         }
@@ -142,11 +140,10 @@ private fun TicketPreviewContent(
 private fun BusinessHeader() {
     Text(
         text = stringResource(R.string.bussines_name),
-        fontWeight = FontWeight.Bold,
-        fontSize = 16.sp
+        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
     )
-    Text(text = stringResource(R.string.bussines_address), fontSize = 12.sp)
-    Text(text = stringResource(R.string.bussines_phone), fontSize = 12.sp)
+    Text(text = stringResource(R.string.bussines_address), style = MaterialTheme.typography.labelSmall)
+    Text(text = stringResource(R.string.bussines_phone), style = MaterialTheme.typography.labelSmall)
 }
 
 @Composable
@@ -163,26 +160,22 @@ private fun ProductsTableHeader() {
         Text(
             text = "Cant",
             modifier = Modifier.weight(1f),
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
         )
         Text(
             text = "Producto",
             modifier = Modifier.weight(2f),
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
         )
         Text(
             text = "P. Unit",
             modifier = Modifier.weight(1f),
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
         )
         Text(
             text = "Total",
             modifier = Modifier.weight(1f),
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
         )
     }
 }
@@ -195,18 +188,17 @@ private fun ProductItemsList(products: List<ProductModel>) {
                 .fillMaxWidth()
                 .padding(vertical = 2.dp)
         ) {
-            Text(text = "${product.stockQuantity}", modifier = Modifier.weight(1f), fontSize = 12.sp)
-            Text(text = product.name, modifier = Modifier.weight(2f), fontSize = 12.sp)
+            Text(text = "${product.stockQuantity}", modifier = Modifier.weight(1f), style = MaterialTheme.typography.labelSmall)
+            Text(text = product.name, modifier = Modifier.weight(2f), style = MaterialTheme.typography.labelSmall)
             Text(
                 text = "%.2f".format(product.priceSell),
                 modifier = Modifier.weight(1f),
-                fontSize = 12.sp
+                style = MaterialTheme.typography.labelSmall
             )
             Text(
                 text = "%.2f".format(product.priceSell * product.stockQuantity),
                 modifier = Modifier.weight(1f),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
             )
         }
     }
@@ -220,7 +212,7 @@ private fun TotalSummary(products: List<ProductModel>) {
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = "TOTAL A PAGAR: ", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text(text = "TOTAL A PAGAR: ", style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
         Text(
             text = "S/. %.2f".format(total),
             fontWeight = FontWeight.ExtraBold,

@@ -2,6 +2,7 @@ package com.pinao.panchitaapp.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 import com.pinao.panchitaapp.domain.model.ProductModel
+import com.pinao.panchitaapp.domain.model.StockEntryModel
 
 interface ProductRepository {
 
@@ -12,4 +13,5 @@ interface ProductRepository {
     suspend fun deleteProduct(productModel: ProductModel)
     fun searchProducts(query: String): Flow<List<ProductModel>>
     suspend fun syncUnsyncedProducts()
+    suspend fun saveStockEntry(model: StockEntryModel)
 }

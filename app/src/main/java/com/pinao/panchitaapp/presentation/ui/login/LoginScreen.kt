@@ -86,7 +86,7 @@ fun LoginScreen(
                 val errorState = uiState as LoginUiState.Error
                 val message = when (val uiText = errorState.message) {
                     is UiText.DynamicString -> uiText.value
-                    is UiText.StringResource -> context.resources.getString(
+                    is UiText.StringResource -> context.getString(
                         uiText.resId, *uiText.args
                     )
                 }
@@ -126,23 +126,22 @@ fun SyncingOverlay() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.7f))
+            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.7f))
             .clickable(enabled = false) {}, // Bloquear interacciones
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator(color = Color.White)
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.inverseOnSurface)
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(R.string.syncing_data),
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+                color = MaterialTheme.colorScheme.inverseOnSurface,
+                style = MaterialTheme.typography.titleSmall
             )
             Text(
                 text = stringResource(R.string.syncing_subtitle),
-                color = Color.White.copy(alpha = 0.8f),
-                fontSize = 14.sp
+                color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.8f),
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
@@ -255,7 +254,7 @@ fun LoginContent(
                 ) {
                     if (uiState is LoginUiState.Loading) {
                         CircularProgressIndicator(
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(24.dp),
                             strokeWidth = 2.dp
                         )

@@ -18,5 +18,9 @@ data class StockEntryModel(
     val entryDate: Long,
     val totalCost: Double,
     val documentNumber: String?,
-    val isSynced: Boolean
+    val isSynced: Boolean,
+    val productId: String = "",
+    val quantityAdded: Double = 0.0,
+    val unitCostPpp: Double = 0.0,
+    val movementType: String = "ENTRY"
 )

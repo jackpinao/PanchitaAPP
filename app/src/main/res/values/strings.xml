@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">PanchitaAPP</string>
     <!-- Add your AdMob App ID here -->
     <string name="id_admob_app">ca-app-pub-3940256099942544/1033173712</string>
@@ -54,6 +54,21 @@
     <string name="edit_product_title">Editar Producto</string>
     <string name="no_categories">No hay categorías disponibles</string>
     <string name="no_brands">No hay marcas disponibles</string>
+        <string name="tab_info">Información</string>
+        <string name="manual_price_label">Precio de venta manual (S/)</string>
+        <string name="manual_price_helper">Deja vacío para calcular automáticamente con el margen de la categoría</string>
+        <string name="save_info_action">Guardar información</string>
+        <string name="total_stock_cost_label">Costo total del stock añadido (S/)</string>
+        <string name="stock_to_add_label">Cantidad de stock a añadir</string>
+        <string name="current_stock_info_format">Stock actual: %1$.2f | Costo unitario actual: S/%2$.2f</string>
+        <string name="final_stock_format">Stock final: %1$.2f</string>
+        <string name="new_avg_cost_format">Nuevo costo promedio (PPP): S/%1$.2f</string>
+        <string name="calculated_sell_price_format">Precio de venta calculado: S/%1$.2f</string>
+        <string name="register_stock_entry_action">Registrar entrada de stock</string>
+        <string name="total_purchase_cost_label">Costo total de compra (S/)</string>
+        <string name="calculated_unit_cost_format">Costo unitario calculado: S/%1$.2f</string>
+        <string name="suggested_price_format">Precio sugerido: S/%1$.2f (Margen: %2$.0f%%)</string>
+        <string name="category_margin_format">Margen de la categoría: %1$.0f%%</string>
 
     <!-- Add Category Screen -->
     <string name="add_category_title">Agregar Categoría</string>
@@ -73,7 +88,7 @@
     <string name="minimarket_sale_title">Venta Minimarket</string>
     <string name="cart_products_title">Productos en Carrito</string>
     <string name="total_to_pay_label">Total a Pagar:</string>
-    <string name="product_details_format">Cant: %1$s | P.U: %2$s | S.Igv: %3$s | Total: %4$s</string>
+    <string name="product_details_format" tools:ignore="Typos">Cant: %1$s | P.U: %2$s | S.Igv: %3$s | Total: %4$s</string>
 
     <!-- Product Search Screen -->
     <string name="search_product_title">Buscar Producto</string>

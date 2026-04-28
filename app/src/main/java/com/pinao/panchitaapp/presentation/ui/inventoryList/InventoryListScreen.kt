@@ -75,7 +75,7 @@ fun InventoryListScreen(
                 val errorState = uiState as InventoryListUiState.Error
                 val message = when (val uiText = errorState.message) {
                     is UiText.DynamicString -> uiText.value
-                    is UiText.StringResource -> context.resources.getString(
+                    is UiText.StringResource -> context.getString(
                         uiText.resId, *uiText.args
                     )
                 }
@@ -239,7 +239,7 @@ fun InventoryItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onItemClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation()
     ) {
         Row(
             modifier = Modifier
@@ -249,26 +249,24 @@ fun InventoryItemCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = product.name, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(text = product.name, style = MaterialTheme.typography.titleSmall)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text = product.barcode, fontSize = 14.sp)
+                Text(text = product.barcode, style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text = String.format(Locale.getDefault(), "S/ %.2f", product.priceBuy), fontSize = 14.sp)
+                Text(text = String.format(Locale.getDefault(), "S/ %.2f", product.priceBuy), style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(4.dp))
                 val stockColor =
                     if (product.stockQuantity > product.stockMin)
-                        MaterialTheme.colorScheme.primary else Color.Red
+                        MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                 Text(
                     text = stringResource(R.string.stock_count_label, product.stockQuantity),
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.labelLarge,
                     color = stockColor,
-                    fontWeight = FontWeight.Medium
                 )
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = String.format(Locale.getDefault(), "S/ %.2f", product.priceSell), fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    text = String.format(Locale.getDefault(), "S/ %.2f", product.priceSell), style = MaterialTheme.typography.bodyLarge,
                 )
                 IconButton(onClick = onDeleteClick) {
                     Icon(

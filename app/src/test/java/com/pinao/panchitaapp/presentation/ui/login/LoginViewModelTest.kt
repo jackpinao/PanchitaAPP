@@ -172,4 +172,47 @@ class LoginViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test
+    fun `init when user is logged in and syncData throws should keep Success state`() = runTest {
+        every { authUseCase.isUserLoggedInUseCase() } returns true
+        coEvery { refreshProductsUseCase() } throws Exception("Network error during sync")
+
+        viewModel = LoginViewModel(authUseCase, refreshProductsUseCase)
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            val state = awaitItem()
+            assertTrue(state is LoginUiState.Success)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `login when exception has null message should set Error with StringResource`() = runTest {
+        coEvery { authUseCase.signInUseCase(any(), any()) } throws Exception()
+
+        viewModel = LoginViewModel(authUseCase, refreshProductsUseCase)
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            awaitItem() // Idle inicial
+
+            viewModel.onEmailChange("test@test.com")
+            awaitItem()
+            viewModel.onPasswordChange("pass123")
+            awaitItem()
+
+            viewModel.login()
+            awaitItem() // Loading
+
+            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+            val errorState = expectMostRecentItem()
+            assertTrue(errorState is LoginUiState.Error)
+            assertTrue((errorState as LoginUiState.Error).message is UiText.StringResource)
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 }

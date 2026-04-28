@@ -91,4 +91,27 @@ class TemporaryProductUseCasesTest {
 
         coVerify(exactly = 1) { repository.clearAllTemporaryProducts() }
     }
+
+    @Test
+    fun `TemporaryProductUseCases equals returns true for same property instances`() {
+        val bundle1 = TemporaryProductUseCases(getAllUseCase, saveUseCase, deleteUseCase, clearAllUseCase)
+        val bundle2 = TemporaryProductUseCases(getAllUseCase, saveUseCase, deleteUseCase, clearAllUseCase)
+
+        assertEquals(bundle1, bundle2)
+    }
+
+    @Test
+    fun `TemporaryProductUseCases equals returns false for different property instances`() {
+        val bundle1 = TemporaryProductUseCases(getAllUseCase, saveUseCase, deleteUseCase, clearAllUseCase)
+        val bundle2 = TemporaryProductUseCases(GetAllTemporaryProductsUseCase(mockk()), saveUseCase, deleteUseCase, clearAllUseCase)
+
+        assert(bundle1 != bundle2)
+    }
+
+    @Test
+    fun `TemporaryProductUseCases equals returns false when compared to null`() {
+        val bundle = TemporaryProductUseCases(getAllUseCase, saveUseCase, deleteUseCase, clearAllUseCase)
+
+        assert(bundle != null)
+    }
 }

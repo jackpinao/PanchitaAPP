@@ -6,6 +6,7 @@ import com.pinao.panchitaapp.domain.usecase.products.GetAllProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
 import com.pinao.panchitaapp.domain.usecase.products.RefreshProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.SaveProductsUseCase
+import com.pinao.panchitaapp.domain.usecase.products.SaveStockEntryUseCase
 import com.pinao.panchitaapp.domain.usecase.products.SearchProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.products.SyncUnsyncedProductsUseCase
 import com.pinao.panchitaapp.domain.usecase.temporary.ClearTemporaryProductsUseCase
@@ -29,7 +30,8 @@ class PresentationModule {
         deleteProductUseCase: DeleteProductUseCase,
         refreshProductsUseCase: RefreshProductsUseCase,
         searchProductsUseCase: SearchProductsUseCase,
-        syncUnsyncedProductsUseCase: SyncUnsyncedProductsUseCase
+        syncUnsyncedProductsUseCase: SyncUnsyncedProductsUseCase,
+        saveStockEntryUseCase: SaveStockEntryUseCase
     ): ProductUseCases = ProductUseCases(
         getAll = getAllProductsUseCase,
         findByCode = findCodeProductUseCase,
@@ -37,7 +39,8 @@ class PresentationModule {
         delete = deleteProductUseCase,
         refreshProducts = refreshProductsUseCase,
         search = searchProductsUseCase,
-        syncUnsyncedProducts = syncUnsyncedProductsUseCase
+        syncUnsyncedProducts = syncUnsyncedProductsUseCase,
+        saveStockEntry = saveStockEntryUseCase
     )
 
     @Factory

@@ -1,0 +1,405 @@
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\build.gradle.kts:100: Warning: Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the android.os.Build.VERSION_CODES javadoc for details. [OldTargetApi]
+        targetSdk = 36
+        ~~~~~~~~~~~~~~
+
+   Explanation for issues of type "OldTargetApi":
+   When your application or sdk runs on a version of Android that is more
+   recent than your targetSdk specifies that it has been tested with, various
+   compatibility modes kick in. This ensures that your application continues
+   to work, but it may look out of place. For example, if the targetSdk is
+   less than 14, your app may get an option button in the UI.
+
+   To fix this issue, set the targetSdk to the highest available value. Then
+   test your app to make sure everything works correctly. You may want to
+   consult the compatibility notes to see what changes apply to each version
+   you are adding support for:
+   https://developer.android.com/reference/android/os/Build.VERSION_CODES.html
+   as well as follow this guide:
+   https://developer.android.com/distribute/best-practices/develop/target-sdk.
+   html
+
+   https://developer.android.com/distribute/best-practices/develop/target-sdk.html
+
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\local.properties:1: Error: Windows file separators (\) and drive letter separators (':') must be escaped (\\) in property files; use C\:/Users/pinao/AppData/Local/Android/Sdk [PropertyEscape]
+sdk.dir=C:/Users/pinao/AppData/Local/Android/Sdk
+         ~
+
+   Explanation for issues of type "PropertyEscape":
+   All backslashes and colons in .property files must be escaped with a
+   backslash (). This means that when writing a Windows path, you must escape
+   the file separators, so the path MyFiles should be written as
+   key=\\My\\Files.
+
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\build.gradle.kts:95: Warning: A newer version of compileSdk than 36 is available: 37 [GradleDependency]
+    compileSdk = 36
+    ~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:4: Warning: A newer version of com.google.firebase:firebase-bom than 34.11.0 is available: 34.12.0 [GradleDependency]
+firebaseBom = "34.11.0"
+              ~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:19: Warning: A newer version of androidx.compose:compose-bom than 2026.03.01 is available: 2026.04.01 [GradleDependency]
+composeBom = "2026.03.01"
+             ~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:20: Warning: A newer version of androidx.compose.material:material than 1.10.6 is available: 1.11.0 [GradleDependency]
+material = "1.10.6"
+           ~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:29: Warning: A newer version of androidx.navigation.safeargs.kotlin than 2.9.7 is available: 2.9.8 [GradleDependency]
+safeargsVersion = "2.9.7"
+                  ~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:30: Warning: A newer version of androidx.navigation:navigation-compose than 2.9.7 is available: 2.9.8 [GradleDependency]
+navigationVersion = "2.9.7"
+                    ~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:32: Warning: A newer version of androidx.compose.runtime:runtime-livedata than 1.10.6 is available: 1.11.0 [GradleDependency]
+runtimeLivedata = "1.10.6"
+                  ~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:43: Warning: A newer version of com.google.firebase.crashlytics than 3.0.6 is available: 3.0.7 [GradleDependency]
+crashlytics = "3.0.6"
+              ~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:49: Warning: A newer version of androidx.compose.runtime:runtime-saveable than 1.10.6 is available: 1.11.0 [GradleDependency]
+runtimeSaveable = "1.10.6"
+                  ~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:51: Warning: A newer version of androidx.compose.ui:ui than 1.10.6 is available: 1.11.0 [GradleDependency]
+ui = "1.10.6"
+     ~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:52: Warning: A newer version of androidx.compose.ui:ui-text than 1.10.6 is available: 1.11.0 [GradleDependency]
+uiText = "1.10.6"
+         ~~~~~~~~
+
+   Explanation for issues of type "GradleDependency":
+   This detector looks for usages of libraries where the version you are using
+   is not the current stable release. Using older versions is fine, and there
+   are cases where you deliberately want to stick with an older version.
+   However, you may simply not be aware that a more recent version is
+   available, and that is what this lint check helps find.
+
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:6: Warning: A newer version of org.jetbrains.kotlin.android than 2.1.0 is available: 2.3.21 [NewerVersionAvailable]
+kotlin = "2.1.0"
+         ~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:6: Warning: A newer version of org.jetbrains.kotlin.plugin.compose than 2.1.0 is available: 2.3.21 [NewerVersionAvailable]
+kotlin = "2.1.0"
+         ~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:6: Warning: A newer version of org.jetbrains.kotlin.plugin.serialization than 2.1.0 is available: 2.3.21 [NewerVersionAvailable]
+kotlin = "2.1.0"
+         ~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:15: Warning: A newer version of org.jetbrains.kotlinx:kotlinx-serialization-json than 1.10.0 is available: 1.11.0 [NewerVersionAvailable]
+kotlinx-serialization = "1.10.0"
+                        ~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:45: Warning: A newer version of io.insert-koin:koin-bom than 4.0.2 is available: 4.2.1 [NewerVersionAvailable]
+koin-bom = "4.0.2"
+           ~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:46: Warning: A newer version of io.insert-koin:koin-annotations-bom than 2.0.0 is available: 2.3.1 [NewerVersionAvailable]
+koin-annotations-bom = "2.0.0"
+                       ~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:46: Warning: A newer version of io.insert-koin:koin-ksp-compiler than 2.0.0 is available: 2.3.1 [NewerVersionAvailable]
+koin-annotations-bom = "2.0.0"
+                       ~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:47: Warning: A newer version of io.kotzilla:kotzilla-sdk than 2.1.1 is available: 2.1.3 [NewerVersionAvailable]
+kotzilla = "2.1.1"
+           ~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\gradle\libs.versions.toml:48: Warning: A newer version of io.kotzilla.kotzilla-plugin than 2.1.1 is available: 2.1.3 [NewerVersionAvailable]
+kotzillaPlugin = "2.1.1"
+                 ~~~~~~~
+
+   Explanation for issues of type "NewerVersionAvailable":
+   This detector checks with a central repository to see if there are newer
+   versions available for the dependencies used by this project. This is
+   similar to the GradleDependency check, which checks for newer versions
+   available in the Android SDK tools and libraries, but this works with any
+   MavenCentral dependency, and connects to the library every time, which
+   makes it more flexible but also much slower.
+
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\java\com\pinao\panchitaapp\presentation\ui\inventoryList\InventoryListScreen.kt:78: Warning: Reading Resources using LocalContext.current.resources [LocalContextResourcesRead from androidx.compose.ui]
+                    is UiText.StringResource -> context.resources.getString(
+                                                ~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\java\com\pinao\panchitaapp\presentation\ui\login\LoginScreen.kt:89: Warning: Reading Resources using LocalContext.current.resources [LocalContextResourcesRead from androidx.compose.ui]
+                    is UiText.StringResource -> context.resources.getString(
+                                                ~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "LocalContextResourcesRead":
+   Changes to the Configuration object will not cause
+   LocalContext.current.resources reads to be invalidated, so calls to APIs
+   suchas Resources.getString() will not be updated when the Configuration
+   changes. Instead, use LocalResources.current to retrieve the Resources -
+   this will invalidate callers when the Configuration changes, to ensure that
+   these calls reflect the latest values.
+
+   Vendor: Jetpack Compose
+   Identifier: androidx.compose.ui
+   Feedback: https://issuetracker.google.com/issues/new?component=612128
+
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:91: Warning: "Cant" is a common misspelling; did you mean "Cannot" or "Can not" or "Can't"? [Typos]
+    <string name="product_details_format">Cant: %1$s | P.U: %2$s | S.Igv: %3$s | Total: %4$s</string>
+                                          ~~~~
+
+   Explanation for issues of type "Typos":
+   This check looks through the string definitions, and if it finds any words
+   that look like likely misspellings, they are flagged.
+
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\mipmap-anydpi-v26: Warning: This folder configuration (v26) is unnecessary; minSdkVersion is 26. Merge all the resources in this folder into mipmap-anydpi. [ObsoleteSdkInt]
+
+   Explanation for issues of type "ObsoleteSdkInt":
+   This check flags version checks that are not necessary, because the
+   minSdkVersion (or surrounding known API level) is already at least as high
+   as the version checked for.
+
+   Similarly, it also looks for resources in -vNN folders, such as values-v14
+   where the version qualifier is less than or equal to the minSdkVersion,
+   where the contents should be merged into the best folder.
+
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:3: Warning: The resource R.color.purple_200 appears to be unused [UnusedResources]
+    <color name="purple_200">#FFBB86FC</color>
+           ~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:4: Warning: The resource R.color.purple_500 appears to be unused [UnusedResources]
+    <color name="purple_500">#FF6200EE</color>
+           ~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:5: Warning: The resource R.color.purple_700 appears to be unused [UnusedResources]
+    <color name="purple_700">#FF3700B3</color>
+           ~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:6: Warning: The resource R.color.teal_200 appears to be unused [UnusedResources]
+    <color name="teal_200">#FF03DAC5</color>
+           ~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:7: Warning: The resource R.color.teal_700 appears to be unused [UnusedResources]
+    <color name="teal_700">#FF018786</color>
+           ~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:8: Warning: The resource R.color.black appears to be unused [UnusedResources]
+    <color name="black">#FF000000</color>
+           ~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:9: Warning: The resource R.color.white appears to be unused [UnusedResources]
+    <color name="white">#FFFFFFFF</color>
+           ~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\dimens.xml:3: Warning: The resource R.dimen.horizontal_margin appears to be unused [UnusedResources]
+    <dimen name="horizontal_margin">16dp</dimen>
+           ~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\dimens.xml:4: Warning: The resource R.dimen.vertical_margin appears to be unused [UnusedResources]
+    <dimen name="vertical_margin">16dp</dimen>
+           ~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\drawable\outline_calendar_view_week_24.xml:1: Warning: The resource R.drawable.outline_calendar_view_week_24 appears to be unused [UnusedResources]
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="24dp" android:tint="#000000" android:viewportHeight="960" android:viewportWidth="960" android:width="24dp">
+^
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:4: Warning: The resource R.string.id_admob_app appears to be unused [UnusedResources]
+    <string name="id_admob_app">ca-app-pub-3940256099942544/1033173712</string>
+            ~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:7: Warning: The resource R.string.settings appears to be unused [UnusedResources]
+    <string name="settings">Settings</string>
+            ~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:10: Warning: The resource R.string.detalles appears to be unused [UnusedResources]
+    <string name="detalles">Detalles</string>
+            ~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:22: Warning: The resource R.string.edit_action appears to be unused [UnusedResources]
+    <string name="edit_action">Editar</string>
+            ~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:23: Warning: The resource R.string.delete_action appears to be unused [UnusedResources]
+    <string name="delete_action">Eliminar</string>
+            ~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:34: Warning: The resource R.string.purchase_price_label appears to be unused [UnusedResources]
+    <string name="purchase_price_label">Precio de compra</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:41: Warning: The resource R.string.search_label appears to be unused [UnusedResources]
+    <string name="search_label">Buscar producto...</string>
+            ~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:49: Warning: The resource R.string.no_products_message appears to be unused [UnusedResources]
+    <string name="no_products_message">No hay productos disponibles. Escanea un código para agregar uno.</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:50: Warning: The resource R.string.empty_search_message appears to be unused [UnusedResources]
+    <string name="empty_search_message">No se encontraron productos.</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:51: Warning: The resource R.string.loading_message appears to be unused [UnusedResources]
+    <string name="loading_message">Cargando...</string>
+            ~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:74: Warning: The resource R.string.add_category_title appears to be unused [UnusedResources]
+    <string name="add_category_title">Agregar Categoría</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:75: Warning: The resource R.string.category_name_label appears to be unused [UnusedResources]
+    <string name="category_name_label">Nombre de la categoría</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:76: Warning: The resource R.string.margin_label appears to be unused [UnusedResources]
+    <string name="margin_label">Margen de ganancia (%)</string>
+            ~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:79: Warning: The resource R.string.add_brand_title appears to be unused [UnusedResources]
+    <string name="add_brand_title">Agregar Marca</string>
+            ~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:80: Warning: The resource R.string.brand_name_label appears to be unused [UnusedResources]
+    <string name="brand_name_label">Nombre de la Marca</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:95: Warning: The resource R.string.select_product_action appears to be unused [UnusedResources]
+    <string name="select_product_action">Seleccionar</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:98: Warning: The resource R.string.ticket_preview_title appears to be unused [UnusedResources]
+    <string name="ticket_preview_title">Ticket de Venta</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:99: Warning: The resource R.string.business_name appears to be unused [UnusedResources]
+    <string name="business_name">Abarrotes Panchita</string>
+            ~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:100: Warning: The resource R.string.business_ruc appears to be unused [UnusedResources]
+    <string name="business_ruc">RUC: 10452668583</string>
+            ~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:101: Warning: The resource R.string.business_address appears to be unused [UnusedResources]
+    <string name="business_address">Av. Santa Rosa Mz N Lt 25</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:104: Warning: The resource R.string.ticket_doc appears to be unused [UnusedResources]
+    <string name="ticket_doc">DNI/RUC: %1$s</string>
+            ~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:105: Warning: The resource R.string.ticket_col_cant appears to be unused [UnusedResources]
+    <string name="ticket_col_cant">CANT</string>
+            ~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:106: Warning: The resource R.string.ticket_col_desc appears to be unused [UnusedResources]
+    <string name="ticket_col_desc">DESCRIPCIÓN</string>
+            ~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:107: Warning: The resource R.string.ticket_col_price appears to be unused [UnusedResources]
+    <string name="ticket_col_price">PRECIO</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:108: Warning: The resource R.string.ticket_col_total appears to be unused [UnusedResources]
+    <string name="ticket_col_total">TOTAL</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:109: Warning: The resource R.string.ticket_item_format appears to be unused [UnusedResources]
+    <string name="ticket_item_format">%1$s</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:110: Warning: The resource R.string.ticket_item_price_format appears to be unused [UnusedResources]
+    <string name="ticket_item_price_format">S/ %.2f</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:111: Warning: The resource R.string.ticket_total_label appears to be unused [UnusedResources]
+    <string name="ticket_total_label">TOTAL A PAGAR</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:112: Warning: The resource R.string.ticket_total_format appears to be unused [UnusedResources]
+    <string name="ticket_total_format">S/ %.2f</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:113: Warning: The resource R.string.ticket_footer appears to be unused [UnusedResources]
+    <string name="ticket_footer">¡Gracias por su compra!</string>
+            ~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:114: Warning: The resource R.string.complete_sale_action appears to be unused [UnusedResources]
+    <string name="complete_sale_action">Confirmar Venta</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:115: Warning: The resource R.string.sale_completed_message appears to be unused [UnusedResources]
+    <string name="sale_completed_message">¡Venta registrada con éxito!</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:120: Warning: The resource R.string.ticket_product appears to be unused [UnusedResources]
+    <string name="ticket_product">Producto</string>
+            ~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:121: Warning: The resource R.string.ticket_price appears to be unused [UnusedResources]
+    <string name="ticket_price">Precio</string>
+            ~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:122: Warning: The resource R.string.ticket_quantity appears to be unused [UnusedResources]
+    <string name="ticket_quantity">Canti.</string>
+            ~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:123: Warning: The resource R.string.ticket_total appears to be unused [UnusedResources]
+    <string name="ticket_total">Total</string>
+            ~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:124: Warning: The resource R.string.ticket_total_title appears to be unused [UnusedResources]
+    <string name="ticket_total_title">Total a Pagar:</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:126: Warning: The resource R.string.ticket_line appears to be unused [UnusedResources]
+    <string name="ticket_line">--------------------------------</string>
+            ~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:137: Warning: The resource R.string.inventary_center appears to be unused [UnusedResources]
+    <string name="inventary_center">Inventario Central</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UnusedResources":
+   Unused resources make applications larger and slow down builds.
+
+
+   The unused resource check can ignore tests. If you want to include
+   resources that are only referenced from tests, consider packaging them in a
+   test source set instead.
+
+   You can include test sources in the unused resource check by setting the
+   system property lint.unused-resources.include-tests=true, and to exclude
+   them (usually for performance reasons), use
+   lint.unused-resources.exclude-tests=true.
+
+   Available options:
+
+   **skip-libraries** (default is true):
+   Whether the unused resource check should skip reporting unused resources in libraries.
+
+   Many libraries will declare resources that are part of the library surface; other modules depending on the library will also reference the resources. To avoid reporting all these resources as unused (in the context of a library), the unused resource check normally skips reporting unused resources in libraries. Instead, run the unused resource check on the consuming app module (along with `checkDependencies=true`).
+
+   However, there are cases where you want to check that all the resources declared in a library are used; in that case, you can disable the skip option.
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UnusedResources">
+           <option name="skip-libraries" value="true" />
+       </issue>
+   </lint>
+   ```
+
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:27: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+    <string name="processing_action">Procesando...</string>
+                                     ~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:41: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+    <string name="search_label">Buscar producto...</string>
+                                ~~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:51: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+    <string name="loading_message">Cargando...</string>
+                                   ~~~~~~~~~~~
+
+   Explanation for issues of type "TypographyEllipsis":
+   You can replace the string "..." with a dedicated ellipsis character,
+   ellipsis character (u2026, &#8230;). This can help make the text more
+   readable.
+
+   https://en.wikipedia.org/wiki/Ellipsis
+
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\java\com\pinao\panchitaapp\data\source\local\SessionManager.kt:23: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        sharedPreferences.edit().clear().apply()
+        ~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UseKtx":
+   The Android KTX libraries decorates the Android platform SDK as well as
+   various libraries with more convenient extension functions available from
+   Kotlin, allowing you to use default parameters, named parameters, and
+   more.
+
+   Available options:
+
+   **remove-defaults** (default is true):
+   Whether to skip arguments that match the defaults provided by the extension.
+
+   Extensions often provide default values for some of the parameters. For example:
+   ```kotlin
+   fun Path.readLines(charset: Charset = Charsets.UTF_8): List<String> { return Files.readAllLines(this, charset) }
+   ```
+   This lint check will by default automatically omit parameters that match the default, so if your code was calling
+
+   ```kotlin
+   Files.readAllLines(file, Charset.UTF_8)
+   ```
+   lint would replace this with
+   ```kotlin
+   file.readLines()
+   ```
+   rather than
+
+   ```kotlin
+   file.readLines(Charset.UTF_8
+   ```
+   You can turn this behavior off using this option.
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="remove-defaults" value="true" />
+       </issue>
+   </lint>
+   ```
+
+   **require-present** (default is true):
+   Whether to only offer extensions already available.
+
+   This option lets you only have lint suggest extension replacements if those extensions are already available on the class path (in other words, you're already depending on the library containing the extension method.)
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="require-present" value="true" />
+       </issue>
+   </lint>
+   ```
+
+1 error, 78 warnings

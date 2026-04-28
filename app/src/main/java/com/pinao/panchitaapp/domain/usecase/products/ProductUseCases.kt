@@ -7,5 +7,6 @@ data class ProductUseCases(
     val delete: DeleteProductUseCase,
     val refreshProducts: RefreshProductsUseCase,
     val search: SearchProductsUseCase,
-    val syncUnsyncedProducts: SyncUnsyncedProductsUseCase
+    val syncUnsyncedProducts: SyncUnsyncedProductsUseCase,
+    val saveStockEntry: SaveStockEntryUseCase
 )

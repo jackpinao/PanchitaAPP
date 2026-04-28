@@ -1,3 +1,5 @@
+package com.pinao.panchitaapp.data.mapper
+
 import com.pinao.panchitaapp.data.source.local.entity.StockEntryEntity
 import com.pinao.panchitaapp.domain.model.StockEntryModel
 
@@ -17,7 +19,11 @@ object StockEntryMapper {
             entryDate = entity.entryDate,
             totalCost = entity.totalCost,
             documentNumber = entity.documentNumber,
-            isSynced = entity.isSynced == 1
+            isSynced = entity.isSynced == 1,
+            productId = entity.productId,
+            quantityAdded = entity.quantityAdded,
+            unitCostPpp = entity.unitCostPpp,
+            movementType = entity.movementType
         )
     }
 
@@ -32,7 +38,11 @@ object StockEntryMapper {
             entryDate = model.entryDate,
             totalCost = model.totalCost,
             documentNumber = model.documentNumber,
-            isSynced = if (model.isSynced) 1 else 0
+            isSynced = if (model.isSynced) 1 else 0,
+            productId = model.productId,
+            quantityAdded = model.quantityAdded,
+            unitCostPpp = model.unitCostPpp,
+            movementType = model.movementType
         )
     }
 }
