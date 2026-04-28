@@ -1,6 +1,6 @@
 package com.pinao.panchitaapp.data.mapper
 
-import StockEntryMapper
+import com.pinao.panchitaapp.data.mapper.StockEntryMapper
 import com.pinao.panchitaapp.data.source.local.entity.StockEntryEntity
 import com.pinao.panchitaapp.domain.model.StockEntryModel
 import org.junit.Assert.assertEquals

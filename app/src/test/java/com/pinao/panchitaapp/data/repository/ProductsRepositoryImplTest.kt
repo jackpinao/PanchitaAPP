@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.pinao.panchitaapp.data.source.local.dao.BrandDao
 import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
 import com.pinao.panchitaapp.data.source.local.dao.ProductDao
+import com.pinao.panchitaapp.data.source.local.dao.StockEntryDao
 import com.pinao.panchitaapp.data.source.local.entity.ProductsEntity
 import com.pinao.panchitaapp.data.source.remote.RemoteDataSource
 import com.pinao.panchitaapp.domain.model.BrandModel
@@ -33,6 +34,7 @@ class ProductsRepositoryImplTest {
     private val mockCategoryDao: CategoryDao = mockk(relaxed = true)
     private val mockBrandDao: BrandDao = mockk(relaxed = true)
     private val mockRemoteDataSource: RemoteDataSource = mockk(relaxed = true)
+    private val mockStockEntryDao: StockEntryDao = mockk(relaxed = true)
 
     @Before
     fun setup() {
@@ -42,8 +44,9 @@ class ProductsRepositoryImplTest {
 
         repository = ProductsRepositoryImpl(
             mockProductDao,
-            mockCategoryDao, 
+            mockCategoryDao,
             mockBrandDao,
+            mockStockEntryDao,
             mockRemoteDataSource
         )
     }
