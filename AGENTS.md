@@ -4,9 +4,14 @@ Android POS (Point of Sale) app for managing sales, inventory, phone recharges, 
 
 ## Rules
 - no hagas build en cada cambio que hagas.
+- Antes de hacer un commit con cambios de consideración (nueva feature, cambio de arquitectura, nueva dependencia, migración Room, nuevas pantallas), actualiza `README.md` e inclúyelo en el mismo commit. Ver `.github/instructions/update-readme.instructions.md` para la lista completa de criterios.
 
 ## Skills
 - **material-3** (`.github/skills/material-3/SKILL.md`): Úsalo siempre que implementes o modifiques UI con Jetpack Compose Material3 — componentes, tokens de color/tipografía/forma, temas, layouts adaptativos y auditoría MD3.
+
+## Instructions
+- **room-migration** (`.github/instructions/room-migration.instructions.md`): Aplica siempre que modifiques entidades Room — migraciones, versión de schema, exportación de JSON.
+- **update-readme** (`.github/instructions/update-readme.instructions.md`): Aplica antes de cualquier commit con cambios de consideración — actualizar `README.md` e incluirlo en el commit.
 
 ## Build & Test Commands
 
