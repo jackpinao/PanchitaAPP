@@ -47,6 +47,7 @@ Presentation  ──►  Domain  ──►  Data
 | **Inventario** | Listado, búsqueda y gestión de productos |
 | **Agregar Producto** | Alta/edición con cálculo PPP (Precio Promedio Ponderado), soporte IGV y percepción |
 | **Módulo de Venta** | Registro de ventas con carrito temporal |
+| **Venta Rápida** | Punto de venta independiente del stock con carga manual (Nombre/Precio/Cantidad), impresión de ticket y exportación PDF |
 | **Recargas Claro** | Registro y consulta de recargas telefónicas |
 | **Categorías** | Gestión de categorías de producto |
 

@@ -23,13 +23,12 @@ class GetCurrentDateTimeTest {
         val result = getCurrentDateTime.getCurrentDateTime()
 
         // Assert
-        // Debe tener el formato: dd-MM-yyyy HH:mm:ss (ej. 25-10-2023 15:30:45)
-        // La longitud es exactamente 19 caracteres
+        // Debe tener el formato: yyyy-MM-dd HH:mm:ss
         assertEquals(19, result.length)
         
         // Validamos usando Regex que coincida con el patrón de dígitos
-        val regex = Regex("\\d{2}-\\d{2}-\\d{4} \\d{2}:\\d{2}:\\d{2}")
-        assertTrue("El formato devuelto no coincide con dd-MM-yyyy HH:mm:ss: $result", result.matches(regex))
+        val regex = Regex("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}")
+        assertTrue("El formato devuelto no coincide con yyyy-MM-dd HH:mm:ss: $result", result.matches(regex))
     }
 
     @Test
@@ -38,22 +37,20 @@ class GetCurrentDateTimeTest {
         val result = getCurrentDateTime.getCurrentDateTime2()
 
         // Assert
-        // Debe tener el formato: dd-MM-yyyy (ej. 25-10-2023)
+        // Debe tener el formato: yyyy-MM-dd
         assertEquals(10, result.length)
 
-        val regex = Regex("\\d{2}-\\d{2}-\\d{4}")
-        assertTrue("El formato devuelto no coincide con dd-MM-yyyy: $result", result.matches(regex))
+        val regex = Regex("\\d{4}-\\d{2}-\\d{2}")
+        assertTrue("El formato devuelto no coincide con yyyy-MM-dd: $result", result.matches(regex))
     }
 
     @Test
     fun `getCurrentDateTime3 should add one day to given timestamp and format it`() {
         // Arrange
-        // Epoch time para 1 de Enero de 2023 a las 12:00 UTC (1672574400000L)
         val timestamp = 1672574400000L
         
-        // Sumamos un día (+86400000 ms) simulando la funcion interna addOneDay
         val expectedInstant = Instant.ofEpochMilli(timestamp + 86400000)
-        val expectedFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy").withZone(ZoneId.systemDefault())
+        val expectedFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault())
         val expectedString = expectedFormatter.format(expectedInstant)
 
         // Act
@@ -62,4 +59,32 @@ class GetCurrentDateTimeTest {
         // Assert
         assertEquals(expectedString, result)
     }
-}
+
+    @Test
+    fun `formatToDisplay should convert DB format to UI format`() {
+        // Arrange
+        val fullDbDate = "2026-05-02 15:30:45"
+        val shortDbDate = "2026-05-02"
+        val expectedDisplay = "02-05-2026"
+
+        // Act
+        val resultFull = getCurrentDateTime.formatToDisplay(fullDbDate)
+        val resultShort = getCurrentDateTime.formatToDisplay(shortDbDate)
+
+        // Assert
+        assertEquals(expectedDisplay, resultFull)
+        assertEquals(expectedDisplay, resultShort)
+    }
+
+    @Test
+    fun `formatToDisplay should return original string if format is unknown`() {
+        // Arrange
+        val oldFormat = "02-05-2026 15:30:45"
+
+        // Act
+        val result = getCurrentDateTime.formatToDisplay(oldFormat)
+
+        // Assert
+        assertEquals(oldFormat, result)
+    }
+}

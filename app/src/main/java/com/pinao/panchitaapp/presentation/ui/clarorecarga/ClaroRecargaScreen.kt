@@ -324,7 +324,7 @@ private fun CenterApp2(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Text(isDate)
+            Text(GetCurrentDateTime().formatToDisplay(isDate))
             IconButton(
                 onClick = {
                     openDialog.value = true
@@ -460,7 +460,7 @@ fun ItemRechange(rechangeModel: RechangeModel) {
             )
 
             Text(
-                text = stringResource(R.string.date_label, rechangeModel.date),
+                text = stringResource(R.string.date_label, GetCurrentDateTime().formatToDisplay(rechangeModel.date)),
                 modifier = Modifier
                     .padding(start = 8.dp, top = 8.dp),
                 textAlign = TextAlign.Center

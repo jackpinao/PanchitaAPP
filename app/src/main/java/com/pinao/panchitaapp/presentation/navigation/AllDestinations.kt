@@ -12,6 +12,8 @@ object AllDestinations {
     const val ADD_CATEGORY = "addCategory"
     const val PRODUCT_SEARCH = "productSearch"
     const val INVENTORY_LIST = "inventoryList"
+    const val FAST_SALE = "fastSale"
+    const val FAST_SALE_PREVIEW = "fastSalePreview"
 }
 
 class AppNavigationActions(
@@ -67,6 +69,18 @@ class AppNavigationActions(
     }
     fun navigateToInventary(){
         navController.navigate(AllDestinations.INVENTORY_LIST){
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    fun navigateToFastSale() {
+        navController.navigate(AllDestinations.FAST_SALE) {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    fun navigateToFastSalePreview() {
+        navController.navigate(AllDestinations.FAST_SALE_PREVIEW) {
             launchSingleTop = true
             restoreState = true
         }

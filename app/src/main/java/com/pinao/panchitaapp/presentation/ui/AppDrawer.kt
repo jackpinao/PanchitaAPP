@@ -47,6 +47,7 @@ fun AppDrawer(
     navigationToGuiaRemision: () -> Unit = {},
     navigationToAddProduct: () -> Unit = {},
     navigationToInventoryList: () -> Unit = {},
+    navigationToFastSale: () -> Unit = {},
     onLogout: () -> Unit = {},
     closeDrawer: () -> Unit = {},
     isPermanent: Boolean = false
@@ -154,6 +155,26 @@ fun AppDrawer(
                 )
             }
 
+        )
+        NavigationDrawerItem(
+            label = {
+                Text(
+                    text = stringResource(id = R.string.fast_sale_title),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            },
+            selected = route == AppScreens.FastSale.route,
+            onClick = {
+                closeDrawer()
+                navigationToFastSale()
+            },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.AddShoppingCart,
+                    contentDescription = stringResource(id = R.string.fast_sale_title)
+                )
+            },
+            shape = MaterialTheme.shapes.small
         )
 
         Spacer(modifier = Modifier.weight(1f))

@@ -168,4 +168,13 @@
     <string name="back_action">Atrás</string>
     <string name="product_search_details_format">Código: %1$s | Stock: %2$.2f</string>
     <string name="currency_format_soles">S/. %1$s</string>
+
+    <!-- Fast Sale Screen -->
+    <string name="fast_sale_title">Venta Rápida</string>
+    <string name="add_item_action">Agregar</string>
+    <string name="fast_sale_cart_empty">No hay productos en la venta rápida.</string>
+    <string name="fast_sale_preview_title">Resumen de Venta Rápida</string>
+    <string name="fast_sale_item_name_placeholder">Nombre del producto</string>
+    <string name="fast_sale_item_price_placeholder">Precio</string>
+    <string name="fast_sale_item_quantity_placeholder">Cant.</string>
 </resources>

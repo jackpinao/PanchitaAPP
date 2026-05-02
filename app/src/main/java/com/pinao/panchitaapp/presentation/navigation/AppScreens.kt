@@ -11,6 +11,8 @@ sealed class AppScreens(val route: String){
     data object AddCategory: AppScreens("addCategory")
     data object ProductSearch: AppScreens("productSearch")
     data object InventoryList: AppScreens("inventoryList")
+    data object FastSale: AppScreens("fastSale")
+    data object FastSalePreview: AppScreens("fastSalePreview")
 
     companion object {
         const val ADD_PRODUCT_ROUTE = "addProduct"

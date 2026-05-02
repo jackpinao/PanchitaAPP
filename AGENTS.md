@@ -4,6 +4,7 @@ Android POS (Point of Sale) app for managing sales, inventory, phone recharges, 
 
 ## Rules
 - no hagas build en cada cambio que hagas.
+- Siempre asegúrate de importar las clases y archivos necesarios al realizar cambios o crear nuevos archivos.
 - Antes de hacer un commit con cambios de consideración (nueva feature, cambio de arquitectura, nueva dependencia, migración Room, nuevas pantallas), actualiza `README.md` e inclúyelo en el mismo commit. Ver `.github/instructions/update-readme.instructions.md` para la lista completa de criterios.
 
 ## Skills
