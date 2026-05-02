@@ -8,6 +8,7 @@ import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.model.SaleModel
 import com.pinao.panchitaapp.domain.model.TemporaryProductModel
 import com.pinao.panchitaapp.domain.service.TicketPdfService
+import com.pinao.panchitaapp.domain.usecase.Auth.EnsureCurrentUserUseCase
 import com.pinao.panchitaapp.domain.usecase.client.SaveClientUseCase
 import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
 import com.pinao.panchitaapp.domain.usecase.products.ScanBarcodeUseCase
@@ -54,7 +55,8 @@ class GuiaRemisionViewModel(
     private val scanBarcodeUseCase: ScanBarcodeUseCase,
     private val completeSaleUseCase: CompleteSaleUseCase,
     private val pdfService: TicketPdfService,
-    private val temporaryProductUseCases: TemporaryProductUseCases
+    private val temporaryProductUseCases: TemporaryProductUseCases,
+    private val ensureCurrentUserUseCase: EnsureCurrentUserUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GuiaRemisionUiState())
@@ -287,6 +289,7 @@ class GuiaRemisionViewModel(
             try {
                 _uiState.update { it.copy(isLoading = true) }
                 val date = GetCurrentDateTime().getCurrentDateTime()
+                val userId = ensureCurrentUserUseCase()
                 saveClientUseCase(ClientModel(name = state.clientName, numDoc = state.clientDoc))
 
                 val ticket = SaleModel(
@@ -294,7 +297,7 @@ class GuiaRemisionViewModel(
                     saleDate = date,
                     totalAmount = state.products.sumOf { it.priceSell * it.stockQuantity },
                     isSynced = true,
-                    userId = "",
+                    userId = userId,
                     clientId = ""
                 )
 

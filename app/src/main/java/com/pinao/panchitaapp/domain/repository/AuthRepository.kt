@@ -17,4 +17,15 @@ interface AuthRepository {
      * Cierra la sesión del usuario.
      */
     fun signOut()
+
+    /**
+     * Retorna el ID del usuario actualmente autenticado, o cadena vacía si no hay sesión.
+     */
+    fun getCurrentUserId(): String
+
+    /**
+     * Garantiza que el usuario autenticado exista en Room, incluso si tenía sesión activa
+     * antes de que se implementara la persistencia local. Retorna el userId.
+     */
+    suspend fun ensureCurrentUserInRoom(): String
 }

@@ -16,6 +16,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -33,6 +35,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.pinao.panchitaapp.R
+import com.pinao.panchitaapp.data.source.local.SessionManager
 import com.pinao.panchitaapp.presentation.ui.AppDrawer
 import com.pinao.panchitaapp.presentation.ui.addCategory.AddCategoryScreen
 import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductScreen
@@ -51,9 +54,7 @@ import com.pinao.panchitaapp.presentation.ui.moduloVenta.search.ProductSearchScr
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,6 +70,7 @@ fun AppNavGraph(
     guiaRemisionViewModel: GuiaRemisionViewModel = koinViewModel(),
     inventaryViewModel: InventoryListViewModel = koinViewModel()
 ) {
+    val sessionManager: SessionManager = koinInject()
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentNavBackStackEntry?.destination?.route ?: ""
     val currentRouteBase = currentRoute.substringBefore("?")
@@ -104,6 +106,7 @@ fun AppNavGraph(
         if (showMainUI) {
             AppDrawer(
                 route = currentRouteBase,
+                userName = sessionManager.getUserName() ?: "",
                 navigationToHome = { navigationActions.navigateToHome() },
                 navigationToRecarga = { navigationActions.navigateToRecarga() },
                 navigationToGuiaRemision = { navigationActions.navigateToGuiaRemision() },
@@ -180,7 +183,9 @@ fun AppNavGraph(
                 navController = navController,
                 startDestination = AppScreens.Login.route,
                 modifier = modifier.padding(
-                    if (showGlobalTopBar) paddingValues else if (showMainUI) PaddingValues(0.dp) else PaddingValues(0.dp)
+                    if (showGlobalTopBar) paddingValues else if (showMainUI) PaddingValues(0.dp) else PaddingValues(
+                        0.dp
+                    )
                 )
             ) {
                 composable(route = AppScreens.Login.route) {

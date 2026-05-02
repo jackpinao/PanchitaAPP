@@ -30,9 +30,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.pinao.panchitaapp.data.source.local.SessionManager
 import com.pinao.panchitaapp.presentation.ui.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,13 +43,15 @@ fun HomeScreen(
     homeViewModel: HomeViewModel,
     navController: NavController
 ) {
+    val sessionManager: SessionManager = koinInject()
+    val userName = sessionManager.getUserName() ?: ""
 
     Screen {
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         val scope = rememberCoroutineScope()
         val drawerState = rememberDrawerState(DrawerValue.Closed)
         //ContentHome(scrollBehavior)
-        ContentHom(scope, drawerState, scrollBehavior)
+        ContentHom(scope, drawerState, scrollBehavior, userName)
     }
 }
 
@@ -81,7 +85,7 @@ private fun ContentHome(scrollBehavior: TopAppBarScrollBehavior) {
             }
         },
         content = {
-            ContentHom(scope, drawerState, scrollBehavior)
+            ContentHom(scope, drawerState, scrollBehavior, "")
         }
     )
 }
@@ -91,7 +95,8 @@ private fun ContentHome(scrollBehavior: TopAppBarScrollBehavior) {
 private fun ContentHom(
     scope: CoroutineScope,
     drawerState: DrawerState,
-    scrollBehavior: TopAppBarScrollBehavior
+    scrollBehavior: TopAppBarScrollBehavior,
+    userName: String = ""
 ) {
     Scaffold(
 //        topBar = {
@@ -120,7 +125,9 @@ private fun ContentHom(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item {
-                    Text(text = "Hola, bienvenido a PanchitaApp")
+                    val welcomeText =
+                        if (userName.isNotEmpty()) "Hola $userName, bienvenido a PanchitaApp" else "Hola, bienvenido a PanchitaApp"
+                    Text(text = welcomeText)
                 }
             }
 

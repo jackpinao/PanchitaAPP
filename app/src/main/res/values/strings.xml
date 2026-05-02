@@ -99,8 +99,8 @@
     <string name="business_name">Abarrotes Panchita</string>
     <string name="business_ruc">RUC: 10452668583</string>
     <string name="business_address">Av. Santa Rosa Mz N Lt 25</string>
-    <string name="ticket_date">Fecha: %1$s</string>
-    <string name="ticket_client">Cliente: %1$s</string>
+    <string name="ticket_date">Fecha:</string>
+    <string name="ticket_client">Cliente:</string>
     <string name="ticket_doc">DNI/RUC: %1$s</string>
     <string name="ticket_col_cant">CANT</string>
     <string name="ticket_col_desc">DESCRIPCIÓN</string>

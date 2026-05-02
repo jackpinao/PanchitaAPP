@@ -41,6 +41,7 @@ import com.pinao.panchitaapp.presentation.navigation.AppScreens
 fun AppDrawer(
     route: String,
     modifier: Modifier = Modifier,
+    userName: String = "",
     navigationToHome: () -> Unit = {},
     navigationToRecarga: () -> Unit = {},
     navigationToGuiaRemision: () -> Unit = {},
@@ -51,7 +52,7 @@ fun AppDrawer(
     isPermanent: Boolean = false
 ) {
     val drawerContent: @Composable ColumnScope.() -> Unit = {
-        DrawerHeader(modifier)
+        DrawerHeader(modifier, userName)
         Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.spacer_padding)))
         NavigationDrawerItem(
             label = {
@@ -192,7 +193,7 @@ fun AppDrawer(
 }
 
 @Composable
-fun DrawerHeader(modifier: Modifier) {
+fun DrawerHeader(modifier: Modifier, userName: String = "") {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start,
@@ -216,6 +217,14 @@ fun DrawerHeader(modifier: Modifier) {
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onPrimary
         )
+        if (userName.isNotEmpty()) {
+            Text(
+                text = "Hola, $userName",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+            )
+        }
     }
 }
 

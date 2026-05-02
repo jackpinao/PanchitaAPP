@@ -10,7 +10,7 @@ object SaleDetailMapper {
         SaleDetailEntity(
             saleDetailId = UUID.randomUUID().toString(),
             saleId = saleId,
-            productId = product.barcode,
+            productId = product.productId,
             quantity = product.stockQuantity,
             priceAtSale = product.priceSell,
             subtotal = product.priceSell * product.stockQuantity

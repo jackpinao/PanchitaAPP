@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.model.TemporaryProductModel
 import com.pinao.panchitaapp.domain.service.TicketPdfService
+import com.pinao.panchitaapp.domain.usecase.Auth.EnsureCurrentUserUseCase
 import com.pinao.panchitaapp.domain.usecase.client.SaveClientUseCase
 import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
 import com.pinao.panchitaapp.domain.usecase.products.ScanBarcodeUseCase
@@ -42,6 +43,7 @@ class GuiaRemisionViewModelTest {
     private val completeSaleUseCase: CompleteSaleUseCase = mockk(relaxed = true)
     private val pdfService: TicketPdfService = mockk(relaxed = true)
     private val temporaryProductUseCases: TemporaryProductUseCases = mockk(relaxed = true)
+    private val ensureCurrentUserUseCase: EnsureCurrentUserUseCase = mockk(relaxed = true)
 
     private lateinit var viewModel: GuiaRemisionViewModel
 
@@ -85,7 +87,7 @@ class GuiaRemisionViewModelTest {
     fun `init should load temporary products into state`() = runTest {
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
 
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
@@ -110,7 +112,7 @@ class GuiaRemisionViewModelTest {
 
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
 
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
@@ -141,7 +143,7 @@ class GuiaRemisionViewModelTest {
 
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
 
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
@@ -164,7 +166,7 @@ class GuiaRemisionViewModelTest {
     fun `onQuantityChange should update quantity only with valid numbers`() = runTest {
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
 
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
@@ -189,7 +191,7 @@ class GuiaRemisionViewModelTest {
 
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
 
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
@@ -229,7 +231,7 @@ class GuiaRemisionViewModelTest {
 
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
 
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
@@ -272,7 +274,7 @@ class GuiaRemisionViewModelTest {
 
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -306,7 +308,7 @@ class GuiaRemisionViewModelTest {
 
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
 
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
@@ -338,7 +340,7 @@ class GuiaRemisionViewModelTest {
 
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
 
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
@@ -373,7 +375,7 @@ class GuiaRemisionViewModelTest {
 
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
 
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
@@ -406,7 +408,7 @@ class GuiaRemisionViewModelTest {
 
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
 
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
@@ -428,7 +430,7 @@ class GuiaRemisionViewModelTest {
     fun `onClientNameChange and onClientDocChange should update state`() = runTest {
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -450,7 +452,7 @@ class GuiaRemisionViewModelTest {
     @Test
     fun `clearErrorMessage should set errorMessage to null`() = runTest {
         // Configuramos para que falle y asigne el error
-        coEvery { pdfService.generateAndSaveTicket(any(), any()) } returns Result.failure(
+        coEvery { pdfService.generateAndSaveTicket(any(), any(), any(), any()) } returns Result.failure(
             Exception(
                 "My error"
             )
@@ -458,7 +460,7 @@ class GuiaRemisionViewModelTest {
 
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -484,7 +486,7 @@ class GuiaRemisionViewModelTest {
     fun `onScanClick should update showSelectionSheet to true`() = runTest {
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -503,7 +505,7 @@ class GuiaRemisionViewModelTest {
     fun `initiatePrintTicket should update printingStatus`() = runTest {
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -526,7 +528,7 @@ class GuiaRemisionViewModelTest {
     fun `finalizeSale should call completeSaleUseCase and clear temporaries`() = runTest {
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
 
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
@@ -556,7 +558,7 @@ class GuiaRemisionViewModelTest {
 
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
 
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
@@ -577,11 +579,11 @@ class GuiaRemisionViewModelTest {
 
     @Test
     fun `downloadTicket should handle success from pdfService`() = runTest {
-        coEvery { pdfService.generateAndSaveTicket(any(), any()) } returns Result.success(Unit)
+        coEvery { pdfService.generateAndSaveTicket(any(), any(), any(), any()) } returns Result.success(Unit)
 
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -606,7 +608,7 @@ class GuiaRemisionViewModelTest {
 
     @Test
     fun `downloadTicket should handle failure from pdfService`() = runTest {
-        coEvery { pdfService.generateAndSaveTicket(any(), any()) } returns Result.failure(
+        coEvery { pdfService.generateAndSaveTicket(any(), any(), any(), any()) } returns Result.failure(
             Exception(
                 "PDF Error format"
             )
@@ -614,7 +616,7 @@ class GuiaRemisionViewModelTest {
 
         viewModel = GuiaRemisionViewModel(
             productUseCases, saveClientUseCase, scanBarcodeUseCase,
-            completeSaleUseCase, pdfService, temporaryProductUseCases
+            completeSaleUseCase, pdfService, temporaryProductUseCases, ensureCurrentUserUseCase
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 

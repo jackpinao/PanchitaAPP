@@ -9,6 +9,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.pinao.panchitaapp.data.source.local.SessionManager
+import com.pinao.panchitaapp.data.source.local.dao.UserDao
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -27,6 +28,7 @@ class AuthRepositoryImplTest {
     private val mockFirebaseAuth: FirebaseAuth = mockk()
     private val mockFirestore: FirebaseFirestore = mockk()
     private val mockSessionManager: SessionManager = mockk(relaxed = true)
+    private val mockUserDao: UserDao = mockk(relaxed = true)
 
     private val mockAuthResult: AuthResult = mockk()
     private val mockFirebaseUser: FirebaseUser = mockk()
@@ -37,7 +39,7 @@ class AuthRepositoryImplTest {
 
     @Before
     fun setup() {
-        repository = AuthRepositoryImpl(mockFirebaseAuth, mockFirestore, mockSessionManager)
+        repository = AuthRepositoryImpl(mockFirebaseAuth, mockFirestore, mockSessionManager, mockUserDao)
     }
 
     @Test
@@ -77,7 +79,7 @@ class AuthRepositoryImplTest {
         assertEquals("Admin User", userModel?.name)
         assertEquals(true, userModel?.active)
 
-        verify(exactly = 1) { mockSessionManager.saveSession("store_01", "admin") }
+        verify(exactly = 1) { mockSessionManager.saveSession("store_01", "admin", uid, "Admin User") }
     }
 
     @Test
@@ -92,7 +94,7 @@ class AuthRepositoryImplTest {
         // Assert
         assertTrue(result.isFailure)
         assertEquals("Invalid credentials", result.exceptionOrNull()?.message)
-        verify(exactly = 0) { mockSessionManager.saveSession(any(), any()) }
+        verify(exactly = 0) { mockSessionManager.saveSession(any(), any(), any(), any()) }
     }
 
     @Test

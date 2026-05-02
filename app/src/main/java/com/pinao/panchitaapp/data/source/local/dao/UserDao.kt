@@ -3,6 +3,7 @@ package com.pinao.panchitaapp.data.source.local.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
@@ -14,6 +15,9 @@ interface UserDao {
 
     @Insert
     suspend fun insert(user: UserEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(user: UserEntity): Long
 
     @Update
     suspend fun update(user: UserEntity): Int

@@ -64,7 +64,7 @@ class SaleRepositoryImpl(
                     // 3. ACTUALIZAR STOCK FINAL EN FIRESTORE (Colección Maestra)
                     // Importante: Usar product.id ya que es el ID del documento en Firestore, no product.code
                     val productMasterRef = firestore.collection("product").document(product.productId)
-                    batch.update(productMasterRef, "stock", product.stockQuantity)
+                    batch.update(productMasterRef, "stockQuantity", product.stockQuantity)
                 }
 
                 // Ejecutamos el lote de forma asíncrona

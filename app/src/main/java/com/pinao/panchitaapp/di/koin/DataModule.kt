@@ -30,6 +30,7 @@ import com.pinao.panchitaapp.data.source.local.dao.RechangeDao
 import com.pinao.panchitaapp.data.source.local.dao.SaleDao
 import com.pinao.panchitaapp.data.source.local.dao.SaleDetailDao
 import com.pinao.panchitaapp.data.source.local.dao.TemporaryProductDao
+import com.pinao.panchitaapp.data.source.local.dao.UserDao
 import com.pinao.panchitaapp.data.source.local.database.AppDatabase
 import com.pinao.panchitaapp.data.source.remote.BrandRemoteDataSource
 import com.pinao.panchitaapp.data.source.remote.CategoryRemoteDataSource
@@ -131,6 +132,11 @@ class DataModule {
     @Single
     fun provideTicketDao(database: AppDatabase): SaleDao {
         return database.ticketDao()
+    }
+
+    @Single
+    fun provideUserDao(database: AppDatabase): UserDao {
+        return database.userDao()
     }
 
     @Single
@@ -240,12 +246,14 @@ class DataModule {
     fun provideAuthRepository(
         firebaseAuth: FirebaseAuth,
         firestore: FirebaseFirestore,
-        sessionManager: SessionManager
+        sessionManager: SessionManager,
+        userDao: UserDao
     ): AuthRepository {
         return AuthRepositoryImpl(
             firebaseAuth,
             firestore,
-            sessionManager
+            sessionManager,
+            userDao
         )
     }
 

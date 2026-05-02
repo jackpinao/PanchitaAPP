@@ -11,6 +11,8 @@ import com.pinao.panchitaapp.domain.repository.RechangeRepository
 import com.pinao.panchitaapp.domain.repository.TemporaryProductRepository
 import com.pinao.panchitaapp.domain.repository.SaleRepository
 import com.pinao.panchitaapp.domain.usecase.Auth.AuthUseCase
+import com.pinao.panchitaapp.domain.usecase.Auth.EnsureCurrentUserUseCase
+import com.pinao.panchitaapp.domain.usecase.Auth.GetCurrentUserIdUseCase
 import com.pinao.panchitaapp.domain.usecase.Auth.IsUserLoggedInUseCase
 import com.pinao.panchitaapp.domain.usecase.Auth.SignInUseCase
 import com.pinao.panchitaapp.domain.usecase.Auth.SignOutUseCase
@@ -236,6 +238,16 @@ class DomainModule {
     fun provideClearTemporaryProductsUseCase(
         temporaryProductRepository: TemporaryProductRepository
     ) = ClearTemporaryProductsUseCase(temporaryProductRepository)
+
+    @Factory
+    fun provideEnsureCurrentUserUseCase(
+        authRepository: AuthRepository
+    ) = EnsureCurrentUserUseCase(authRepository)
+
+    @Factory
+    fun provideGetCurrentUserIdUseCase(
+        authRepository: AuthRepository
+    ) = GetCurrentUserIdUseCase(authRepository)
 
     @Factory
     fun provideSignInUseCase(

@@ -100,7 +100,7 @@ class SaleRepositoryImplTest {
         
         // La rebaja del stock maestro en Firestore por los 2 productos
         // Total de llamadas a update = 2
-        coVerify(exactly = 2) { mockBatch.update(any(), "stock", any<Any>()) }
+        coVerify(exactly = 2) { mockBatch.update(any(), "stockQuantity", any<Any>()) }
         
         // Todo consolidado en un solo commit a Firebase
         coVerify(exactly = 1) { mockBatch.commit() }
