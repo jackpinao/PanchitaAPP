@@ -331,7 +331,12 @@ class GuiaRemisionViewModel(
                 totalAmount = state.products.sumOf { it.priceSell * it.stockQuantity }
             )
 
-            pdfService.generateAndSaveTicket(ticket, state.products)
+            pdfService.generateAndSaveTicket(
+                ticket = ticket,
+                products = state.products,
+                clientName = state.clientName,
+                clientDoc = state.clientDoc
+            )
                 .onSuccess {
                     _uiState.update {
                         it.copy(

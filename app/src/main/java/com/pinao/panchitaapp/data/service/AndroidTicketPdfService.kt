@@ -29,7 +29,9 @@ class AndroidTicketPdfService(
 
     override suspend fun generateAndSaveTicket(
         ticket: SaleModel,
-        products: List<ProductModel>
+        products: List<ProductModel>,
+        clientName: String,
+        clientDoc: String
     ): Result<Unit> = withContext(Dispatchers.IO) {
         var pdfDocument: PdfDocument? = null
         try {
@@ -37,7 +39,7 @@ class AndroidTicketPdfService(
             val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
             val page = pdfDocument.startPage(pageInfo)
             
-            drawTicketContent(page.canvas, ticket, products)
+            drawTicketContent(page.canvas, ticket, products, clientName, clientDoc)
             pdfDocument.finishPage(page)
 
             val fileName = "Ticket_${ticket.saleId}_${System.currentTimeMillis()}.pdf"
@@ -55,7 +57,13 @@ class AndroidTicketPdfService(
     /**
      * Dibuja el contenido del ticket en el canvas del PDF.
      */
-    private fun drawTicketContent(canvas: Canvas, ticket: SaleModel, products: List<ProductModel>) {
+    private fun drawTicketContent(
+        canvas: Canvas,
+        ticket: SaleModel,
+        products: List<ProductModel>,
+        clientName: String,
+        clientDoc: String
+    ) {
         val titlePaint = Paint().apply {
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             textSize = 14f
@@ -70,6 +78,21 @@ class AndroidTicketPdfService(
         var y = 50f
         canvas.drawText("Bodega 'El Chasqui'", 40f, y, titlePaint)
         y += 30f
+
+        val normalizedClientName = clientName.trim()
+        val normalizedClientDoc = clientDoc.trim()
+        if (normalizedClientName.isNotEmpty()) {
+            canvas.drawText("Cliente: $normalizedClientName", 40f, y, textPaint)
+            y += 20f
+        }
+        if (normalizedClientDoc.isNotEmpty()) {
+            canvas.drawText("Documento: $normalizedClientDoc", 40f, y, textPaint)
+            y += 20f
+        }
+        if (normalizedClientName.isNotEmpty() || normalizedClientDoc.isNotEmpty()) {
+            y += 10f
+        }
+
         canvas.drawText("Ticket ID: ${ticket.saleId}", 40f, y, textPaint)
         y += 20f
         canvas.drawText("Fecha: ${ticket.saleDate}", 40f, y, textPaint)

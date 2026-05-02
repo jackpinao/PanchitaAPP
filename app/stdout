@@ -107,32 +107,26 @@ kotzillaPlugin = "2.1.1"
    MavenCentral dependency, and connects to the library every time, which
    makes it more flexible but also much slower.
 
-C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\java\com\pinao\panchitaapp\presentation\ui\inventoryList\InventoryListScreen.kt:78: Warning: Reading Resources using LocalContext.current.resources [LocalContextResourcesRead from androidx.compose.ui]
-                    is UiText.StringResource -> context.resources.getString(
-                                                ~~~~~~~~~~~~~~~~~
-C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\java\com\pinao\panchitaapp\presentation\ui\login\LoginScreen.kt:89: Warning: Reading Resources using LocalContext.current.resources [LocalContextResourcesRead from androidx.compose.ui]
-                    is UiText.StringResource -> context.resources.getString(
-                                                ~~~~~~~~~~~~~~~~~
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\java\com\pinao\panchitaapp\presentation\ui\inventoryList\InventoryListScreen.kt:78: Error: Querying resource values using LocalContext.current [LocalContextGetResourceValueCall from androidx.compose.ui]
+                    is UiText.StringResource -> context.getString(
+                                                ^
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\java\com\pinao\panchitaapp\presentation\ui\login\LoginScreen.kt:89: Error: Querying resource values using LocalContext.current [LocalContextGetResourceValueCall from androidx.compose.ui]
+                    is UiText.StringResource -> context.getString(
+                                                ^
 
-   Explanation for issues of type "LocalContextResourcesRead":
-   Changes to the Configuration object will not cause
-   LocalContext.current.resources reads to be invalidated, so calls to APIs
-   suchas Resources.getString() will not be updated when the Configuration
-   changes. Instead, use LocalResources.current to retrieve the Resources -
-   this will invalidate callers when the Configuration changes, to ensure that
-   these calls reflect the latest values.
+   Explanation for issues of type "LocalContextGetResourceValueCall":
+   Changes to the Configuration object will not cause LocalContext.current
+   reads to be invalidated, so calls to APIs such as Context.getString() will
+   not be updated when the Configuration changes, and so stale values might be
+   used. Instead, you can use Compose APIs such as stringResource,
+   colorResource, and painterResource - or LocalResources.current and query
+   properties from Resources directly. Using these APIs will invalidate
+   callers when the Configuration changes, to ensure that these calls reflect
+   the latest values.
 
    Vendor: Jetpack Compose
    Identifier: androidx.compose.ui
    Feedback: https://issuetracker.google.com/issues/new?component=612128
-
-C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\strings.xml:91: Warning: "Cant" is a common misspelling; did you mean "Cannot" or "Can not" or "Can't"? [Typos]
-    <string name="product_details_format">Cant: %1$s | P.U: %2$s | S.Igv: %3$s | Total: %4$s</string>
-                                          ~~~~
-
-   Explanation for issues of type "Typos":
-   This check looks through the string definitions, and if it finds any words
-   that look like likely misspellings, they are flagged.
 
 C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\mipmap-anydpi-v26: Warning: This folder configuration (v26) is unnecessary; minSdkVersion is 26. Merge all the resources in this folder into mipmap-anydpi. [ObsoleteSdkInt]
 
@@ -145,25 +139,13 @@ C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\mipmap-anydpi-v2
    where the version qualifier is less than or equal to the minSdkVersion,
    where the contents should be merged into the best folder.
 
-C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:3: Warning: The resource R.color.purple_200 appears to be unused [UnusedResources]
-    <color name="purple_200">#FFBB86FC</color>
-           ~~~~~~~~~~~~~~~~~
-C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:4: Warning: The resource R.color.purple_500 appears to be unused [UnusedResources]
-    <color name="purple_500">#FF6200EE</color>
-           ~~~~~~~~~~~~~~~~~
-C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:5: Warning: The resource R.color.purple_700 appears to be unused [UnusedResources]
-    <color name="purple_700">#FF3700B3</color>
-           ~~~~~~~~~~~~~~~~~
-C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:6: Warning: The resource R.color.teal_200 appears to be unused [UnusedResources]
-    <color name="teal_200">#FF03DAC5</color>
-           ~~~~~~~~~~~~~~~
-C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:7: Warning: The resource R.color.teal_700 appears to be unused [UnusedResources]
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:3: Warning: The resource R.color.teal_700 appears to be unused [UnusedResources]
     <color name="teal_700">#FF018786</color>
            ~~~~~~~~~~~~~~~
-C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:8: Warning: The resource R.color.black appears to be unused [UnusedResources]
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:4: Warning: The resource R.color.black appears to be unused [UnusedResources]
     <color name="black">#FF000000</color>
            ~~~~~~~~~~~~
-C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:9: Warning: The resource R.color.white appears to be unused [UnusedResources]
+C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\colors.xml:5: Warning: The resource R.color.white appears to be unused [UnusedResources]
     <color name="white">#FFFFFFFF</color>
            ~~~~~~~~~~~~
 C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\res\values\dimens.xml:3: Warning: The resource R.dimen.horizontal_margin appears to be unused [UnusedResources]
@@ -402,4 +384,4 @@ C:\Users\pinao\Documents\PROYECTOS\PanchitaAPP\app\src\main\java\com\pinao\panch
    </lint>
    ```
 
-1 error, 78 warnings
+3 errors, 71 warnings

@@ -12,5 +12,10 @@ interface TicketPdfService {
      * Genera y guarda un PDF basado en la información de la venta.
      * @return Result con el estado de la operación.
      */
-    suspend fun generateAndSaveTicket(ticket: SaleModel, products: List<ProductModel>): Result<Unit>
+    suspend fun generateAndSaveTicket(
+        ticket: SaleModel,
+        products: List<ProductModel>,
+        clientName: String,
+        clientDoc: String
+    ): Result<Unit>
 }
