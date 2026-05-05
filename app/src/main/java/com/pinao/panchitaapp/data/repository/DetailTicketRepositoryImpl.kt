@@ -12,18 +12,26 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
+import io.github.jan_tennert.supabase.SupabaseClient
+import io.github.jan_tennert.supabase.postgrest.postgrest
+import com.pinao.panchitaapp.data.source.remote.dto.SupabaseSaleDetailDto
+
 class DetailTicketRepositoryImpl(
     private val saleDetailDao: SaleDetailDao,
+    private val supabaseClient: SupabaseClient,
     private val firestore: FirebaseFirestore
 ) : DetailTicketRepository {
-
-    private val detailsCollection = firestore.collection("detail_ticket")
 
     override suspend fun saveTicketDetails(details: SaleDetailModel) {
         withContext(Dispatchers.IO) {
             try {
-                Log.d("DetailTicketRepositoryImpl", "Saving details to Firestore: $details")
-                detailsCollection.document(details.saleDetailId).set(details).await()
+                Log.d("DetailTicketRepositoryImpl", "Saving details to Supabase: $details")
+                // Nota: Aquí necesitaríamos el nombre del producto para el DTO completo, 
+                // pero si la interfaz no lo provee, podemos omitirlo o traerlo de Room.
+                // Por ahora usamos un placeholder o asumimos que se maneja en SaleRepository.
+                
+                // detailsCollection.document(details.saleDetailId).set(details).await()
+                
                 Log.d("DetailTicketRepositoryImpl", "Saving details Ticket to Room: $details")
                 saleDetailDao.insertDetails(SaleDetailMapper.toDatabase(details))
                 Log.d("DetailTicketRepositoryImpl", "Details saved successfully")

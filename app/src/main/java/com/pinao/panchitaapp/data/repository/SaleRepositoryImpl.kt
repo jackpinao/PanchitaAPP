@@ -14,12 +14,18 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
+import io.github.jan_tennert.supabase.SupabaseClient
+import io.github.jan_tennert.supabase.postgrest.postgrest
+import com.pinao.panchitaapp.data.source.remote.dto.SupabaseSaleDto
+import com.pinao.panchitaapp.data.source.remote.dto.SupabaseSaleDetailDto
+
 /**
- * Repositorio de Tickets que coordina la persistencia local (Room) y remota (Firestore).
+ * Repositorio de Tickets que coordina la persistencia local (Room) y remota (Supabase).
  */
 class SaleRepositoryImpl(
     private val saleDao: SaleDao,
     private val saleDetailDao: SaleDetailDao,
+    private val supabaseClient: SupabaseClient,
     private val firestore: FirebaseFirestore
 ) : SaleRepository {
 
@@ -35,7 +41,6 @@ class SaleRepositoryImpl(
             try {
                 // 1. Persistencia Local (Room)
                 val saleEntity = SaleMapper.toEntity(ticket)
-                val batch = firestore.batch()
                 val detailEntities = products.map { product ->
                     SaleDetailMapper.toEntity(product, ticket.saleId)
                 }
@@ -44,36 +49,34 @@ class SaleRepositoryImpl(
                 saleDao.saveFullSale(saleEntity, detailEntities)
                 Log.d("TicketRepositoryImp", "Venta guardada localmente en Room")
 
-                detailEntities.forEach { detail ->
-                    val detailRef = detailsCollection.document(detail.saleDetailId)
-                    batch.set(detailRef, detail)
-                    Log.d("TicketRepositoryImp", "Detalle de venta guardado en Firestore")
-                }
-
-                // 2. Persistencia Remota (Firestore) mediante WriteBatch
-                val saleRef = saleCollection.document(ticket.saleId)
+                // 2. Persistencia Remota (Supabase)
+                
                 // Guardar la cabecera del ticket
-                batch.set(saleRef, ticket)
+                val saleDto = SaleMapper.toSupabaseDto(ticket)
+                supabaseClient.postgrest["sales"].upsert(saleDto)
 
-                // Guardar productos como subcolección para evitar límites de tamaño de documento
+                // Guardar detalles de venta
+                val detailDtos = detailEntities.mapIndexed { index, entity ->
+                    SaleDetailMapper.toSupabaseDto(entity, products[index].name, ticket.storeId)
+                }
+                supabaseClient.postgrest["sale_items"].upsert(detailDtos)
+
+                // 3. Actualizar Stock en Supabase
                 products.forEach { product ->
-                    // 2. Guardar Detalle de Venta
-                    val detailRef = saleRef.collection("items").document(UUID.randomUUID().toString())
-                    batch.set(detailRef, product)
-
-                    // 3. ACTUALIZAR STOCK FINAL EN FIRESTORE (Colección Maestra)
-                    // Importante: Usar product.id ya que es el ID del documento en Firestore, no product.code
-                    val productMasterRef = firestore.collection("product").document(product.productId)
-                    batch.update(productMasterRef, "stockQuantity", product.stockQuantity)
+                    supabaseClient.postgrest["products"].update({
+                        set("current_stock", product.stockQuantity)
+                    }) {
+                        filter {
+                            eq("id", product.productId)
+                        }
+                    }
                 }
 
-                // Ejecutamos el lote de forma asíncrona
-                batch.commit().await()
-                Log.d("TicketRepositoryImpl", "Venta sincronizada exitosamente con Firestore")
+
+                Log.d("TicketRepositoryImpl", "Venta sincronizada exitosamente con Supabase")
 
             } catch (e: Exception) {
                 Log.e("TicketRepositoryImpl", "Error crítico al guardar la venta: ${e.message}", e)
-                // Re-lanzamos la excepción para que el ViewModel/UI maneje el estado de error
                 throw e
             }
         }

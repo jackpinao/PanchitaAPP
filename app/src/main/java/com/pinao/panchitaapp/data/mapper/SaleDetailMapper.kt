@@ -1,6 +1,7 @@
-﻿package com.pinao.panchitaapp.data.mapper
+package com.pinao.panchitaapp.data.mapper
 
 import com.pinao.panchitaapp.data.source.local.entity.SaleDetailEntity
+import com.pinao.panchitaapp.data.source.remote.dto.SupabaseSaleDetailDto
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.model.SaleDetailModel
 import java.util.UUID
@@ -33,6 +34,18 @@ object SaleDetailMapper {
             productId = entity.productId,
             quantity = entity.quantity,
             priceAtSale = entity.priceAtSale,
+            subtotal = entity.subtotal
+        )
+
+    fun toSupabaseDto(entity: SaleDetailEntity, productName: String, storeId: String): SupabaseSaleDetailDto =
+        SupabaseSaleDetailDto(
+            id = entity.saleDetailId,
+            tenantId = storeId,
+            saleId = entity.saleId,
+            productId = entity.productId,
+            productName = productName,
+            quantity = entity.quantity,
+            unitPrice = entity.priceAtSale,
             subtotal = entity.subtotal
         )
 }

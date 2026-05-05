@@ -106,6 +106,9 @@ android {
         buildConfigField("String", "KOTZILLA_APP_ID", "\"${localProperties.getProperty("KOTZILLA_APP_ID") ?: ""}\"")
         buildConfigField("String", "KOTZILLA_KEY_ID", "\"${localProperties.getProperty("KOTZILLA_KEY_ID") ?: ""}\"")
         buildConfigField("String", "KOTZILLA_API_KEY", "\"${localProperties.getProperty("KOTZILLA_API_KEY") ?: ""}\"")
+        
+        buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL") ?: ""}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY") ?: ""}\"")
     }
 
     // Asegurar que el JSON se genere antes de compilar
@@ -228,6 +231,14 @@ dependencies {
 
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.work.runtime.ktx)
+
+    // Supabase
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.postgrest)
+    implementation(libs.supabase.auth)
+    implementation(libs.supabase.realtime)
+    implementation(libs.supabase.storage)
+    implementation(libs.ktor.client.android)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

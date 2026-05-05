@@ -54,6 +54,9 @@ material3 = "1.4.0"
 workManager = "2.11.2"
 turbine = "1.2.1"
 kover = "0.9.8"
+supabase = "3.6.0"
+ktor = "3.1.0"
+
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
@@ -139,6 +142,18 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+
+# Supabase
+supabase-bom = { group = "io.github.jan-tennert.supabase", name = "bom", version.ref = "supabase" }
+supabase-postgrest = { group = "io.github.jan-tennert.supabase", name = "postgrest-kt" }
+supabase-auth = { group = "io.github.jan-tennert.supabase", name = "auth-kt" }
+supabase-realtime = { group = "io.github.jan-tennert.supabase", name = "realtime-kt" }
+supabase-storage = { group = "io.github.jan-tennert.supabase", name = "storage-kt" }
+
+# Ktor engine for Supabase
+ktor-client-android = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktor" }
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

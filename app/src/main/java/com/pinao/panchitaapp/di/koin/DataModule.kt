@@ -8,6 +8,14 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import io.github.jan_tennert.supabase.SupabaseClient
+import io.github.jan_tennert.supabase.auth.Auth
+import io.github.jan_tennert.supabase.createSupabaseClient
+import io.github.jan_tennert.supabase.postgrest.Postgrest
+import io.github.jan_tennert.supabase.realtime.Realtime
+import io.github.jan_tennert.supabase.storage.Storage
+import io.ktor.client.engine.android.Android
+import com.pinao.panchitaapp.BuildConfig
 import com.pinao.panchitaapp.data.network.rechange.RechangeApiClient
 import com.pinao.panchitaapp.data.network.rechange.RechangeService
 import com.pinao.panchitaapp.data.repository.AuthRepositoryImpl
@@ -32,15 +40,14 @@ import com.pinao.panchitaapp.data.source.local.dao.SaleDetailDao
 import com.pinao.panchitaapp.data.source.local.dao.TemporaryProductDao
 import com.pinao.panchitaapp.data.source.local.dao.UserDao
 import com.pinao.panchitaapp.data.source.local.database.AppDatabase
-import com.pinao.panchitaapp.data.source.remote.BrandRemoteDataSource
 import com.pinao.panchitaapp.data.source.remote.CategoryRemoteDataSource
 import com.pinao.panchitaapp.data.source.remote.ProductRemoteDataSource
 import com.pinao.panchitaapp.data.source.remote.RemoteDataSource
 import com.pinao.panchitaapp.data.source.remote.RemoteDataSourceImpl
-import com.pinao.panchitaapp.data.source.remote.firebase.FirebaseBrandDataSource
-import com.pinao.panchitaapp.data.source.remote.firebase.FirebaseCategoryDataSource
-import com.pinao.panchitaapp.data.source.remote.firebase.FirebaseProductDataSource
+import com.pinao.panchitaapp.data.source.remote.supabase.SupabaseCategoryDataSource
+import com.pinao.panchitaapp.data.source.remote.supabase.SupabaseProductDataSource
 import com.pinao.panchitaapp.domain.repository.AuthRepository
+
 import com.pinao.panchitaapp.domain.repository.BarcodeScanner
 import com.pinao.panchitaapp.domain.repository.BrandRepository
 import com.pinao.panchitaapp.domain.repository.CategoryRepository
@@ -80,6 +87,20 @@ class DataModule {
     @Single
     fun provideFirebaseAuth(): FirebaseAuth {
         return Firebase.auth
+    }
+
+    @Single
+    fun provideSupabaseClient(): SupabaseClient {
+        return createSupabaseClient(
+            supabaseUrl = BuildConfig.SUPABASE_URL,
+            supabaseKey = BuildConfig.SUPABASE_ANON_KEY
+        ) {
+            httpEngine = Android.create()
+            install(Postgrest)
+            install(Auth)
+            install(Realtime)
+            install(Storage)
+        }
     }
 
     @Single
@@ -210,9 +231,10 @@ class DataModule {
     @Single
     fun provideDetailTicketRepository(
         saleDetailDao: SaleDetailDao,
+        supabaseClient: SupabaseClient,
         firestore: FirebaseFirestore
     ): DetailTicketRepository {
-        return DetailTicketRepositoryImpl(saleDetailDao, firestore)
+        return DetailTicketRepositoryImpl(saleDetailDao, supabaseClient, firestore)
     }
 
     @Single
@@ -224,11 +246,13 @@ class DataModule {
     fun provideTicketRepository(
         saleDao: SaleDao,
         saleDetailDao: SaleDetailDao,
+        supabaseClient: SupabaseClient,
         firestore: FirebaseFirestore
     ): SaleRepository {
         return SaleRepositoryImpl(
             saleDao,
             saleDetailDao,
+            supabaseClient,
             firestore
         )
     }
@@ -244,42 +268,39 @@ class DataModule {
 
     @Single
     fun provideAuthRepository(
+        supabaseClient: SupabaseClient,
         firebaseAuth: FirebaseAuth,
         firestore: FirebaseFirestore,
         sessionManager: SessionManager,
         userDao: UserDao
     ): AuthRepository {
         return AuthRepositoryImpl(
-            firebaseAuth,
-            firestore,
+            supabaseClient,
             sessionManager,
-            userDao
+            userDao,
+            firebaseAuth,
+            firestore
         )
     }
 
     @Factory
     fun provideRemoteDataSource(
-        brandRemoteDataSource: BrandRemoteDataSource,
         categoryRemoteDataSource: CategoryRemoteDataSource,
         productRemoteDataSource: ProductRemoteDataSource
     ): RemoteDataSource = RemoteDataSourceImpl(
-        brandRemoteDataSource = brandRemoteDataSource,
         categoryRemoteDataSource = categoryRemoteDataSource,
         productRemoteDataSource = productRemoteDataSource
     )
 
+
+
     @Single
-    fun provideBrandRemoteDataSource(firestore: FirebaseFirestore): BrandRemoteDataSource {
-        return FirebaseBrandDataSource(firestore)
+    fun provideCategoryRemoteDataSource(supabaseClient: SupabaseClient): CategoryRemoteDataSource {
+        return SupabaseCategoryDataSource(supabaseClient)
     }
 
     @Single
-    fun provideCategoryRemoteDataSource(firestore: FirebaseFirestore): CategoryRemoteDataSource {
-        return FirebaseCategoryDataSource(firestore)
-    }
-
-    @Single
-    fun provideProductRemoteDataSource(firestore: FirebaseFirestore): ProductRemoteDataSource {
-        return FirebaseProductDataSource(firestore)
+    fun provideProductRemoteDataSource(supabaseClient: SupabaseClient): ProductRemoteDataSource {
+        return SupabaseProductDataSource(supabaseClient)
     }
 }

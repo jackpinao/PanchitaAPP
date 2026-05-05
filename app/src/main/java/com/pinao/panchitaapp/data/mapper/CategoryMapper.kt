@@ -2,6 +2,7 @@ package com.pinao.panchitaapp.data.mapper
 
 import com.pinao.panchitaapp.data.source.local.entity.CategoryEntity
 import com.pinao.panchitaapp.data.source.remote.dto.FirebaseCategoryDto
+import com.pinao.panchitaapp.data.source.remote.dto.SupabaseCategoryDto
 import com.pinao.panchitaapp.domain.model.CategoryModel
 
 object CategoryMapper {
@@ -41,6 +42,25 @@ object CategoryMapper {
             storeId = model.storeId,
             name = model.name,
             revenue = model.revenue
+        )
+    }
+
+    fun toDomain(dto: SupabaseCategoryDto): CategoryModel {
+        return CategoryModel(
+            categoryId = dto.id,
+            storeId = dto.tenantId,
+            name = dto.name,
+            revenue = 0.0, // Not in Supabase schema
+            isSynced = true
+        )
+    }
+
+
+    fun toSupabaseDto(model: CategoryModel): SupabaseCategoryDto {
+        return SupabaseCategoryDto(
+            id = model.categoryId,
+            tenantId = model.storeId,
+            name = model.name
         )
     }
 }

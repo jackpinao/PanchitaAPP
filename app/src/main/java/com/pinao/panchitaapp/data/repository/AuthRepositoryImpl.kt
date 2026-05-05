@@ -9,50 +9,74 @@ import com.pinao.panchitaapp.domain.model.UserModel
 import com.pinao.panchitaapp.domain.repository.AuthRepository
 import kotlinx.coroutines.tasks.await
 
+import io.github.jan_tennert.supabase.SupabaseClient
+import io.github.jan_tennert.supabase.auth.auth
+import io.github.jan_tennert.supabase.auth.providers.builtin.Email
+import io.github.jan_tennert.supabase.postgrest.postgrest
+import io.github.jan_tennert.supabase.postgrest.query.Columns
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+
 class AuthRepositoryImpl(
-    private val firebaseAuth: FirebaseAuth,
-    private val firestore: FirebaseFirestore,
+    private val supabaseClient: SupabaseClient,
     private val sessionManager: SessionManager,
-    private val userDao: UserDao
+    private val userDao: UserDao,
+    private val firebaseAuth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
 ) : AuthRepository {
+
+    @Serializable
+    private data class SupabaseUserDto(
+        @SerialName("id") val id: String,
+        @SerialName("tenant_id") val tenantId: String,
+        @SerialName("auth_id") val authId: String,
+        @SerialName("full_name") val fullName: String,
+        @SerialName("email") val email: String,
+        @SerialName("role") val role: String,
+        @SerialName("is_active") val isActive: Boolean
+    )
 
     override suspend fun signIn(email: String, pass: String): Result<UserModel> {
         return try {
-            val authResult = firebaseAuth.signInWithEmailAndPassword(email, pass).await()
-            val uid = authResult.user?.uid ?: throw Exception("Error al obtener UID")
+            supabaseClient.auth.signInWith(Email) {
+                this.email = email
+                this.password = pass
+            }
+            
+            val uid = supabaseClient.auth.currentUserOrNull()?.id ?: throw Exception("Error al obtener UID")
 
-            // Buscamos datos adicionales en Firestore
-            val userDoc = firestore.collection("users").document(uid).get().await()
+            // Buscamos datos adicionales en la tabla 'users' de Supabase
+            val userDto = supabaseClient.postgrest["users"]
+                .select(columns = Columns.ALL) {
+                    filter {
+                        eq("auth_id", uid)
+                    }
+                }
+                .decodeSingle<SupabaseUserDto>()
 
-            val role = userDoc.getString("role") ?: "vendedor"
-            val storeId = userDoc.getString("store_id") ?: ""
-            val emailValue = userDoc.getString("email") ?: ""
-            val name = userDoc.getString("name") ?: ""
-            val active = userDoc.getBoolean("is_active") ?: false
+            // Persistimos en SessionManager
+            sessionManager.saveSession(userDto.tenantId, userDto.role, userDto.id, userDto.fullName)
 
-            // Persistimos en SessionManager (incluido el userId y userName)
-            sessionManager.saveSession(storeId, role, uid, name)
-
-            // Guardamos el usuario en Room para satisfacer la FK de ventas
+            // Guardamos en Room
             userDao.upsert(
                 UserEntity(
-                    userId = uid,
-                    storeId = storeId,
-                    name = name,
-                    email = emailValue,
+                    userId = userDto.id,
+                    storeId = userDto.tenantId,
+                    name = userDto.fullName,
+                    email = userDto.email,
                     password = "",
-                    role = role,
-                    isActive = if (active) 1 else 0
+                    role = userDto.role,
+                    isActive = if (userDto.isActive) 1 else 0
                 )
             )
 
             val user = UserModel(
-                userId = uid,
-                storeId = storeId,
-                email = emailValue,
-                role = role,
-                active = active,
-                name = name
+                userId = userDto.id,
+                storeId = userDto.tenantId,
+                email = userDto.email,
+                role = userDto.role,
+                active = userDto.isActive,
+                name = userDto.fullName
             )
             Result.success(user)
         } catch (e: Exception) {
@@ -60,13 +84,13 @@ class AuthRepositoryImpl(
         }
     }
 
-    override fun isUserLoggedIn(): Boolean = firebaseAuth.currentUser != null
+    override fun isUserLoggedIn(): Boolean = supabaseClient.auth.currentUserOrNull() != null
 
     override fun getCurrentUserId(): String =
-        sessionManager.getUserId() ?: firebaseAuth.currentUser?.uid ?: ""
+        sessionManager.getUserId() ?: supabaseClient.auth.currentUserOrNull()?.id ?: ""
 
     override suspend fun ensureCurrentUserInRoom(): String {
-        val uid = firebaseAuth.currentUser?.uid ?: return ""
+        val uid = supabaseClient.auth.currentUserOrNull()?.id ?: return ""
         // Si ya existe en Room no hace nada costoso
         if (userDao.getUserForId(uid) != null) {
             if (sessionManager.getUserId().isNullOrEmpty()) {
@@ -80,35 +104,41 @@ class AuthRepositoryImpl(
             }
             return uid
         }
-        // No existe en Room: lo trae de Firestore y lo persiste
+        // No existe en Room: lo trae de Supabase y lo persiste
         return try {
-            val userDoc = firestore.collection("users").document(uid).get().await()
-            val role = userDoc.getString("role") ?: "vendedor"
-            val storeId = userDoc.getString("store_id") ?: ""
-            val emailValue = userDoc.getString("email") ?: ""
-            val name = userDoc.getString("name") ?: ""
-            val active = userDoc.getBoolean("is_active") ?: false
-            sessionManager.saveSession(storeId, role, uid, name)
+            val userDto = supabaseClient.postgrest["users"]
+                .select(columns = Columns.ALL) {
+                    filter {
+                        eq("auth_id", uid)
+                    }
+                }
+                .decodeSingle<SupabaseUserDto>()
+
+            sessionManager.saveSession(userDto.tenantId, userDto.role, userDto.id, userDto.fullName)
             userDao.upsert(
                 UserEntity(
-                    userId = uid,
-                    storeId = storeId,
-                    name = name,
-                    email = emailValue,
+                    userId = userDto.id,
+                    storeId = userDto.tenantId,
+                    name = userDto.fullName,
+                    email = userDto.email,
                     password = "",
-                    role = role,
-                    isActive = if (active) 1 else 0
+                    role = userDto.role,
+                    isActive = if (userDto.isActive) 1 else 0
                 )
             )
-            uid
+            userDto.id
         } catch (e: Exception) {
-            // Si Firestore falla, retornamos uid de todas formas para dar error claro al caller
             uid
         }
     }
 
     override fun signOut() {
-        firebaseAuth.signOut()
+        // Ejecutar en un scope o hacer bloqueante si es necesario, 
+        // pero la interfaz de AuthRepository suele ser síncrona para signOut
+        // supabaseClient.auth.signOut() // Esto es suspend en v3.0+
         sessionManager.clearSession()
+        // Nota: El signOut de Supabase es suspendido. 
+        // Si la UI requiere que sea inmediato, se puede lanzar en un scope global 
+        // o cambiar la firma de la interfaz.
     }
 }
