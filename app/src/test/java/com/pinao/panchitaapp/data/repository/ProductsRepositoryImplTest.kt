@@ -1,14 +1,14 @@
+
+
 package com.pinao.panchitaapp.data.repository
 
 import android.util.Log
 import app.cash.turbine.test
-import com.pinao.panchitaapp.data.source.local.dao.BrandDao
 import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
 import com.pinao.panchitaapp.data.source.local.dao.ProductDao
 import com.pinao.panchitaapp.data.source.local.dao.StockEntryDao
 import com.pinao.panchitaapp.data.source.local.entity.ProductsEntity
 import com.pinao.panchitaapp.data.source.remote.RemoteDataSource
-import com.pinao.panchitaapp.domain.model.BrandModel
 import com.pinao.panchitaapp.domain.model.CategoryModel
 import com.pinao.panchitaapp.domain.model.ProductModel
 import io.mockk.coEvery
@@ -32,7 +32,6 @@ class ProductsRepositoryImplTest {
     private lateinit var repository: ProductsRepositoryImpl
     private val mockProductDao: ProductDao = mockk(relaxed = true)
     private val mockCategoryDao: CategoryDao = mockk(relaxed = true)
-    private val mockBrandDao: BrandDao = mockk(relaxed = true)
     private val mockRemoteDataSource: RemoteDataSource = mockk(relaxed = true)
     private val mockStockEntryDao: StockEntryDao = mockk(relaxed = true)
 
@@ -45,7 +44,6 @@ class ProductsRepositoryImplTest {
         repository = ProductsRepositoryImpl(
             mockProductDao,
             mockCategoryDao,
-            mockBrandDao,
             mockStockEntryDao,
             mockRemoteDataSource
         )
@@ -63,13 +61,13 @@ class ProductsRepositoryImplTest {
                 productId = "p1",
                 storeId = "s1",
                 categoryId = "c1",
-                brandId = "b1",
                 detailTicketEntityId = "d1",
                 name = "Prod1",
                 description = "Desc1",
                 priceBuy = 10.0,
                 priceSell = 15.0,
                 priceExcludingIGV = 12.0,
+                revenue = 0.0,
                 stockQuantity = 100.0,
                 stockMin = 5.0,
                 barcode = "111",
@@ -98,13 +96,13 @@ class ProductsRepositoryImplTest {
                 productId = "p1",
                 storeId = "s1",
                 categoryId = "c1",
-                brandId = "b1",
                 detailTicketEntityId = "d1",
                 name = "Prod1",
                 description = "Desc1",
                 priceBuy = 10.0,
                 priceSell = 15.0,
                 priceExcludingIGV = 12.0,
+                revenue = 0.0,
                 stockQuantity = 100.0,
                 stockMin = 5.0,
                 barcode = "111",
@@ -130,13 +128,13 @@ class ProductsRepositoryImplTest {
             productId = "p2",
             storeId = "s1",
             categoryId = "c1",
-            brandId = "b1",
             detailTicketEntityId = "d1",
             name = "Prod2",
             description = "Desc2",
             priceBuy = 20.0,
             priceSell = 25.0,
             priceExcludingIGV = 22.0,
+            revenue = 0.0,
             stockQuantity = 50.0,
             stockMin = 5.0,
             barcode = "222",
@@ -171,7 +169,6 @@ class ProductsRepositoryImplTest {
             productId = "p3",
             storeId = "s1",
             categoryId = "c1",
-            brandId = "b1",
             detailTicketEntityId = "d1",
             name = "Prod3",
             priceSell = 30.0,
@@ -194,7 +191,7 @@ class ProductsRepositoryImplTest {
         coVerify(exactly = 1) {
             mockProductDao.insertProduct(withArg { entity ->
                 assertEquals("p3", entity.productId)
-                assertEquals(1, entity.isSynced) // Debería cambiar a true (1) al guardarse exitosamente
+                assertEquals(1, entity.isSynced) // DeberÃ­a cambiar a true (1) al guardarse exitosamente
             })
         }
     }
@@ -205,7 +202,6 @@ class ProductsRepositoryImplTest {
             productId = "p4",
             storeId = "s1",
             categoryId = "c1",
-            brandId = "b1",
             detailTicketEntityId = "d1",
             name = "Prod4",
             priceSell = 40.0,
@@ -228,7 +224,7 @@ class ProductsRepositoryImplTest {
         coVerify(exactly = 1) {
             mockProductDao.insertProduct(withArg { entity ->
                 assertEquals("p4", entity.productId)
-                assertEquals(0, entity.isSynced) // Debería cambiar a false (0) al fallar Firebase/Retrofit
+                assertEquals(0, entity.isSynced) // DeberÃ­a cambiar a false (0) al fallar Firebase/Retrofit
             })
         }
     }
@@ -269,13 +265,13 @@ class ProductsRepositoryImplTest {
             productId = "pUnsynced",
             storeId = "s1",
             categoryId = "c1",
-            brandId = "b1",
             detailTicketEntityId = "d1",
             name = "ProdUnsynced",
             description = "Desc",
             priceBuy = 10.0,
             priceSell = 15.0,
             priceExcludingIGV = 12.0,
+            revenue = 0.0,
             stockQuantity = 100.0,
             stockMin = 5.0,
             barcode = "111",
@@ -305,13 +301,13 @@ class ProductsRepositoryImplTest {
             productId = "pUnsynced",
             storeId = "s1",
             categoryId = "c1",
-            brandId = "b1",
             detailTicketEntityId = "d1",
             name = "ProdUnsynced",
             description = "Desc",
             priceBuy = 10.0,
             priceSell = 15.0,
             priceExcludingIGV = 12.0,
+            revenue = 0.0,
             stockQuantity = 100.0,
             stockMin = 5.0,
             barcode = "111",
@@ -350,20 +346,16 @@ class ProductsRepositoryImplTest {
     }
 
     @Test
-    fun `refreshProductsFromRemote should download categories, brands and products and update Room`() =
+    fun `refreshProductsFromRemote should download categories and products and update Room`() =
         runTest {
             // Arrange
             val remoteCategories = listOf(CategoryModel("cat1", name = "Cat 1"))
             coEvery { mockRemoteDataSource.categoryRemoteDataSource.getCategories() } returns remoteCategories
 
-            val remoteBrands = listOf(BrandModel("brand1", name = "Brand 1"))
-            coEvery { mockRemoteDataSource.brandRemoteDataSource.getBrands() } returns remoteBrands
-
             val remoteProducts = listOf(
                 ProductModel(
                     productId = "pRemote1",
                     categoryId = "cat1",
-                    brandId = "brand1",
                     name = "Remote Prod"
                 )
             )
@@ -376,11 +368,6 @@ class ProductsRepositoryImplTest {
             coVerify(exactly = 1) {
                 mockCategoryDao.insertCategory(withArg {
                     assertEquals("cat1", it.categoryId)
-                })
-            }
-            coVerify(exactly = 1) {
-                mockBrandDao.upsertAll(withArg {
-                    assertEquals("brand1", it.brandId)
                 })
             }
             coVerify(exactly = 1) { mockProductDao.deleteProductsNotInList(listOf("pRemote1")) }
@@ -396,7 +383,6 @@ class ProductsRepositoryImplTest {
     fun `refreshProductsFromRemote should clear room database if remote product list is empty`() =
         runTest {
             coEvery { mockRemoteDataSource.categoryRemoteDataSource.getCategories() } returns emptyList()
-            coEvery { mockRemoteDataSource.brandRemoteDataSource.getBrands() } returns emptyList()
             coEvery { mockRemoteDataSource.productRemoteDataSource.getProducts() } returns emptyList()
 
             // Act

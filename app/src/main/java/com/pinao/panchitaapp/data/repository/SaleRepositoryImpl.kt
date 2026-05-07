@@ -2,22 +2,17 @@ package com.pinao.panchitaapp.data.repository
 
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
-import com.pinao.panchitaapp.data.source.local.dao.SaleDetailDao
-import com.pinao.panchitaapp.data.source.local.dao.SaleDao
 import com.pinao.panchitaapp.data.mapper.SaleDetailMapper
 import com.pinao.panchitaapp.data.mapper.SaleMapper
+import com.pinao.panchitaapp.data.source.local.dao.SaleDao
+import com.pinao.panchitaapp.data.source.local.dao.SaleDetailDao
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.model.SaleModel
 import com.pinao.panchitaapp.domain.repository.SaleRepository
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import java.util.UUID
-
-import io.github.jan_tennert.supabase.SupabaseClient
-import io.github.jan_tennert.supabase.postgrest.postgrest
-import com.pinao.panchitaapp.data.source.remote.dto.SupabaseSaleDto
-import com.pinao.panchitaapp.data.source.remote.dto.SupabaseSaleDetailDto
 
 /**
  * Repositorio de Tickets que coordina la persistencia local (Room) y remota (Supabase).
@@ -50,7 +45,7 @@ class SaleRepositoryImpl(
                 Log.d("TicketRepositoryImp", "Venta guardada localmente en Room")
 
                 // 2. Persistencia Remota (Supabase)
-                
+
                 // Guardar la cabecera del ticket
                 val saleDto = SaleMapper.toSupabaseDto(ticket)
                 supabaseClient.postgrest["sales"].upsert(saleDto)

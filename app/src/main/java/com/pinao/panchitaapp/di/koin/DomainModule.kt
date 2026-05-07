@@ -2,25 +2,21 @@ package com.pinao.panchitaapp.di.koin
 
 import com.pinao.panchitaapp.domain.repository.AuthRepository
 import com.pinao.panchitaapp.domain.repository.BarcodeScanner
-import com.pinao.panchitaapp.domain.repository.BrandRepository
+
 import com.pinao.panchitaapp.domain.repository.CategoryRepository
 import com.pinao.panchitaapp.domain.repository.ClientRepository
 import com.pinao.panchitaapp.domain.repository.DetailTicketRepository
 import com.pinao.panchitaapp.domain.repository.ProductRepository
 import com.pinao.panchitaapp.domain.repository.RechangeRepository
-import com.pinao.panchitaapp.domain.repository.TemporaryProductRepository
 import com.pinao.panchitaapp.domain.repository.SaleRepository
+import com.pinao.panchitaapp.domain.repository.TemporaryProductRepository
 import com.pinao.panchitaapp.domain.usecase.Auth.AuthUseCase
 import com.pinao.panchitaapp.domain.usecase.Auth.EnsureCurrentUserUseCase
 import com.pinao.panchitaapp.domain.usecase.Auth.GetCurrentUserIdUseCase
 import com.pinao.panchitaapp.domain.usecase.Auth.IsUserLoggedInUseCase
 import com.pinao.panchitaapp.domain.usecase.Auth.SignInUseCase
 import com.pinao.panchitaapp.domain.usecase.Auth.SignOutUseCase
-import com.pinao.panchitaapp.domain.usecase.brand.BrandUseCases
-import com.pinao.panchitaapp.domain.usecase.brand.DeleteBrandUseCase
-import com.pinao.panchitaapp.domain.usecase.brand.FindBrandUseCase
-import com.pinao.panchitaapp.domain.usecase.brand.SaveBrandUseCase
-import com.pinao.panchitaapp.domain.usecase.brand.GetAllBrandsUseCase
+
 import com.pinao.panchitaapp.domain.usecase.category.CategoryUseCases
 import com.pinao.panchitaapp.domain.usecase.category.CheckCategoryNameUseCase
 import com.pinao.panchitaapp.domain.usecase.category.DeleteCategoryUseCase
@@ -54,7 +50,6 @@ import com.pinao.panchitaapp.domain.usecase.ticket.GetDetailsByTicketIdUseCase
 import com.pinao.panchitaapp.domain.usecase.ticket.SaveDetailTicketUseCase
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
-import org.koin.core.annotation.Single
 
 @Module
 class DomainModule {
@@ -275,37 +270,6 @@ class DomainModule {
         signOutUseCase = signOutUseCase
     )
 
-    @Factory
-    fun provideGetAllBrandsUseCase(
-        brandRepository: BrandRepository
-    ) = GetAllBrandsUseCase(brandRepository)
 
-    @Factory
-    fun provideSaveBrandUseCase(
-        brandRepository: BrandRepository
-    ) = SaveBrandUseCase(brandRepository)
-
-    @Factory
-    fun provideDeleteBrandUseCase(
-        brandRepository: BrandRepository
-    ) = DeleteBrandUseCase(brandRepository)
-
-    @Factory
-    fun provideFindBrandUseCase(
-        brandRepository: BrandRepository
-    ) = FindBrandUseCase(brandRepository)
-
-    @Factory
-    fun provideBrandUseCases(
-        getAll: GetAllBrandsUseCase,
-        findByCode: FindBrandUseCase,
-        save: SaveBrandUseCase,
-        delete: DeleteBrandUseCase,
-    ) = BrandUseCases(
-        getAll = getAll,
-        findByCode = findByCode,
-        save = save,
-        delete = delete,
-    )
 
 }

@@ -1,4 +1,4 @@
-﻿package com.pinao.panchitaapp.presentation.ui.addProduct
+package com.pinao.panchitaapp.presentation.ui.addProduct
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
@@ -32,6 +32,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -90,7 +91,6 @@ fun AddProductScreen(
         onPriceChange = viewModel::onPriceChange,
         onStockChange = viewModel::onStockChange,
         onCategoryChange = viewModel::onCategoryChange,
-        onBrandChange = viewModel::onBrandChange,
         onManualPriceChange = viewModel::onManualPriceChange,
         onTabSelected = viewModel::onTabSelected,
         onScannedClick = viewModel::startScanning,
@@ -114,7 +114,6 @@ fun AddProductContent(
     onPriceChange: (String) -> Unit,
     onStockChange: (String) -> Unit,
     onCategoryChange: (String) -> Unit,
-    onBrandChange: (String) -> Unit,
     onManualPriceChange: (String) -> Unit,
     onTabSelected: (Int) -> Unit,
     onScannedClick: () -> Unit,
@@ -161,7 +160,6 @@ fun AddProductContent(
                                     uiState = uiState,
                                     onNameChange = onNameChange,
                                     onCategoryChange = onCategoryChange,
-                                    onBrandChange = onBrandChange,
                                     onManualPriceChange = onManualPriceChange,
                                     onCategoryClick = onCategoryClick,
                                     onSaveInfoClick = onSaveInfoClick
@@ -194,7 +192,6 @@ fun AddProductContent(
                                     onNameChange = onNameChange,
                                     onCodeChange = onCodeChange,
                                     onCategoryChange = onCategoryChange,
-                                    onBrandChange = onBrandChange,
                                     onScannedClick = onScannedClick,
                                     onCategoryClick = onCategoryClick
                                 )
@@ -205,6 +202,7 @@ fun AddProductContent(
                                     uiState = uiState,
                                     onPriceChange = onPriceChange,
                                     onStockChange = onStockChange,
+                                    onManualPriceChange = onManualPriceChange,
                                     onSaveClick = onSaveNewClick,
                                     onIgvToggle = onIgvToggle,
                                     onPercepcionToggle = onPercepcionToggle
@@ -219,7 +217,6 @@ fun AddProductContent(
                                 onNameChange = onNameChange,
                                 onCodeChange = onCodeChange,
                                 onCategoryChange = onCategoryChange,
-                                onBrandChange = onBrandChange,
                                 onScannedClick = onScannedClick,
                                 onCategoryClick = onCategoryClick
                             )
@@ -227,6 +224,7 @@ fun AddProductContent(
                                 uiState = uiState,
                                 onPriceChange = onPriceChange,
                                 onStockChange = onStockChange,
+                                onManualPriceChange = onManualPriceChange,
                                 onSaveClick = onSaveNewClick,
                                 onIgvToggle = onIgvToggle,
                                 onPercepcionToggle = onPercepcionToggle
@@ -245,15 +243,12 @@ private fun InfoTabContent(
     uiState: AddProductUiState,
     onNameChange: (String) -> Unit,
     onCategoryChange: (String) -> Unit,
-    onBrandChange: (String) -> Unit,
     onManualPriceChange: (String) -> Unit,
     onCategoryClick: () -> Unit,
     onSaveInfoClick: () -> Unit
 ) {
     val listCategories = uiState.listOfCategoriesName
-    val listBrands = uiState.listOfBrandsName
     var categoryExpanded by remember { mutableStateOf(false) }
-    var brandExpanded by remember { mutableStateOf(false) }
 
     TextField(
         value = uiState.productName,
@@ -316,57 +311,26 @@ private fun InfoTabContent(
     }
     Spacer(modifier = Modifier.padding(8.dp))
 
-    ExposedDropdownMenuBox(
-        expanded = brandExpanded,
-        onExpandedChange = { brandExpanded = !brandExpanded },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 30.dp)
-    ) {
+    if (uiState.isEditMode) {
         TextField(
-            value = uiState.productBrand,
+            value = String.format("%.2f", uiState.calculatedUnitPrice),
             onValueChange = {},
             readOnly = true,
-            label = { Text(stringResource(R.string.brand_label)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = brandExpanded) },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            label = { Text("Precio de compra unitario (Costo)") },
             modifier = Modifier
-                .menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = true)
                 .fillMaxWidth()
+                .padding(horizontal = 30.dp),
+            colors = TextFieldDefaults.colors(
+                disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            enabled = false
         )
-        ExposedDropdownMenu(
-            expanded = brandExpanded,
-            onDismissRequest = { brandExpanded = false }
-        ) {
-            if (listBrands.isEmpty()) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.no_brands)) },
-                    onClick = { brandExpanded = false }
-                )
-            } else {
-                listBrands.forEach { brandName ->
-                    DropdownMenuItem(
-                        text = { Text(brandName) },
-                        onClick = { onBrandChange(brandName); brandExpanded = false },
-                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                    )
-                }
-            }
-        }
+        Spacer(modifier = Modifier.padding(8.dp))
     }
-    Spacer(modifier = Modifier.padding(8.dp))
 
-    if (uiState.productRevenueCategory > 0) {
-        Text(
-              text = stringResource(R.string.category_margin_format, uiState.productRevenueCategory),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp)
-        )
-        Spacer(modifier = Modifier.padding(4.dp))
-    }
+
 
     TextField(
         value = uiState.productManualPrice,
@@ -383,6 +347,14 @@ private fun InfoTabContent(
             )
         }
     )
+    if (uiState.productManualPrice.isNotEmpty() && uiState.profitMarginPercent > 0) {
+        Text(
+            text = String.format("Ganancia: %.1f%%", uiState.profitMarginPercent),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 4.dp)
+        )
+    }
     Spacer(modifier = Modifier.padding(15.dp))
 
     Button(
@@ -486,14 +458,7 @@ private fun StockTabContent(
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 2.dp)
     )
-    if (uiState.calculatedSellingPrice > 0) {
-        Text(
-            text = stringResource(R.string.calculated_sell_price_format, uiState.calculatedSellingPrice),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 2.dp)
-        )
-    }
+
 
     Spacer(modifier = Modifier.padding(15.dp))
 
@@ -520,14 +485,11 @@ private fun NewProductLeftContent(
     onNameChange: (String) -> Unit,
     onCodeChange: (String) -> Unit,
     onCategoryChange: (String) -> Unit,
-    onBrandChange: (String) -> Unit,
     onScannedClick: () -> Unit,
     onCategoryClick: () -> Unit
 ) {
     val listCategories = uiState.listOfCategoriesName
-    val listBrands = uiState.listOfBrandsName
     var categoryExpanded by remember { mutableStateOf(false) }
-    var brandExpanded by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -620,45 +582,7 @@ private fun NewProductLeftContent(
     }
     Spacer(modifier = Modifier.padding(8.dp))
 
-    ExposedDropdownMenuBox(
-        expanded = brandExpanded,
-        onExpandedChange = { brandExpanded = !brandExpanded },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 30.dp)
-    ) {
-        TextField(
-            value = uiState.productBrand,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(stringResource(R.string.brand_label)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = brandExpanded) },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-            modifier = Modifier
-                .menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = true)
-                .fillMaxWidth()
-        )
-        ExposedDropdownMenu(
-            expanded = brandExpanded,
-            onDismissRequest = { brandExpanded = false }
-        ) {
-            if (listBrands.isEmpty()) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.no_brands)) },
-                    onClick = { brandExpanded = false }
-                )
-            } else {
-                listBrands.forEach { brandName ->
-                    DropdownMenuItem(
-                        text = { Text(brandName) },
-                        onClick = { onBrandChange(brandName); brandExpanded = false },
-                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                    )
-                }
-            }
-        }
-    }
-    Spacer(modifier = Modifier.padding(8.dp))
+
 }
 
 @Composable
@@ -666,6 +590,7 @@ private fun NewProductRightContent(
     uiState: AddProductUiState,
     onPriceChange: (String) -> Unit,
     onStockChange: (String) -> Unit,
+    onManualPriceChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onIgvToggle: (Boolean) -> Unit = {},
     onPercepcionToggle: (Boolean) -> Unit = {}
@@ -727,6 +652,23 @@ private fun NewProductRightContent(
             .padding(horizontal = 30.dp),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
     )
+    Spacer(modifier = Modifier.padding(8.dp))
+
+    TextField(
+        value = uiState.productManualPrice,
+        onValueChange = onManualPriceChange,
+        label = { Text(stringResource(R.string.manual_price_label)) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        supportingText = {
+            Text(
+                stringResource(R.string.manual_price_helper),
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
+    )
 
     if (uiState.calculatedUnitPrice > 0) {
         Text(
@@ -736,17 +678,9 @@ private fun NewProductRightContent(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 8.dp)
         )
     }
-    if (uiState.calculatedSellingPrice > 0) {
+    if (uiState.productManualPrice.isNotEmpty() && uiState.profitMarginPercent > 0) {
         Text(
-                text = stringResource(R.string.calculated_sell_price_format, uiState.calculatedSellingPrice),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, bottom = 4.dp)
-        )
-    }
-    if (uiState.productCategory.isNotEmpty()) {
-        Text(
-                text = stringResource(R.string.suggested_price_format, uiState.calculatedSellingPrice, uiState.productRevenueCategory),
+            text = String.format("Ganancia: %.1f%%", uiState.profitMarginPercent),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, bottom = 4.dp)
@@ -801,7 +735,7 @@ fun AddProductScreenPreview() {
     AddProductContent(
         uiState = uiState,
         onNameChange = {}, onCodeChange = {}, onPriceChange = {}, onStockChange = {},
-        onCategoryChange = {}, onBrandChange = {}, onManualPriceChange = {},
+        onCategoryChange = {}, onManualPriceChange = {},
         onTabSelected = {}, onScannedClick = {}, onCategoryClick = {},
         onSaveNewClick = {}, onSaveInfoClick = {}, onRegisterStockClick = {}, onBackClick = {}
     )

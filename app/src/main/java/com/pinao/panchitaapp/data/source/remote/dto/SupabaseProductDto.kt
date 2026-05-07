@@ -15,6 +15,7 @@ data class SupabaseProductDto(
     @SerialName("image_url") val imageUrl: String? = null,
     @SerialName("purchase_price") val purchasePrice: Double = 0.0,
     @SerialName("sale_price") val salePrice: Double = 0.0,
+    @SerialName("revenue") val revenue: Double = 0.0,
     @SerialName("current_stock") val currentStock: Double = 0.0,
     @SerialName("min_stock") val minStock: Double = 0.0,
     @SerialName("unit") val unit: String = "UND",

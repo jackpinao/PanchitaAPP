@@ -26,8 +26,8 @@ class CheckCategoryNameUseCaseTest {
     fun `invoke should return true when category name exists exactly`() = runTest {
         // Given
         val existingCategories = listOf(
-            CategoryModel(categoryId = "1", name = "Bebidas", revenue = 10.0),
-            CategoryModel(categoryId = "2", name = "Snacks", revenue = 15.0)
+            CategoryModel(categoryId = "1", name = "Bebidas"),
+            CategoryModel(categoryId = "2", name = "Snacks")
         )
         // Simulamos que el repositorio devuelve nuestra lista
         every { mockRepository.getAllCategoriesFromDataBase() } returns flowOf(existingCategories)
@@ -44,7 +44,7 @@ class CheckCategoryNameUseCaseTest {
     fun `invoke should return true when category name exists with different case`() = runTest {
         // Given
         val existingCategories = listOf(
-            CategoryModel(categoryId = "1", name = "Lácteos", revenue = 5.0)
+            CategoryModel(categoryId = "1", name = "Lácteos")
         )
         every { mockRepository.getAllCategoriesFromDataBase() } returns flowOf(existingCategories)
 
@@ -60,8 +60,8 @@ class CheckCategoryNameUseCaseTest {
     fun `invoke should return false when category name does not exist`() = runTest {
         // Given
         val existingCategories = listOf(
-            CategoryModel(categoryId = "1", name = "Bebidas", revenue = 10.0),
-            CategoryModel(categoryId = "2", name = "Snacks", revenue = 15.0)
+            CategoryModel(categoryId = "1", name = "Bebidas"),
+            CategoryModel(categoryId = "2", name = "Snacks")
         )
         every { mockRepository.getAllCategoriesFromDataBase() } returns flowOf(existingCategories)
 

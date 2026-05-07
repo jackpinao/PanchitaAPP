@@ -2,7 +2,7 @@ package com.pinao.panchitaapp.data.source.local.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.pinao.panchitaapp.data.source.local.dao.BrandDao
+
 import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
 import com.pinao.panchitaapp.data.source.local.dao.ClientDao
 import com.pinao.panchitaapp.data.source.local.dao.SaleDetailDao
@@ -13,7 +13,7 @@ import com.pinao.panchitaapp.data.source.local.dao.SupplierDao
 import com.pinao.panchitaapp.data.source.local.dao.TemporaryProductDao
 import com.pinao.panchitaapp.data.source.local.dao.SaleDao
 import com.pinao.panchitaapp.data.source.local.dao.UserDao
-import com.pinao.panchitaapp.data.source.local.entity.BrandEntity
+
 import com.pinao.panchitaapp.data.source.local.entity.CategoryEntity
 import com.pinao.panchitaapp.data.source.local.entity.ClientEntity
 import com.pinao.panchitaapp.data.source.local.entity.SaleDetailEntity
@@ -35,12 +35,12 @@ import com.pinao.panchitaapp.data.source.local.entity.UserEntity
         RechangeEntity::class,
         CategoryEntity::class,
         TemporaryProductEntity::class,
-        BrandEntity::class,
+
         SupplierEntity::class,
         StockEntryEntity::class
     ],
     exportSchema = true,
-    version = 19,
+    version = 22,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
@@ -53,5 +53,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun temporaryProductDao(): TemporaryProductDao
     abstract fun supplierDao(): SupplierDao
     abstract fun stockEntryDao(): StockEntryDao
-    abstract fun brandDao(): BrandDao
+
 }

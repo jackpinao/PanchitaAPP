@@ -16,12 +16,13 @@ class ProductMapperTest {
             productId = "prod123",
             storeId = "store1",
             categoryId = "cat1",
-            brandId = "brand1",
+
             detailTicketEntityId = "ticket1",
             name = "Inca Kola 1L",
             priceSell = 5.50,
             priceBuy = 4.00,
             priceExcludingIGV = 4.66,
+            revenue = 0.0,
             description = "Gaseosa peruana",
             image = "url_imagen",
             stockQuantity = 100.0,
@@ -38,7 +39,7 @@ class ProductMapperTest {
         assertEquals(entity.productId, model.productId)
         assertEquals(entity.storeId, model.storeId)
         assertEquals(entity.categoryId, model.categoryId)
-        assertEquals(entity.brandId, model.brandId)
+
         assertEquals(entity.detailTicketEntityId, model.detailTicketEntityId)
         assertEquals(entity.name, model.name)
         assertEquals(entity.priceSell, model.priceSell, 0.0)
@@ -62,12 +63,13 @@ class ProductMapperTest {
             isSynced = 0, // 0 means false
             storeId = "",
             categoryId = "",
-            brandId = "",
+
             detailTicketEntityId = "",
             description = "",
             priceBuy = 0.0,
             priceSell = 0.0,
             priceExcludingIGV = 0.0,
+            revenue = 0.0,
             stockQuantity = 0.0,
             stockMin = 0.0,
             barcode = "",
@@ -89,12 +91,13 @@ class ProductMapperTest {
             productId = "prod123",
             storeId = "store1",
             categoryId = "cat1",
-            brandId = "brand1",
+
             detailTicketEntityId = "ticket1",
             name = "Inca Kola 1L",
             priceSell = 5.50,
             priceBuy = 4.00,
             priceExcludingIGV = 4.66,
+            revenue = 0.0,
             description = "Gaseosa peruana",
             image = "url_imagen",
             stockQuantity = 100.0,
@@ -111,7 +114,7 @@ class ProductMapperTest {
         assertEquals(model.productId, entity.productId)
         assertEquals(model.storeId, entity.storeId)
         assertEquals(model.categoryId, entity.categoryId)
-        assertEquals(model.brandId, entity.brandId)
+
         assertEquals(model.detailTicketEntityId, entity.detailTicketEntityId)
         assertEquals(model.name, entity.name)
         assertEquals(model.priceSell, entity.priceSell, 0.0)

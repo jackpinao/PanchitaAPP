@@ -83,7 +83,6 @@ fun AddCategoryScreen(
         //category = currentCategory,
         snackbarHostState = snackbarHostState,
         onNameChange = viewModel::onNameChange,
-        onRevenueChange = viewModel::onRevenueChange,
         onSaveClick = viewModel::saveCategory,
         onBackClick = { navController.popBackStack() }
     )
@@ -96,7 +95,6 @@ fun AddCategoryContent(
     //category: CategoryModel,
     snackbarHostState: SnackbarHostState,
     onNameChange: (String) -> Unit,
-    onRevenueChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -128,31 +126,6 @@ fun AddCategoryContent(
                     isError = isError,
                     enabled = !isLoading
                 )
-                Spacer(modifier = Modifier.padding(8.dp))
-                Row(
-                    modifier = Modifier
-                        .padding(start = 30.dp, end = 30.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextField(
-                        value = if (category.revenue == 0.0) "" else category.revenue.toString(),
-                        onValueChange = onRevenueChange,
-                        label = { Text(stringResource(R.string.revenue)) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 8.dp),
-                        enabled = !isLoading,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-                    Text(
-                        text = " % ",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .weight(0.5f)
-                    )
-                }
                 Spacer(modifier = Modifier.padding(15.dp))
                 Button(
                     onClick = onSaveClick,
@@ -192,14 +165,13 @@ fun AddCategoryTopBar(onBackClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun AddCategoryScreenPreview() {
-    val category = CategoryModel(name = "Bebidas", revenue = 10.5)
+    val category = CategoryModel(name = "Bebidas")
     val uiState = AddCategoryUiState.Idle(category)
     AddCategoryContent(
         uiState = uiState,
         //category = category,
         snackbarHostState = SnackbarHostState(),
         onNameChange = {},
-        onRevenueChange = {},
         onSaveClick = {},
         onBackClick = {}
     )

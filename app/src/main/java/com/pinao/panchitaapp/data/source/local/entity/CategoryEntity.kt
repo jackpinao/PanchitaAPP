@@ -19,8 +19,7 @@ data class CategoryEntity(
     val storeId: String,
     @ColumnInfo(name = "name")
     val name: String,
-    @ColumnInfo(name = "revenue", defaultValue = "0.0")
-    val revenue: Double,
+
     @ColumnInfo(name = "is_synced", defaultValue = "0")
     val isSynced: Int = 0
 )

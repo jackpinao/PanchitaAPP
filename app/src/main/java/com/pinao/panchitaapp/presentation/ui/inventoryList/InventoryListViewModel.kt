@@ -1,5 +1,6 @@
 package com.pinao.panchitaapp.presentation.ui.inventoryList
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
@@ -67,7 +68,13 @@ class InventoryListViewModel(
                 productUseCases.syncUnsyncedProducts()
                 productUseCases.refreshProducts()
             } catch (e: Exception) {
-                // Optionally handle the error here
+                Log.e("InventoryListViewModel", "el error es: $e")
+            } finally {
+                _uiState.update { currentState ->
+                    if (currentState is InventoryListUiState.Loading) {
+                        InventoryListUiState.Success(currentState.inventoryList)
+                    } else currentState
+                }
             }
         }
     }

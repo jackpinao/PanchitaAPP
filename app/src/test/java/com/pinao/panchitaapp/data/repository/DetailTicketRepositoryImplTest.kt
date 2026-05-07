@@ -9,11 +9,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.pinao.panchitaapp.data.source.local.dao.SaleDetailDao
 import com.pinao.panchitaapp.data.source.local.entity.SaleDetailEntity
 import com.pinao.panchitaapp.domain.model.SaleDetailModel
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.postgrest.postgrest
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -27,9 +30,7 @@ class DetailTicketRepositoryImplTest {
 
     private lateinit var repository: DetailTicketRepositoryImpl
     private val mockDao: SaleDetailDao = mockk(relaxed = true)
-    private val mockFirestore: FirebaseFirestore = mockk(relaxed = true)
-    private val mockCollection: CollectionReference = mockk(relaxed = true)
-    private val mockDocument: DocumentReference = mockk(relaxed = true)
+    private val mockSupabaseClient: SupabaseClient = mockk()
 
     @Before
     fun setup() {
@@ -37,19 +38,24 @@ class DetailTicketRepositoryImplTest {
         every { Log.d(any(), any()) } returns 0
         every { Log.e(any(), any(), any()) } returns 0
 
-        every { mockFirestore.collection("detail_ticket") } returns mockCollection
-        every { mockCollection.document(any()) } returns mockDocument
+        mockkStatic("io.github.jan.supabase.postgrest.PostgrestKt")
+        every { mockSupabaseClient.postgrest } returns mockk(relaxed = true)
 
-        repository = DetailTicketRepositoryImpl(mockDao, mockFirestore)
+        repository = DetailTicketRepositoryImpl(
+            saleDetailDao = mockDao,
+            supabaseClient = mockSupabaseClient,
+            firestore = mockk(relaxed = true)
+        )
     }
 
     @After
     fun tearDown() {
         unmockkStatic(Log::class)
+        unmockkStatic("io.github.jan.supabase.postgrest.PostgrestKt")
     }
 
     @Test
-    fun `saveTicketDetails should save to Firestore and Room`() = runTest {
+    fun `saveTicketDetails should save to Room`() = runTest {
         val model = SaleDetailModel(
             saleDetailId = "detail1",
             saleId = "sale1",
@@ -59,11 +65,8 @@ class DetailTicketRepositoryImplTest {
             subtotal = 20.0
         )
 
-        every { mockDocument.set(model) } returns Tasks.forResult(null)
-
         repository.saveTicketDetails(model)
 
-        coVerify(exactly = 1) { mockDocument.set(model) }
         coVerify(exactly = 1) { 
             mockDao.insertDetails(withArg { entity -> 
                 assertEquals("detail1", entity.saleDetailId)

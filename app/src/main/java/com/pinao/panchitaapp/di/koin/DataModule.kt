@@ -8,18 +8,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
-import io.github.jan_tennert.supabase.SupabaseClient
-import io.github.jan_tennert.supabase.auth.Auth
-import io.github.jan_tennert.supabase.createSupabaseClient
-import io.github.jan_tennert.supabase.postgrest.Postgrest
-import io.github.jan_tennert.supabase.realtime.Realtime
-import io.github.jan_tennert.supabase.storage.Storage
-import io.ktor.client.engine.android.Android
 import com.pinao.panchitaapp.BuildConfig
 import com.pinao.panchitaapp.data.network.rechange.RechangeApiClient
 import com.pinao.panchitaapp.data.network.rechange.RechangeService
 import com.pinao.panchitaapp.data.repository.AuthRepositoryImpl
-import com.pinao.panchitaapp.data.repository.BrandRepositoryImpl
+
 import com.pinao.panchitaapp.data.repository.CategoryRepositoryImpl
 import com.pinao.panchitaapp.data.repository.ClientRepositoryImpl
 import com.pinao.panchitaapp.data.repository.DetailTicketRepositoryImpl
@@ -30,7 +23,7 @@ import com.pinao.panchitaapp.data.repository.SaleRepositoryImpl
 import com.pinao.panchitaapp.data.repository.TemporaryProductRepositoryImpl
 import com.pinao.panchitaapp.data.service.AndroidTicketPdfService
 import com.pinao.panchitaapp.data.source.local.SessionManager
-import com.pinao.panchitaapp.data.source.local.dao.BrandDao
+
 import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
 import com.pinao.panchitaapp.data.source.local.dao.ClientDao
 import com.pinao.panchitaapp.data.source.local.dao.ProductDao
@@ -40,6 +33,7 @@ import com.pinao.panchitaapp.data.source.local.dao.SaleDetailDao
 import com.pinao.panchitaapp.data.source.local.dao.TemporaryProductDao
 import com.pinao.panchitaapp.data.source.local.dao.UserDao
 import com.pinao.panchitaapp.data.source.local.database.AppDatabase
+
 import com.pinao.panchitaapp.data.source.remote.CategoryRemoteDataSource
 import com.pinao.panchitaapp.data.source.remote.ProductRemoteDataSource
 import com.pinao.panchitaapp.data.source.remote.RemoteDataSource
@@ -47,9 +41,8 @@ import com.pinao.panchitaapp.data.source.remote.RemoteDataSourceImpl
 import com.pinao.panchitaapp.data.source.remote.supabase.SupabaseCategoryDataSource
 import com.pinao.panchitaapp.data.source.remote.supabase.SupabaseProductDataSource
 import com.pinao.panchitaapp.domain.repository.AuthRepository
-
 import com.pinao.panchitaapp.domain.repository.BarcodeScanner
-import com.pinao.panchitaapp.domain.repository.BrandRepository
+
 import com.pinao.panchitaapp.domain.repository.CategoryRepository
 import com.pinao.panchitaapp.domain.repository.ClientRepository
 import com.pinao.panchitaapp.domain.repository.DetailTicketRepository
@@ -58,6 +51,13 @@ import com.pinao.panchitaapp.domain.repository.RechangeRepository
 import com.pinao.panchitaapp.domain.repository.SaleRepository
 import com.pinao.panchitaapp.domain.repository.TemporaryProductRepository
 import com.pinao.panchitaapp.domain.service.TicketPdfService
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.realtime.Realtime
+import io.github.jan.supabase.storage.Storage
+import io.ktor.client.engine.android.Android
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
@@ -74,7 +74,13 @@ class DataModule {
             AppDatabase::class.java,
             DATABASE_NAME
         )
-            .addMigrations(com.pinao.panchitaapp.data.source.local.database.Migration17To18(), com.pinao.panchitaapp.data.source.local.database.Migration18To19())
+            .addMigrations(
+                com.pinao.panchitaapp.data.source.local.database.Migration17To18(),
+                com.pinao.panchitaapp.data.source.local.database.Migration18To19(),
+                com.pinao.panchitaapp.data.source.local.database.Migration19To20,
+                com.pinao.panchitaapp.data.source.local.database.Migration20To21,
+                com.pinao.panchitaapp.data.source.local.database.Migration21To22
+            )
             .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
     }
@@ -165,10 +171,7 @@ class DataModule {
         return database.temporaryProductDao()
     }
 
-    @Single
-    fun provideBrandDao(database: AppDatabase): BrandDao {
-        return database.brandDao()
-    }
+
 
     @Single
     fun provideRechangeService(api: RechangeApiClient): RechangeService {
@@ -192,23 +195,18 @@ class DataModule {
     fun provideProductRepository(
         productDao: ProductDao,
         categoryDao: CategoryDao,
-        brandDao: BrandDao,
         stockEntryDao: com.pinao.panchitaapp.data.source.local.dao.StockEntryDao,
         remoteDataSource: RemoteDataSource
     ): ProductRepository {
-        return ProductsRepositoryImpl(productDao, categoryDao, brandDao, stockEntryDao, remoteDataSource)
-    }
-
-    @Single(createdAtStart = true)
-    fun provideBrandRepository(
-        brandDao: BrandDao,
-        remoteDataSource: RemoteDataSource
-    ): BrandRepository {
-        return BrandRepositoryImpl(
-            brandDao,
+        return ProductsRepositoryImpl(
+            productDao,
+            categoryDao,
+            stockEntryDao,
             remoteDataSource
         )
     }
+
+
 
     @Single(createdAtStart = true)
     fun provideClientRepository(clientDao: ClientDao): ClientRepository {
@@ -293,7 +291,6 @@ class DataModule {
     )
 
 
-
     @Single
     fun provideCategoryRemoteDataSource(supabaseClient: SupabaseClient): CategoryRemoteDataSource {
         return SupabaseCategoryDataSource(supabaseClient)
@@ -303,4 +300,6 @@ class DataModule {
     fun provideProductRemoteDataSource(supabaseClient: SupabaseClient): ProductRemoteDataSource {
         return SupabaseProductDataSource(supabaseClient)
     }
+
+
 }

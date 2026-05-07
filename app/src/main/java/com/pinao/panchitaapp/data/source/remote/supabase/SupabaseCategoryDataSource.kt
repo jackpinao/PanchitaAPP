@@ -4,9 +4,9 @@ import android.util.Log
 import com.pinao.panchitaapp.data.mapper.CategoryMapper
 import com.pinao.panchitaapp.data.source.remote.CategoryRemoteDataSource
 import com.pinao.panchitaapp.domain.model.CategoryModel
-import io.github.jan_tennert.supabase.SupabaseClient
-import io.github.jan_tennert.supabase.postgrest.postgrest
-import io.github.jan_tennert.supabase.postgrest.query.Columns
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Columns
 
 class SupabaseCategoryDataSource(
     private val supabaseClient: SupabaseClient
@@ -16,7 +16,8 @@ class SupabaseCategoryDataSource(
 
     override suspend fun getCategories(): List<CategoryModel> {
         return try {
-            val result = table.select(columns = Columns.ALL).decodeList<com.pinao.panchitaapp.data.source.remote.dto.SupabaseCategoryDto>()
+            val result = table.select(columns = Columns.ALL)
+                .decodeList<com.pinao.panchitaapp.data.source.remote.dto.SupabaseCategoryDto>()
             result.map { CategoryMapper.toDomain(it) }
         } catch (e: Exception) {
             Log.e("SupabaseCategoryDS", "Error fetching categories", e)
@@ -39,7 +40,7 @@ class SupabaseCategoryDataSource(
         return try {
             table.delete {
                 filter {
-                    eq("category_id", categoryModel.categoryId)
+                    eq("id", categoryModel.categoryId)
                 }
             }
             true

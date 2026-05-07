@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -176,9 +178,25 @@ fun InventoryListContent(
                     placeholder = { Text(stringResource(R.string.search_product_placeholder)) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { onSearchQueryChange("") }) {
-                                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear_action))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(onClick = { onSearchQueryChange("") }) {
+                                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear_action))
+                                }
+                            }
+                            IconButton(
+                                onClick = onRefresh,
+                                enabled = !isRefreshing
+                            ) {
+                                if (isRefreshing) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                } else {
+                                    Icon(Icons.Default.Refresh, contentDescription = "Actualizar/Descargar productos")
+                                }
                             }
                         }
                     }

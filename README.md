@@ -12,8 +12,8 @@ Aplicación Android de Punto de Venta (POS) para gestión de ventas, inventario,
 | Arquitectura | Clean Architecture + MVVM |
 | DI | Koin 4 + KSP |
 | Base de datos local | Room (SQLite) |
-| Base de datos remota | Firebase Firestore |
-| Red | Retrofit 2 |
+| Base de datos remota | Supabase (PostgreSQL + RLS) |
+| Red | Supabase Client (Ktor) |
 | Navegación | Compose Navigation (rutas tipadas) |
 | Background sync | WorkManager |
 | Tests | JUnit + MockK + Turbine |
@@ -43,9 +43,9 @@ Presentation  ──►  Domain  ──►  Data
 
 | Feature | Descripción |
 |---------|-------------|
-| **Auth** | Login con Firebase Authentication |
+| **Auth** | Login con Supabase Auth |
 | **Inventario** | Listado, búsqueda y gestión de productos |
-| **Agregar Producto** | Alta/edición con cálculo PPP (Precio Promedio Ponderado), soporte IGV y percepción |
+| **Agregar Producto** | Alta/edición con ingreso manual de precios, cálculo de costo unitario (PPP) y soporte multi-tenant |
 | **Módulo de Venta** | Registro de ventas con carrito temporal |
 | **Venta Rápida** | Punto de venta independiente del stock con carga manual (Nombre/Precio/Cantidad), impresión de ticket y exportación PDF |
 | **Recargas Claro** | Registro y consulta de recargas telefónicas |
@@ -82,7 +82,7 @@ Presentation  ──►  Domain  ──►  Data
 
 ```
 app/src/main/java/com/pinao/panchitaapp/
-├── data/              # Implementaciones de repos, Room, Firebase, Retrofit, mappers
+├── data/              # Repos, Room, Supabase DataSources, mappers, DTOs
 ├── di/koin/           # Módulos de Koin (DataModule, DomainModule, PresentationModule)
 ├── domain/            # Use cases, interfaces de repos, modelos, Resource<T>
 ├── presentation/
@@ -93,7 +93,7 @@ app/src/main/java/com/pinao/panchitaapp/
 
 ---
 
-## Base de Datos (Room v18)
+## Base de Datos (Room v22)
 
 - Nombre: `panchita_app`
 - Schema exportado en `app/schemas/`

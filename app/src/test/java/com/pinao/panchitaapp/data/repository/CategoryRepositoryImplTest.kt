@@ -48,8 +48,8 @@ class CategoryRepositoryImplTest {
     @Test
     fun `getAllCategoriesFromDataBase should emit mapped categories from Dao`() = runTest {
         val entities = listOf(
-            CategoryEntity("cat1", "store1", "Lácteos", 10.0, 1),
-            CategoryEntity("cat2", "store1", "Dulces", 20.0, 0)
+            CategoryEntity("cat1", "store1", "Lácteos", 1),
+            CategoryEntity("cat2", "store1", "Dulces", 0)
         )
         every { mockDao.getAllCategories() } returns flowOf(entities)
 
@@ -101,7 +101,7 @@ class CategoryRepositoryImplTest {
 
     @Test
     fun `findCodeCategory should return mapped category from Dao`() = runTest {
-        val entity = CategoryEntity("cat_code", "store1", "Bebidas", 5.0, 1)
+        val entity = CategoryEntity("cat_code", "store1", "Bebidas", 1)
         every { mockDao.findCodeCategory("cat_code") } returns flowOf(entity)
 
         repository.findCodeCategory("cat_code").test {
@@ -129,7 +129,6 @@ class CategoryRepositoryImplTest {
             "cat1",
             "store1",
             "Carnes",
-            15.0,
             true
         )
 
@@ -152,7 +151,6 @@ class CategoryRepositoryImplTest {
             "cat1",
             "store1",
             "Carnes",
-            15.0,
             true
         )
 
@@ -175,7 +173,6 @@ class CategoryRepositoryImplTest {
             "cat_to_delete",
             "store1",
             "Borrar",
-            0.0,
             true
         )
 
@@ -198,7 +195,6 @@ class CategoryRepositoryImplTest {
             "cat_to_delete",
             "store1",
             "Borrar",
-            0.0,
             true
         )
 

@@ -1,0 +1,779 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 22,
+    "identityHash": "02ab4cb6d118eb6564425d4ad91cb33a",
+    "entities": [
+      {
+        "tableName": "user",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`user_id` TEXT NOT NULL, `store_id` TEXT NOT NULL, `name` TEXT NOT NULL, `email` TEXT NOT NULL, `password` TEXT NOT NULL, `role` TEXT NOT NULL, `is_active` INTEGER NOT NULL, PRIMARY KEY(`user_id`))",
+        "fields": [
+          {
+            "fieldPath": "userId",
+            "columnName": "user_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "storeId",
+            "columnName": "store_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "password",
+            "columnName": "password",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "role",
+            "columnName": "role",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isActive",
+            "columnName": "is_active",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "user_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_user_email",
+            "unique": true,
+            "columnNames": [
+              "email"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_user_email` ON `${TABLE_NAME}` (`email`)"
+          }
+        ]
+      },
+      {
+        "tableName": "client",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`client_id` TEXT NOT NULL, `name` TEXT NOT NULL, `numDoc` TEXT NOT NULL, `is_active` INTEGER NOT NULL, `dateCreate` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(`client_id`))",
+        "fields": [
+          {
+            "fieldPath": "clientId",
+            "columnName": "client_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numDoc",
+            "columnName": "numDoc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isActive",
+            "columnName": "is_active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateCreate",
+            "columnName": "dateCreate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "CURRENT_TIMESTAMP"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "client_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_client_numDoc",
+            "unique": true,
+            "columnNames": [
+              "numDoc"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_client_numDoc` ON `${TABLE_NAME}` (`numDoc`)"
+          }
+        ]
+      },
+      {
+        "tableName": "sale",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sale_id` TEXT NOT NULL, `store_id` TEXT NOT NULL, `user_id` TEXT NOT NULL, `client_id` TEXT NOT NULL, `sale_date` TEXT NOT NULL, `total_amount` REAL NOT NULL, `payment_type` TEXT NOT NULL, `is_synced` INTEGER NOT NULL, PRIMARY KEY(`sale_id`), FOREIGN KEY(`user_id`) REFERENCES `user`(`user_id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "saleId",
+            "columnName": "sale_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "storeId",
+            "columnName": "store_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "user_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "client_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleDate",
+            "columnName": "sale_date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalAmount",
+            "columnName": "total_amount",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paymentType",
+            "columnName": "payment_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSynced",
+            "columnName": "is_synced",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sale_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_sale_user_id",
+            "unique": false,
+            "columnNames": [
+              "user_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sale_user_id` ON `${TABLE_NAME}` (`user_id`)"
+          },
+          {
+            "name": "index_sale_client_id",
+            "unique": false,
+            "columnNames": [
+              "client_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sale_client_id` ON `${TABLE_NAME}` (`client_id`)"
+          },
+          {
+            "name": "index_sale_sale_id",
+            "unique": true,
+            "columnNames": [
+              "sale_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_sale_sale_id` ON `${TABLE_NAME}` (`sale_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "user",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "user_id"
+            ],
+            "referencedColumns": [
+              "user_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "sale_detail",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sale_detail_id` TEXT NOT NULL, `sale_id` TEXT NOT NULL, `product_id` TEXT NOT NULL, `quantity` REAL NOT NULL, `price_at_sale` REAL NOT NULL, `subtotal` REAL NOT NULL, PRIMARY KEY(`sale_detail_id`), FOREIGN KEY(`sale_id`) REFERENCES `sale`(`sale_id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`product_id`) REFERENCES `product`(`product_id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "saleDetailId",
+            "columnName": "sale_detail_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleId",
+            "columnName": "sale_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "productId",
+            "columnName": "product_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "quantity",
+            "columnName": "quantity",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceAtSale",
+            "columnName": "price_at_sale",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "subtotal",
+            "columnName": "subtotal",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sale_detail_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_sale_detail_sale_id",
+            "unique": false,
+            "columnNames": [
+              "sale_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sale_detail_sale_id` ON `${TABLE_NAME}` (`sale_id`)"
+          },
+          {
+            "name": "index_sale_detail_product_id",
+            "unique": false,
+            "columnNames": [
+              "product_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sale_detail_product_id` ON `${TABLE_NAME}` (`product_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "sale",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "sale_id"
+            ],
+            "referencedColumns": [
+              "sale_id"
+            ]
+          },
+          {
+            "table": "product",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "product_id"
+            ],
+            "referencedColumns": [
+              "product_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "product",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`product_id` TEXT NOT NULL, `store_id` TEXT NOT NULL, `category_id` TEXT NOT NULL, `detailTicketEntity_id` TEXT NOT NULL DEFAULT '', `name` TEXT NOT NULL, `description` TEXT NOT NULL, `price_Buy` REAL NOT NULL, `price_sell` REAL NOT NULL, `price_excluding_igv` REAL NOT NULL, `revenue` REAL NOT NULL DEFAULT 0.0, `stock_quantity` REAL NOT NULL, `stock_min` REAL NOT NULL DEFAULT 5.0, `barcode` TEXT NOT NULL, `image` TEXT NOT NULL, `last_updated` TEXT NOT NULL, `is_synced` INTEGER NOT NULL DEFAULT 0, `is_deleted` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`product_id`), FOREIGN KEY(`category_id`) REFERENCES `category`(`category_id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
+        "fields": [
+          {
+            "fieldPath": "productId",
+            "columnName": "product_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "storeId",
+            "columnName": "store_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categoryId",
+            "columnName": "category_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "detailTicketEntityId",
+            "columnName": "detailTicketEntity_id",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceBuy",
+            "columnName": "price_Buy",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceSell",
+            "columnName": "price_sell",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceExcludingIGV",
+            "columnName": "price_excluding_igv",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revenue",
+            "columnName": "revenue",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "0.0"
+          },
+          {
+            "fieldPath": "stockQuantity",
+            "columnName": "stock_quantity",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stockMin",
+            "columnName": "stock_min",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "5.0"
+          },
+          {
+            "fieldPath": "barcode",
+            "columnName": "barcode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "image",
+            "columnName": "image",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUpdated",
+            "columnName": "last_updated",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSynced",
+            "columnName": "is_synced",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "isDeleted",
+            "columnName": "is_deleted",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "product_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_product_barcode",
+            "unique": true,
+            "columnNames": [
+              "barcode"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_product_barcode` ON `${TABLE_NAME}` (`barcode`)"
+          },
+          {
+            "name": "index_product_category_id",
+            "unique": false,
+            "columnNames": [
+              "category_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_product_category_id` ON `${TABLE_NAME}` (`category_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "category",
+            "onDelete": "RESTRICT",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "category_id"
+            ],
+            "referencedColumns": [
+              "category_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "rechange",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `date` TEXT NOT NULL, `amount` INTEGER NOT NULL, `numPhone` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amount",
+            "columnName": "amount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numPhone",
+            "columnName": "numPhone",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_rechange_date",
+            "unique": true,
+            "columnNames": [
+              "date"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_rechange_date` ON `${TABLE_NAME}` (`date`)"
+          }
+        ]
+      },
+      {
+        "tableName": "category",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`category_id` TEXT NOT NULL, `store_id` TEXT NOT NULL, `name` TEXT NOT NULL, `is_synced` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`category_id`))",
+        "fields": [
+          {
+            "fieldPath": "categoryId",
+            "columnName": "category_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "storeId",
+            "columnName": "store_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSynced",
+            "columnName": "is_synced",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "category_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_category_category_id",
+            "unique": true,
+            "columnNames": [
+              "category_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_category_category_id` ON `${TABLE_NAME}` (`category_id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "temporary_product",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `productId` TEXT NOT NULL, `name` TEXT NOT NULL, `price` REAL NOT NULL, `priceExcludingIGV` REAL NOT NULL, `quantity` REAL NOT NULL, `code` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "productId",
+            "columnName": "productId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "price",
+            "columnName": "price",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceExcludingIGV",
+            "columnName": "priceExcludingIGV",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "quantity",
+            "columnName": "quantity",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "Supplier",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`supplier_id` TEXT NOT NULL, `store_id` TEXT NOT NULL, `name` TEXT NOT NULL, `phone` TEXT, `email` TEXT, `is_synced` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`supplier_id`))",
+        "fields": [
+          {
+            "fieldPath": "supplierId",
+            "columnName": "supplier_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "storeId",
+            "columnName": "store_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phone",
+            "columnName": "phone",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isSynced",
+            "columnName": "is_synced",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "supplier_id"
+          ]
+        }
+      },
+      {
+        "tableName": "StockEntry",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`entry_id` TEXT NOT NULL, `store_id` TEXT NOT NULL, `supplier_id` TEXT NOT NULL, `entry_date` INTEGER NOT NULL, `total_cost` REAL NOT NULL, `document_number` TEXT, `is_synced` INTEGER NOT NULL, `product_id` TEXT NOT NULL DEFAULT '', `quantity_added` REAL NOT NULL DEFAULT 0.0, `unit_cost_ppp` REAL NOT NULL DEFAULT 0.0, `movement_type` TEXT NOT NULL DEFAULT 'ENTRY', PRIMARY KEY(`entry_id`), FOREIGN KEY(`supplier_id`) REFERENCES `Supplier`(`supplier_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "entryId",
+            "columnName": "entry_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "storeId",
+            "columnName": "store_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "supplierId",
+            "columnName": "supplier_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "entryDate",
+            "columnName": "entry_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalCost",
+            "columnName": "total_cost",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "documentNumber",
+            "columnName": "document_number",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isSynced",
+            "columnName": "is_synced",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "productId",
+            "columnName": "product_id",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "quantityAdded",
+            "columnName": "quantity_added",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "0.0"
+          },
+          {
+            "fieldPath": "unitCostPpp",
+            "columnName": "unit_cost_ppp",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "0.0"
+          },
+          {
+            "fieldPath": "movementType",
+            "columnName": "movement_type",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'ENTRY'"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "entry_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_StockEntry_supplier_id",
+            "unique": false,
+            "columnNames": [
+              "supplier_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_StockEntry_supplier_id` ON `${TABLE_NAME}` (`supplier_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "Supplier",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "supplier_id"
+            ],
+            "referencedColumns": [
+              "supplier_id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '02ab4cb6d118eb6564425d4ad91cb33a')"
+    ]
+  }
+}

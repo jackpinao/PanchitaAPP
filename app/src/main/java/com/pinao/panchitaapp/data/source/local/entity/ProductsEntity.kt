@@ -14,18 +14,11 @@ import androidx.room.Index
             parentColumns = ["category_id"],
             childColumns = ["category_id"],
             onDelete = ForeignKey.RESTRICT,
-        ),
-        ForeignKey(
-            entity = BrandEntity::class,
-            parentColumns = ["brand_id"],
-            childColumns = ["brand_id"],
-            onDelete = ForeignKey.RESTRICT,
         )
     ],
     indices = [
         Index(value = ["barcode"], unique = true),
-        Index(value = ["category_id"]),
-        Index(value = ["brand_id"])
+        Index(value = ["category_id"])
     ]
 )
 data class ProductsEntity(
@@ -36,8 +29,6 @@ data class ProductsEntity(
     val storeId: String,
     @ColumnInfo(name = "category_id")
     val categoryId: String,
-    @ColumnInfo(name = "brand_id")
-    val brandId: String,
     @ColumnInfo(name = "detailTicketEntity_id", defaultValue = "")
     val detailTicketEntityId: String,
     @ColumnInfo(name = "name")
@@ -50,6 +41,8 @@ data class ProductsEntity(
     val priceSell: Double, //precio de venta
     @ColumnInfo(name = "price_excluding_igv")
     val priceExcludingIGV: Double, //precio sin igv
+    @ColumnInfo(name = "revenue", defaultValue = "0.0")
+    val revenue: Double,
     @ColumnInfo(name = "stock_quantity")
     val stockQuantity: Double,
     @ColumnInfo(name = "stock_min", defaultValue = "5.0")

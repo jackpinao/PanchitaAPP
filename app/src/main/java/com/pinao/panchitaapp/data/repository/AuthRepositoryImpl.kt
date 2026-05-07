@@ -1,5 +1,6 @@
 package com.pinao.panchitaapp.data.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.pinao.panchitaapp.data.source.local.SessionManager
@@ -9,11 +10,11 @@ import com.pinao.panchitaapp.domain.model.UserModel
 import com.pinao.panchitaapp.domain.repository.AuthRepository
 import kotlinx.coroutines.tasks.await
 
-import io.github.jan_tennert.supabase.SupabaseClient
-import io.github.jan_tennert.supabase.auth.auth
-import io.github.jan_tennert.supabase.auth.providers.builtin.Email
-import io.github.jan_tennert.supabase.postgrest.postgrest
-import io.github.jan_tennert.supabase.postgrest.query.Columns
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 
@@ -38,21 +39,32 @@ class AuthRepositoryImpl(
 
     override suspend fun signIn(email: String, pass: String): Result<UserModel> {
         return try {
+            Log.d("AuthRepositoryImpl", "Intentando login con email: $email")
             supabaseClient.auth.signInWith(Email) {
                 this.email = email
                 this.password = pass
             }
             
-            val uid = supabaseClient.auth.currentUserOrNull()?.id ?: throw Exception("Error al obtener UID")
+            val currentUser = supabaseClient.auth.currentUserOrNull()
+            Log.d("AuthRepositoryImpl", "Login exitoso, currentUser: $currentUser")
+            
+            val uid = currentUser?.id ?: throw Exception("Error al obtener UID")
+            // Usar el email canónico de Supabase Auth (siempre lowercase) para la búsqueda
+            val canonicalEmail = currentUser.email ?: email
 
-            // Buscamos datos adicionales en la tabla 'users' de Supabase
-            val userDto = supabaseClient.postgrest["users"]
-                .select(columns = Columns.ALL) {
-                    filter {
-                        eq("auth_id", uid)
-                    }
-                }
-                .decodeSingle<SupabaseUserDto>()
+            // Buscamos datos del usuario mediante RPC para eludir el RLS (Security Definer)
+            Log.d("AuthRepositoryImpl", "Buscando usuario mediante RPC get_user_profile")
+            var userDto = supabaseClient.postgrest
+                .rpc("get_user_profile")
+                .decodeList<SupabaseUserDto>()
+                .firstOrNull()
+            
+            if (userDto == null) {
+                Log.e("AuthRepositoryImpl", "Usuario NO encontrado en la tabla 'users' mediante el RPC get_user_profile. Verificar que el registro en la web creó la fila.")
+                throw Exception("Datos de usuario no encontrados en la base de datos. Verifique que su cuenta fue registrada correctamente.")
+            }
+            
+            Log.d("AuthRepositoryImpl", "Usuario encontrado: $userDto")
 
             // Persistimos en SessionManager
             sessionManager.saveSession(userDto.tenantId, userDto.role, userDto.id, userDto.fullName)
@@ -80,6 +92,7 @@ class AuthRepositoryImpl(
             )
             Result.success(user)
         } catch (e: Exception) {
+            Log.e("AuthRepositoryImpl", "Error en signIn", e)
             Result.failure(e)
         }
     }
@@ -90,29 +103,42 @@ class AuthRepositoryImpl(
         sessionManager.getUserId() ?: supabaseClient.auth.currentUserOrNull()?.id ?: ""
 
     override suspend fun ensureCurrentUserInRoom(): String {
-        val uid = supabaseClient.auth.currentUserOrNull()?.id ?: return ""
+        val currentUser = supabaseClient.auth.currentUserOrNull()
+        val uid = currentUser?.id ?: return ""
+        val email = currentUser.email ?: ""
+
         // Si ya existe en Room no hace nada costoso
-        if (userDao.getUserForId(uid) != null) {
+        // Intentamos buscar por uid (auth_id) o por el ID guardado en sesión
+        val sessionUserId = sessionManager.getUserId()
+        val userInRoom = if (!sessionUserId.isNullOrEmpty()) {
+            userDao.getUserForId(sessionUserId)
+        } else {
+            userDao.getUserForId(uid)
+        }
+
+        if (userInRoom != null) {
             if (sessionManager.getUserId().isNullOrEmpty()) {
-                val user = userDao.getUserForId(uid)
                 sessionManager.saveSession(
                     sessionManager.getStoreId() ?: "",
                     sessionManager.getUserRole() ?: "",
-                    uid,
-                    user?.name ?: ""
+                    userInRoom.userId,
+                    userInRoom.name
                 )
             }
-            return uid
+            return userInRoom.userId
         }
-        // No existe en Room: lo trae de Supabase y lo persiste
+
+        // No existe en Room: lo trae de Supabase (con RPC para bypass RLS) y lo persiste
         return try {
-            val userDto = supabaseClient.postgrest["users"]
-                .select(columns = Columns.ALL) {
-                    filter {
-                        eq("auth_id", uid)
-                    }
-                }
-                .decodeSingle<SupabaseUserDto>()
+            Log.d("AuthRepositoryImpl", "ensureCurrentUserInRoom: Obteniendo datos vía RPC get_user_profile")
+            val userDto = supabaseClient.postgrest
+                .rpc("get_user_profile")
+                .decodeList<SupabaseUserDto>()
+                .firstOrNull()
+
+            if (userDto == null) {
+                throw Exception("Datos de usuario no encontrados en la base de datos.")
+            }
 
             sessionManager.saveSession(userDto.tenantId, userDto.role, userDto.id, userDto.fullName)
             userDao.upsert(
@@ -128,6 +154,7 @@ class AuthRepositoryImpl(
             )
             userDto.id
         } catch (e: Exception) {
+            Log.e("AuthRepositoryImpl", "Error en ensureCurrentUserInRoom", e)
             uid
         }
     }

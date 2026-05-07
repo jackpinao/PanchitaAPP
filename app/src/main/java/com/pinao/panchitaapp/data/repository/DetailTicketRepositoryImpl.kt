@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-import io.github.jan_tennert.supabase.SupabaseClient
-import io.github.jan_tennert.supabase.postgrest.postgrest
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.postgrest.postgrest
 import com.pinao.panchitaapp.data.source.remote.dto.SupabaseSaleDetailDto
 
 class DetailTicketRepositoryImpl(

@@ -4,17 +4,14 @@ import app.cash.turbine.test
 import com.pinao.panchitaapp.domain.model.CategoryModel
 import com.pinao.panchitaapp.domain.usecase.category.CheckCategoryNameUseCase
 import com.pinao.panchitaapp.domain.usecase.category.SaveCategoryUseCase
+import com.pinao.panchitaapp.data.source.local.SessionManager
 import com.pinao.panchitaapp.test.utils.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -30,16 +27,18 @@ class AddCategoryViewModelTest {
     private lateinit var viewModel: AddCategoryViewModel
     private val saveCategoryUseCase: SaveCategoryUseCase = mockk()
     private val checkCategoryNameUseCase: CheckCategoryNameUseCase = mockk()
+    private val sessionManager: SessionManager = mockk()
 
     @Before
     fun setup() {
         coEvery { saveCategoryUseCase(any()) } returns Unit
         coEvery { checkCategoryNameUseCase(any()) } returns false
+        every { sessionManager.getStoreId() } returns "test-store-id"
     }
 
     @Test
-    fun `onNameChange and onRevenueChange should update the state`() = runTest {
-        viewModel = AddCategoryViewModel(saveCategoryUseCase, checkCategoryNameUseCase)
+    fun `onNameChange should update the state`() = runTest {
+        viewModel = AddCategoryViewModel(saveCategoryUseCase, checkCategoryNameUseCase, sessionManager)
 
         viewModel.uiState.test {
             awaitItem() // Estado inicial (Idle)
@@ -47,16 +46,12 @@ class AddCategoryViewModelTest {
             viewModel.onNameChange("Lácteos")
             val stateAfterName = awaitItem()
             assertEquals("Lácteos", stateAfterName.category.name)
-
-            viewModel.onRevenueChange("15.5")
-            val stateAfterRevenue = awaitItem()
-            assertEquals(15.5, stateAfterRevenue.category.revenue, 0.0)
         }
     }
 
     @Test
     fun `saveCategory with blank name should return Error state`() = runTest {
-        viewModel = AddCategoryViewModel(saveCategoryUseCase, checkCategoryNameUseCase)
+        viewModel = AddCategoryViewModel(saveCategoryUseCase, checkCategoryNameUseCase, sessionManager)
 
         viewModel.uiState.test {
             awaitItem() // Idle inicial
@@ -76,7 +71,7 @@ class AddCategoryViewModelTest {
         val categoryName = "Bebidas"
         coEvery { checkCategoryNameUseCase(categoryName) } returns true
 
-        viewModel = AddCategoryViewModel(saveCategoryUseCase, checkCategoryNameUseCase)
+        viewModel = AddCategoryViewModel(saveCategoryUseCase, checkCategoryNameUseCase, sessionManager)
 
         viewModel.uiState.test {
             awaitItem() // Inicial
@@ -99,22 +94,18 @@ class AddCategoryViewModelTest {
 
     @Test
     fun `saveCategory with valid inputs should return Success state`() = runTest {
-        val categoryName = "Bebidas"
-        val categoryRevenue = "10.0"
+        val categoryName = "Nueva Categoría"
 
         coEvery { checkCategoryNameUseCase(categoryName) } returns false
         coEvery { saveCategoryUseCase(any()) } returns Unit
 
-        viewModel = AddCategoryViewModel(saveCategoryUseCase, checkCategoryNameUseCase)
+        viewModel = AddCategoryViewModel(saveCategoryUseCase, checkCategoryNameUseCase, sessionManager)
 
         viewModel.uiState.test {
             awaitItem() // Inicial
 
             viewModel.onNameChange(categoryName)
-            awaitItem() // Actualiza nombre
-
-            viewModel.onRevenueChange(categoryRevenue)
-            awaitItem() // Actualiza revenue
+            awaitItem() // Actualiza name
 
             viewModel.saveCategory()
 
@@ -124,7 +115,6 @@ class AddCategoryViewModelTest {
             val successState = awaitItem()
             assertTrue(successState is AddCategoryUiState.Success)
             assertEquals(categoryName, successState.category.name)
-            assertEquals(10.0, successState.category.revenue, 0.0)
 
             coVerify { checkCategoryNameUseCase(categoryName) }
             coVerify { saveCategoryUseCase(any()) }

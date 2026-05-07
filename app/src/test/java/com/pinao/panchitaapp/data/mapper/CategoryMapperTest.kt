@@ -16,7 +16,6 @@ class CategoryMapperTest {
             categoryId = "cat_1",
             storeId = "store_1",
             name = "Bebidas",
-            revenue = 15.5,
             isSynced = 1
         )
 
@@ -27,7 +26,6 @@ class CategoryMapperTest {
         assertEquals(entity.categoryId, model.categoryId)
         assertEquals(entity.storeId, model.storeId)
         assertEquals(entity.name, model.name)
-        assertEquals(entity.revenue, model.revenue, 0.0)
         assertTrue(model.isSynced)
     }
 
@@ -37,7 +35,6 @@ class CategoryMapperTest {
             categoryId = "cat_2",
             storeId = "store_1",
             name = "Snacks",
-            revenue = 10.0,
             isSynced = 0
         )
 
@@ -53,7 +50,6 @@ class CategoryMapperTest {
             categoryId = "cat_1",
             storeId = "store_1",
             name = "Bebidas",
-            revenue = 15.5,
             isSynced = true
         )
 
@@ -64,7 +60,6 @@ class CategoryMapperTest {
         assertEquals(model.categoryId, entity.categoryId)
         assertEquals(model.storeId, entity.storeId)
         assertEquals(model.name, entity.name)
-        assertEquals(model.revenue, entity.revenue, 0.0)
         assertEquals(1, entity.isSynced)
     }
 

@@ -1,11 +1,11 @@
 package com.pinao.panchitaapp.data.repository
 
 import android.util.Log
-import com.pinao.panchitaapp.data.mapper.BrandMapper
+
 import com.pinao.panchitaapp.data.mapper.CategoryMapper
 import com.pinao.panchitaapp.data.mapper.ProductMapper
 import com.pinao.panchitaapp.data.mapper.StockEntryMapper
-import com.pinao.panchitaapp.data.source.local.dao.BrandDao
+
 import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
 import com.pinao.panchitaapp.data.source.local.dao.ProductDao
 import com.pinao.panchitaapp.data.source.local.dao.StockEntryDao
@@ -21,7 +21,6 @@ import kotlinx.coroutines.withContext
 class ProductsRepositoryImpl(
     private val productDao: ProductDao,
     private val categoryDao: CategoryDao,
-    private val brandDao: BrandDao,
     private val stockEntryDao: StockEntryDao,
     private val remoteDataSource: RemoteDataSource
 ) : ProductRepository {
@@ -42,40 +41,42 @@ class ProductsRepositoryImpl(
     override suspend fun refreshProductsFromRemote() {
         withContext(Dispatchers.IO) {
             try {
-
+                Log.d("ProductsRepositoryImpl", "Starting manual refresh from Supabase")
                 val categories = remoteDataSource.categoryRemoteDataSource.getCategories()
+                Log.d("ProductsRepositoryImpl", "Fetched ${categories.size} categories")
                 val categoryIds = categories.map { it.categoryId }.toSet()
 
                 categories.forEach { categoryModel ->
                     categoryDao.insertCategory(CategoryMapper.toDatabase(categoryModel))
                 }
 
-                val brands = remoteDataSource.brandRemoteDataSource.getBrands()
-                val brandIds = brands.map { it.brandId }.toSet()
 
-                brands.forEach { brandModel ->
-                    brandDao.upsertAll(BrandMapper.toDatabase(brandModel))
-                }
 
                 val remoteProducts = remoteDataSource.productRemoteDataSource.getProducts()
+                Log.d("ProductsRepositoryImpl", "Fetched ${remoteProducts.size} products from Supabase")
 
                 if (remoteProducts.isEmpty()) {
+                    Log.d("ProductsRepositoryImpl", "No remote products found, cleaning local database")
                     productDao.deleteAllProducts()
                     return@withContext
                 }
 
                 val validRemoteProducts = remoteProducts.filter { product ->
-                    categoryIds.contains(product.categoryId) && brandIds.contains(product.brandId)
+                    val catValid = product.categoryId.isEmpty() || categoryIds.contains(product.categoryId)
+                    if (!catValid) Log.w("ProductsRepositoryImpl", "Product ${product.name} has invalid category: ${product.categoryId}")
+                    catValid
                 }
+                
+                Log.d("ProductsRepositoryImpl", "Products valid for local storage: ${validRemoteProducts.size}")
                 val remoteIds = validRemoteProducts.map { it.productId }
 
                 productDao.deleteProductsNotInList(remoteIds)
 
                 validRemoteProducts.forEach { productModel ->
-                    // Mark products coming from remote as synced
                     val entity = ProductMapper.toDatabase(productModel.copy(isSynced = true))
                     productDao.insertProduct(entity)
                 }
+                Log.d("ProductsRepositoryImpl", "Refresh completed successfully")
             } catch (e: Exception) {
                 Log.e("ProductsRepositoryImpl", "Error during synchronization", e)
             }

@@ -1,10 +1,9 @@
-﻿package com.pinao.panchitaapp.data.source.remote.dto
+package com.pinao.panchitaapp.data.source.remote.dto
 
 data class FirebaseProductDto(
     val productId: String = "",
     val storeId: String = "",
     val categoryId: String = "",
-    val brandId: String = "",
     val name: String = "",
     val description: String = "",
     val priceBuy: Double = 0.0,

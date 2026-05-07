@@ -6,6 +6,7 @@ import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.domain.model.CategoryModel
 import com.pinao.panchitaapp.domain.usecase.category.CheckCategoryNameUseCase
 import com.pinao.panchitaapp.domain.usecase.category.SaveCategoryUseCase
+import com.pinao.panchitaapp.data.source.local.SessionManager
 import com.pinao.panchitaapp.presentation.ui.login.UiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +21,8 @@ import java.util.UUID
 @KoinViewModel
 class AddCategoryViewModel(
     private val saveCategoryUseCase: SaveCategoryUseCase,
-    private val checkCategoryNameUseCase: CheckCategoryNameUseCase
+    private val checkCategoryNameUseCase: CheckCategoryNameUseCase,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AddCategoryUiState>(
@@ -45,12 +47,7 @@ class AddCategoryViewModel(
         updateState { it.copy(name = newName) }
     }
 
-    fun onRevenueChange(newRevenue: String) {
-        // Validación básica para permitir solo números y un punto decimal
-        if (newRevenue.isEmpty() || newRevenue.matches(Regex("^\\d*\\.?\\d*$"))) {
-            updateState { it.copy(revenue = newRevenue.toDoubleOrNull() ?: 0.0) }
-        }
-    }
+
 
     fun saveCategory() {
         val category = _uiState.value.category
@@ -76,8 +73,12 @@ class AddCategoryViewModel(
             }
 
             try {
+                val storeId = sessionManager.getStoreId() ?: ""
                 saveCategoryUseCase(
-                    category.copy(categoryId = UUID.randomUUID().toString())
+                    category.copy(
+                        categoryId = UUID.randomUUID().toString(),
+                        storeId = storeId
+                    )
                 )
                 _uiState.value = AddCategoryUiState.Success(category)
 

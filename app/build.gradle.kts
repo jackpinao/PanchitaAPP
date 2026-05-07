@@ -98,8 +98,8 @@ android {
         applicationId = "com.pinao.panchitaapp"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
-        versionName = "4.3"
+        versionCode = 9
+        versionName = "4.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

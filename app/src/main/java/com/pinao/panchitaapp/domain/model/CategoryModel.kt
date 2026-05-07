@@ -6,6 +6,5 @@ data class CategoryModel (
     val categoryId: String = UUID.randomUUID().toString(),
     val storeId: String = "",
     val name: String = "",
-    val revenue: Double = 0.0,
     var isSynced: Boolean = false
 )

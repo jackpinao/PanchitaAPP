@@ -5,9 +5,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.pinao.panchitaapp.data.source.local.database.AppDatabase
-import com.pinao.panchitaapp.data.source.local.entity.BrandEntity
 import com.pinao.panchitaapp.data.source.local.entity.CategoryEntity
-import com.pinao.panchitaapp.data.source.local.dao.BrandDao
 import com.pinao.panchitaapp.data.source.local.entity.ProductsEntity
 import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
 import com.pinao.panchitaapp.data.source.local.dao.ProductDao
@@ -24,7 +22,6 @@ class ProductDaoTest {
     private lateinit var database: AppDatabase
     private lateinit var productDao: ProductDao
     private lateinit var categoryDao: CategoryDao
-    private lateinit var brandDao: BrandDao
 
     @Before
     fun setup() {
@@ -34,7 +31,6 @@ class ProductDaoTest {
             .build()
         productDao = database.productDao()
         categoryDao = database.categoryDao()
-        brandDao = database.brandDao()
     }
 
     @After
@@ -44,22 +40,20 @@ class ProductDaoTest {
 
     @Test
     fun insertProduct_and_read_it_in_list() = runTest {
-        val category = CategoryEntity("cat1", "store1", "Lácteos", 10.0)
-        val brand = BrandEntity("brand1", "store1", "Gloria")
+        val category = CategoryEntity("cat1", "store1", "Lácteos", 1)
         categoryDao.insertCategory(category)
-        brandDao.upsertAll(brand)
 
         val product = ProductsEntity(
             productId = "prod1",
             storeId = "store1",
             categoryId = "cat1",
-            brandId = "brand1",
             detailTicketEntityId = "",
             name = "Leche Gloria",
             description = "Tarro azul",
             priceBuy = 3.50,
             priceSell = 4.20,
             priceExcludingIGV = 3.80,
+            revenue = 0.70,
             stockQuantity = 50.0,
             stockMin = 10.0,
             barcode = "77500000001",
@@ -76,13 +70,45 @@ class ProductDaoTest {
 
     @Test
     fun searchProducts_returns_correct_results() = runTest {
-        val category = CategoryEntity("cat1", "store1", "Gaseosas", 10.0)
-        val brand = BrandEntity("brand1", "store1", "Coca Cola")
+        val category = CategoryEntity("cat1", "store1", "Gaseosas", 1)
         categoryDao.insertCategory(category)
-        brandDao.upsertAll(brand)
 
-        val p1 = ProductsEntity("id1", "s1", "cat1", "brand1", "", "Inka Kola", "3L", 5.0, 7.0, 6.0, 10.0, 2.0, "123", "", "", 1)
-        val p2 = ProductsEntity("id2", "s1", "cat1", "brand1", "", "Coca Cola", "3L", 5.0, 7.0, 6.0, 10.0, 2.0, "456", "", "", 1)
+        val p1 = ProductsEntity(
+            productId = "id1",
+            storeId = "s1",
+            categoryId = "cat1",
+            detailTicketEntityId = "",
+            name = "Inka Kola",
+            description = "3L",
+            priceBuy = 5.0,
+            priceSell = 7.0,
+            priceExcludingIGV = 6.0,
+            revenue = 2.0,
+            stockQuantity = 10.0,
+            stockMin = 2.0,
+            barcode = "123",
+            image = "",
+            lastUpdated = "",
+            isSynced = 1
+        )
+        val p2 = ProductsEntity(
+            productId = "id2",
+            storeId = "s1",
+            categoryId = "cat1",
+            detailTicketEntityId = "",
+            name = "Coca Cola",
+            description = "3L",
+            priceBuy = 5.0,
+            priceSell = 7.0,
+            priceExcludingIGV = 6.0,
+            revenue = 2.0,
+            stockQuantity = 10.0,
+            stockMin = 2.0,
+            barcode = "456",
+            image = "",
+            lastUpdated = "",
+            isSynced = 1
+        )
         
         productDao.insertProduct(p1)
         productDao.insertProduct(p2)

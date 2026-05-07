@@ -25,7 +25,7 @@ class SaveCategoryUseCaseTest {
     @Test
     fun `invoke should call saveCategory on repository with given model`() = runTest {
         // Given
-        val categoryToSave = CategoryModel(categoryId = "cat1", name = "Verduras", revenue = 12.0)
+        val categoryToSave = CategoryModel(categoryId = "cat1", name = "Verduras")
         coEvery { repository.saveCategory(any()) } returns Unit
 
         // When
@@ -36,7 +36,6 @@ class SaveCategoryUseCaseTest {
             repository.saveCategory(withArg { 
                 assertEquals("cat1", it.categoryId)
                 assertEquals("Verduras", it.name)
-                assertEquals(12.0, it.revenue, 0.0)
             }) 
         }
     }

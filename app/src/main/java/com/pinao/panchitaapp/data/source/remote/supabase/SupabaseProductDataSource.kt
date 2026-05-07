@@ -4,9 +4,9 @@ import android.util.Log
 import com.pinao.panchitaapp.data.mapper.ProductMapper
 import com.pinao.panchitaapp.data.source.remote.ProductRemoteDataSource
 import com.pinao.panchitaapp.domain.model.ProductModel
-import io.github.jan_tennert.supabase.SupabaseClient
-import io.github.jan_tennert.supabase.postgrest.postgrest
-import io.github.jan_tennert.supabase.postgrest.query.Columns
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Columns
 
 class SupabaseProductDataSource(
     private val supabaseClient: SupabaseClient
@@ -16,7 +16,8 @@ class SupabaseProductDataSource(
 
     override suspend fun getProducts(): List<ProductModel> {
         return try {
-            val result = table.select(columns = Columns.ALL).decodeList<com.pinao.panchitaapp.data.source.remote.dto.SupabaseProductDto>()
+            val result = table.select(columns = Columns.ALL)
+                .decodeList<com.pinao.panchitaapp.data.source.remote.dto.SupabaseProductDto>()
             result.map { ProductMapper.toDomain(it) }
         } catch (e: Exception) {
             Log.e("SupabaseProductDS", "Error fetching products", e)

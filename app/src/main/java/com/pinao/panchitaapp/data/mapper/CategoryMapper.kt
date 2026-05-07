@@ -11,7 +11,6 @@ object CategoryMapper {
             categoryId = entity.categoryId,
             storeId = entity.storeId,
             name = entity.name,
-            revenue = entity.revenue,
             isSynced = entity.isSynced == 1
         )
     }
@@ -21,7 +20,6 @@ object CategoryMapper {
             categoryId = model.categoryId,
             storeId = model.storeId,
             name = model.name,
-            revenue = model.revenue,
             isSynced = if (model.isSynced) 1 else 0
         )
     }
@@ -31,7 +29,6 @@ object CategoryMapper {
             categoryId = dto.categoryId,
             storeId = dto.storeId,
             name = dto.name,
-            revenue = dto.revenue,
             isSynced = true
         )
     }
@@ -40,8 +37,7 @@ object CategoryMapper {
         return FirebaseCategoryDto(
             categoryId = model.categoryId,
             storeId = model.storeId,
-            name = model.name,
-            revenue = model.revenue
+            name = model.name
         )
     }
 
@@ -50,7 +46,6 @@ object CategoryMapper {
             categoryId = dto.id,
             storeId = dto.tenantId,
             name = dto.name,
-            revenue = 0.0, // Not in Supabase schema
             isSynced = true
         )
     }
