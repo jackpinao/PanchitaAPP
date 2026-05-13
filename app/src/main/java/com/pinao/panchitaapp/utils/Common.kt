@@ -2,16 +2,23 @@ package com.pinao.panchitaapp.utils
 
 class Common {
     fun String.sinAcento(): String {
-        val original = "ÁÉÍÓÚÜáéíóúü"
-        val replacement = "AEIOUUaeiouu"
-        val output = StringBuilder()
+        val output = StringBuilder(length)
         for (c in this) {
-            val index = original.indexOf(c)
-            if (index >= 0) {
-                output.append(replacement[index])
-            } else {
-                output.append(c)
-            }
+            output.append(
+                when (c) {
+                    'Á' -> 'A'
+                    'É' -> 'E'
+                    'Í' -> 'I'
+                    'Ó' -> 'O'
+                    'Ú', 'Ü' -> 'U'
+                    'á' -> 'a'
+                    'é' -> 'e'
+                    'í' -> 'i'
+                    'ó' -> 'o'
+                    'ú', 'ü' -> 'u'
+                    else -> c
+                }
+            )
         }
         return output.toString()
     }
