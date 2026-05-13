@@ -53,6 +53,8 @@ data class ProductsEntity(
     val image: String,
     @ColumnInfo(name = "last_updated")
     val lastUpdated: String,
+    @ColumnInfo(name = "expiry_date")
+    val expiryDate: String? = null,
     @ColumnInfo(name = "is_synced", defaultValue = "0")
     val isSynced: Int = 0,
     @ColumnInfo(name = "is_deleted", defaultValue = "0")

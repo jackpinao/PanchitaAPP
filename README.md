@@ -45,7 +45,7 @@ Presentation  ──►  Domain  ──►  Data
 |---------|-------------|
 | **Auth** | Login con Supabase Auth |
 | **Inventario** | Listado, búsqueda y gestión de productos |
-| **Agregar Producto** | Alta/edición con ingreso manual de precios, cálculo de costo unitario (PPP) y soporte multi-tenant |
+| **Agregar Producto** | Alta/edición con ingreso manual de precios, cálculo de costo unitario (PPP), soporte multi-tenant y autogeneración de códigos de barras |
 | **Módulo de Venta** | Registro de ventas con carrito temporal |
 | **Venta Rápida** | Punto de venta independiente del stock con carga manual (Nombre/Precio/Cantidad), impresión de ticket y exportación PDF |
 | **Recargas Claro** | Registro y consulta de recargas telefónicas |

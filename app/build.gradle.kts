@@ -97,9 +97,9 @@ android {
     defaultConfig {
         applicationId = "com.pinao.panchitaapp"
         minSdk = 26
-        targetSdk = 36
-        versionCode = 9
-        versionName = "4.5"
+        targetSdk = 35
+        versionCode = 13
+        versionName = "4.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

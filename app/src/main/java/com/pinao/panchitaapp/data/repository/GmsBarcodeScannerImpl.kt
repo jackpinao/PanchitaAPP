@@ -19,12 +19,18 @@ class GmsBarcodeScannerImpl(
         return try {
             val options = GmsBarcodeScannerOptions.Builder()
                 .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
-                .enableAutoZoom()
-                // allowManualInput() comentado temporalmente para evitar SecurityException (Unknown calling package name)
-                // .allowManualInput()
                 .build()
 
             val scanner = GmsBarcodeScanning.getClient(context, options)
+
+            // Verificamos e instalamos el módulo si es necesario (crítico para Android 13+)
+            val moduleInstall = com.google.android.gms.common.moduleinstall.ModuleInstall.getClient(context)
+            val moduleInstallRequest = com.google.android.gms.common.moduleinstall.ModuleInstallRequest.newBuilder()
+                .addApi(scanner)
+                .build()
+            
+            // Esperamos a que se asegure la instalación del módulo
+            moduleInstall.installModules(moduleInstallRequest).await()
 
             // Convertimos la API basada en Tasks de Google a Corrutinas de Kotlin
             val barcode = scanner.startScan().await()

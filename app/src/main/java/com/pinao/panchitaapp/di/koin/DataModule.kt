@@ -79,7 +79,8 @@ class DataModule {
                 com.pinao.panchitaapp.data.source.local.database.Migration18To19(),
                 com.pinao.panchitaapp.data.source.local.database.Migration19To20,
                 com.pinao.panchitaapp.data.source.local.database.Migration20To21,
-                com.pinao.panchitaapp.data.source.local.database.Migration21To22
+                com.pinao.panchitaapp.data.source.local.database.Migration21To22,
+                com.pinao.panchitaapp.data.source.local.database.Migration22To23
             )
             .fallbackToDestructiveMigration(dropAllTables = true)
             .build()

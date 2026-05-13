@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.pinao.panchitaapp.domain.usecase.category.CategoryUseCases
 import com.pinao.panchitaapp.domain.usecase.products.ProductUseCases
 import com.pinao.panchitaapp.domain.usecase.products.ScanBarcodeUseCase
+import com.pinao.panchitaapp.data.source.local.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -29,6 +30,8 @@ data class AddProductUiState(
     val productCategory: String = "",
     val productCategoryId: String = "",
     val productStock: String = "",
+    val productStockMin: String = "5.0",
+    val productExpiryDate: String = "",
     val productManualPrice: String = "",
     val listOfCategoriesName: List<String> = emptyList(),
     val listOfCategoriesId: List<String> = emptyList(),
@@ -58,7 +61,8 @@ data class AddProductUiState(
 class AddProductViewModel(
     private val productUseCases: ProductUseCases,
     private val categoryUseCases: CategoryUseCases,
-    private val scanBarcodeUseCase: ScanBarcodeUseCase
+    private val scanBarcodeUseCase: ScanBarcodeUseCase,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddProductUiState())
@@ -72,6 +76,16 @@ class AddProductViewModel(
         if (newPrice.isEmpty() || newPrice.matches(Regex("^\\d*\\.?\\d*$"))) {
             _uiState.update { it.copy(productManualPrice = newPrice) }
         }
+    }
+
+    fun onStockMinChange(newMin: String) {
+        if (newMin.isEmpty() || newMin.matches(Regex("^\\d*\\.?\\d*$"))) {
+            _uiState.update { it.copy(productStockMin = newMin) }
+        }
+    }
+
+    fun onExpiryDateChange(newDate: String) {
+        _uiState.update { it.copy(productExpiryDate = newDate) }
     }
 
     fun onTabSelected(tabIndex: Int) {
@@ -218,6 +232,8 @@ class AddProductViewModel(
                         calculatedUnitPrice = product.priceBuy,
                         productManualPrice = if (product.priceSell > 0) product.priceSell.toString() else "",
                         productCategoryId = product.categoryId,
+                        productStockMin = product.stockMin.toString(),
+                        productExpiryDate = product.expiryDate ?: "",
                         isEditMode = true,
                         isLoading = false
                     )
@@ -278,27 +294,32 @@ class AddProductViewModel(
             val state = _uiState.value
 
             if (state.productName.isBlank() || state.productCategoryId.isBlank()) {
-                _uiState.update { it.copy(error = "El nombre y la categorÃ­a son obligatorios") }
+                _uiState.update { it.copy(error = "El nombre y la categoría son obligatorios") }
                 return@launch
             }
 
             _uiState.update { it.copy(isLoading = true) }
 
+            val finalBarcode = if (state.productCode.isBlank()) "GEN-${System.currentTimeMillis()}" else state.productCode
             val manualPrice = state.productManualPrice.toDoubleOrNull() ?: 0.0
             val finalPriceSell = PriceUtils.roundSellingPrice(manualPrice)
             val priceWithoutIGV = PriceUtils.calculatePriceExcludingIGV(finalPriceSell)
             val profitMargin = if (state.existingPriceBuy > 0) ((finalPriceSell - state.existingPriceBuy) / state.existingPriceBuy) * 100.0 else 0.0
 
             try {
+                val storeId = sessionManager.getStoreId() ?: ""
                 val product = ProductModel(
                     productId = state.productId ?: UUID.randomUUID().toString(),
+                    storeId = storeId,
                     name = state.productName,
-                    barcode = state.productCode,
+                    barcode = finalBarcode,
                     priceBuy = state.existingPriceBuy,
                     priceSell = finalPriceSell,
                     priceExcludingIGV = priceWithoutIGV,
                     revenue = profitMargin,
                     stockQuantity = state.existingStock,
+                    stockMin = state.productStockMin.toDoubleOrNull() ?: 5.0,
+                    expiryDate = state.productExpiryDate.takeIf { it.isNotBlank() },
                     categoryId = state.productCategoryId
                 )
 
@@ -333,6 +354,7 @@ class AddProductViewModel(
 
             _uiState.update { it.copy(isLoading = true) }
 
+            val finalBarcode = if (state.productCode.isBlank()) "GEN-${System.currentTimeMillis()}" else state.productCode
             val unitPurchasePrice = PriceUtils.roundPurchasePrice(state.calculatedUnitPrice)
             val finalStock = state.finalCalculatedStock
 
@@ -342,22 +364,26 @@ class AddProductViewModel(
             val profitMargin = if (unitPurchasePrice > 0) ((finalSellingPrice - unitPurchasePrice) / unitPurchasePrice) * 100.0 else 0.0
 
             try {
+                val storeId = sessionManager.getStoreId() ?: ""
                 val product = ProductModel(
                     productId = state.productId ?: UUID.randomUUID().toString(),
+                    storeId = storeId,
                     name = state.productName,
-                    barcode = state.productCode,
+                    barcode = finalBarcode,
                     priceBuy = unitPurchasePrice,
                     priceSell = finalSellingPrice,
                     priceExcludingIGV = priceWithoutIGV,
                     revenue = profitMargin,
                     stockQuantity = finalStock,
+                    stockMin = state.productStockMin.toDoubleOrNull() ?: 5.0,
+                    expiryDate = state.productExpiryDate.takeIf { it.isNotBlank() },
                     categoryId = state.productCategoryId
                 )
                 productUseCases.save(product)
 
                 val stockEntry = StockEntryModel(
                     entryId = UUID.randomUUID().toString(),
-                    storeId = "",
+                    storeId = storeId,
                     supplierId = "",
                     entryDate = System.currentTimeMillis(),
                     totalCost = addedCost,
@@ -382,18 +408,16 @@ class AddProductViewModel(
         viewModelScope.launch {
             val state = _uiState.value
 
-            if (state.productName.isBlank() || state.productCode.isBlank() || state.productCategoryId.isBlank()) {
+            if (state.productName.isBlank() || state.productCategoryId.isBlank()) {
                 _uiState.update { it.copy(error = "Por favor, completa los campos obligatorios") }
                 return@launch
             }
 
-            if (!state.isEditMode && (state.productTotalCost.isBlank() || state.productStock.isBlank())) {
-                _uiState.update { it.copy(error = "El costo total y el stock son obligatorios para un nuevo producto") }
-                return@launch
-            }
+            // No longer require total cost and stock for new product
 
             _uiState.update { it.copy(isLoading = true) }
 
+            val finalBarcode = if (state.productCode.isBlank()) "GEN-${System.currentTimeMillis()}" else state.productCode
             val unitPurchasePrice = PriceUtils.roundPurchasePrice(state.calculatedUnitPrice)
             val finalStock = state.finalCalculatedStock
 
@@ -403,17 +427,20 @@ class AddProductViewModel(
             val profitMargin = if (unitPurchasePrice > 0) ((finalSellingPrice - unitPurchasePrice) / unitPurchasePrice) * 100.0 else 0.0
 
             try {
-
+                val storeId = sessionManager.getStoreId() ?: ""
 
                 val product = ProductModel(
                     productId = state.productId ?: UUID.randomUUID().toString(),
+                    storeId = storeId,
                     name = state.productName,
-                    barcode = state.productCode,
+                    barcode = finalBarcode,
                     priceBuy = unitPurchasePrice,
                     priceSell = finalSellingPrice,
                     priceExcludingIGV = priceWithoutIGV,
                     revenue = profitMargin,
                     stockQuantity = finalStock,
+                    stockMin = state.productStockMin.toDoubleOrNull() ?: 5.0,
+                    expiryDate = state.productExpiryDate.takeIf { it.isNotBlank() },
                     categoryId = state.productCategoryId
                 )
 

@@ -23,6 +23,7 @@ object ProductMapper {
             barcode = entity.barcode,
             lastUpdated = entity.lastUpdated,
             stockMin = entity.stockMin,
+            expiryDate = entity.expiryDate,
             isSynced = entity.isSynced == 1,
             isDeleted = entity.isDeleted == 1
         )
@@ -45,6 +46,7 @@ object ProductMapper {
             barcode = model.barcode,
             lastUpdated = model.lastUpdated,
             stockMin = model.stockMin,
+            expiryDate = model.expiryDate,
             isSynced = if (model.isSynced) 1 else 0,
             isDeleted = if (model.isDeleted) 1 else 0
         )
@@ -105,6 +107,7 @@ object ProductMapper {
             barcode = dto.barcode ?: "",
             image = dto.imageUrl ?: "",
             lastUpdated = dto.updatedAt ?: "",
+            expiryDate = dto.expiryDate,
             isSynced = true,
             isDeleted = !dto.isActive
         )
@@ -124,6 +127,7 @@ object ProductMapper {
             minStock = model.stockMin,
             barcode = model.barcode.takeIf { it.isNotEmpty() },
             imageUrl = model.image.takeIf { it.isNotEmpty() },
+            expiryDate = model.expiryDate,
             isActive = !model.isDeleted
         )
     }

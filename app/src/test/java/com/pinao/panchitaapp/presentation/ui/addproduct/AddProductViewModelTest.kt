@@ -12,6 +12,7 @@ import com.pinao.panchitaapp.presentation.ui.addProduct.AddProductViewModel
 import com.pinao.panchitaapp.test.utils.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
+import com.pinao.panchitaapp.data.source.local.SessionManager
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -35,6 +36,7 @@ class AddProductViewModelTest {
     private val productUseCases: ProductUseCases = mockk(relaxed = true)
     private val categoryUseCases: CategoryUseCases = mockk(relaxed = true)
     private val scanBarcodeUseCase: ScanBarcodeUseCase = mockk()
+    private val sessionManager: SessionManager = mockk(relaxed = true)
 
 
     private lateinit var viewModel: AddProductViewModel
@@ -66,7 +68,7 @@ class AddProductViewModelTest {
     @Test
     fun `init should fetch categories`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -83,7 +85,7 @@ class AddProductViewModelTest {
         every { categoryUseCases.getAll() } returns flow { throw Exception("DB Error") }
 
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -97,7 +99,7 @@ class AddProductViewModelTest {
     @Test
     fun `onNameChange should update product name in state`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
 
         viewModel.uiState.test {
@@ -112,7 +114,7 @@ class AddProductViewModelTest {
     @Test
     fun `onPriceChange should update price only if valid numbers`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
 
         viewModel.uiState.test {
@@ -129,7 +131,7 @@ class AddProductViewModelTest {
     @Test
     fun `onStockChange should update stock only if valid numbers`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
 
         viewModel.uiState.test {
@@ -146,7 +148,7 @@ class AddProductViewModelTest {
     @Test
     fun `onCodeChanged should update productCode`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
 
         viewModel.uiState.test {
@@ -161,7 +163,7 @@ class AddProductViewModelTest {
     @Test
     fun `onCategoryChange should map category name to id`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -188,7 +190,7 @@ class AddProductViewModelTest {
         every { productUseCases.findByCode("775123") } returns flowOf(mockProduct)
 
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -213,7 +215,7 @@ class AddProductViewModelTest {
         every { productUseCases.findByCode("999") } returns flowOf(null)
 
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -236,7 +238,7 @@ class AddProductViewModelTest {
     fun `startScanning should update productCode when scanned`() = runTest {
         coEvery { scanBarcodeUseCase() } returns "123456789"
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -258,7 +260,7 @@ class AddProductViewModelTest {
     fun `startScanning should stop loading if scanner returns null`() = runTest {
         coEvery { scanBarcodeUseCase() } returns null
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -278,7 +280,7 @@ class AddProductViewModelTest {
     @Test
     fun `saveProduct with missing fields should set error`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -297,7 +299,7 @@ class AddProductViewModelTest {
         coEvery { productUseCases.save(any()) } returns Unit
 
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -337,6 +339,50 @@ class AddProductViewModelTest {
         }
     }
 
+    @Test
+    fun `saveProduct success without cost and stock should save with zero values`() = runTest {
+        coEvery { productUseCases.save(any()) } returns Unit
+
+        viewModel = AddProductViewModel(
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
+        )
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            awaitItem()
+            // Completamos solo los campos requeridos
+            viewModel.onNameChange("Producto Sin Stock")
+            viewModel.onCodeChanged("789")
+            viewModel.onCategoryChange("Bebidas") // cat1
+
+            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+            expectMostRecentItem()
+
+            // Act
+            viewModel.saveProduct()
+
+            // Assert
+            val loadingState = awaitItem()
+            Assert.assertTrue(loadingState.isLoading)
+
+            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+            val successState = expectMostRecentItem()
+            Assert.assertFalse(successState.isLoading)
+            Assert.assertTrue(successState.navigateBack)
+
+            coVerify {
+                productUseCases.save(match {
+                    it.name == "Producto Sin Stock" &&
+                            it.barcode == "789" &&
+                            it.priceBuy == 0.0 &&
+                            it.stockQuantity == 0.0
+                })
+            }
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
 
 
     @Test
@@ -344,7 +390,7 @@ class AddProductViewModelTest {
         coEvery { productUseCases.save(any()) } throws Exception("Save Error")
 
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -371,7 +417,7 @@ class AddProductViewModelTest {
     @Test
     fun `onErrorShow should clear error message`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -402,7 +448,7 @@ class AddProductViewModelTest {
         every { productUseCases.findByCode("775123") } returns flowOf(mockProduct)
 
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -449,7 +495,7 @@ class AddProductViewModelTest {
         every { productUseCases.findByCode("775123") } returns flowOf(mockProduct)
 
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -486,7 +532,7 @@ class AddProductViewModelTest {
     @Test
     fun `registerStockEntry with zero stock should show error and not save`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -506,7 +552,7 @@ class AddProductViewModelTest {
     @Test
     fun `onIgvToggle true should update flag and recalculate unit price excluding IGV`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -533,7 +579,7 @@ class AddProductViewModelTest {
     @Test
     fun `onIgvToggle false should restore original unit price`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -560,7 +606,7 @@ class AddProductViewModelTest {
     @Test
     fun `onPercepcionToggle true should update flag and recalculate unit price excluding percepcion`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -586,7 +632,7 @@ class AddProductViewModelTest {
     @Test
     fun `onIgvToggle and onPercepcionToggle together should divide by combined factor`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -614,7 +660,7 @@ class AddProductViewModelTest {
     @Test
     fun `onPriceChange should apply IGV flag when already active`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -638,7 +684,7 @@ class AddProductViewModelTest {
     @Test
     fun `onStockChange should apply percepcion flag when already active`() = runTest {
         viewModel = AddProductViewModel(
-            productUseCases, categoryUseCases, scanBarcodeUseCase
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
         )
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
@@ -655,6 +701,36 @@ class AddProductViewModelTest {
             // costo neto = 102/1.02 = 100, stock total = 2 → precio unitario = 50
             Assert.assertEquals(50.0, state.calculatedUnitPrice, 0.01)
 
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+    @Test
+    fun `saveProduct without barcode should auto-generate one`() = runTest {
+        coEvery { productUseCases.save(any()) } returns Unit
+        every { sessionManager.getStoreId() } returns "store123"
+
+        viewModel = AddProductViewModel(
+            productUseCases, categoryUseCases, scanBarcodeUseCase, sessionManager
+        )
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.onNameChange("Auto Barcode Product")
+            viewModel.onCategoryChange("Bebidas") // cat1
+            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+            expectMostRecentItem()
+
+            viewModel.saveProduct()
+            
+            mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+            expectMostRecentItem()
+
+            coVerify {
+                productUseCases.save(match {
+                    it.name == "Auto Barcode Product" && it.barcode.startsWith("GEN-")
+                })
+            }
             cancelAndIgnoreRemainingEvents()
         }
     }

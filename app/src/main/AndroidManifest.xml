@@ -19,6 +19,9 @@
     <queries>
         <package android:name="com.google.android.gms" />
         <intent>
+            <action android:name="com.google.mlkit.vision.codescanner.SCAN" />
+        </intent>
+        <intent>
             <action android:name="com.google.android.gms.actions.SEARCH_ACTION" />
         </intent>
     </queries>

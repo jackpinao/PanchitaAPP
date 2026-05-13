@@ -1,5 +1,7 @@
 package com.pinao.panchitaapp.presentation.ui.fastSale
 
+import com.pinao.panchitaapp.data.source.local.SessionManager
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pinao.panchitaapp.domain.model.ClientModel
@@ -47,7 +49,8 @@ class FastSaleViewModel(
     private val completeSaleUseCase: CompleteSaleUseCase,
     private val pdfService: TicketPdfService,
     private val saveClientUseCase: SaveClientUseCase,
-    private val ensureCurrentUserUseCase: EnsureCurrentUserUseCase
+    private val ensureCurrentUserUseCase: EnsureCurrentUserUseCase,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FastSaleUiState())
@@ -104,9 +107,11 @@ class FastSaleViewModel(
     }
 
     private fun mapItemsToProductModels(items: List<FastSaleItem>): List<ProductModel> {
+        val storeId = sessionManager.getStoreId() ?: ""
         return items.map { item ->
             ProductModel(
                 productId = UUID.randomUUID().toString(),
+                storeId = storeId,
                 name = item.name,
                 priceSell = item.price,
                 stockQuantity = item.quantity // Usado como cantidad para el ticket
@@ -128,8 +133,10 @@ class FastSaleViewModel(
                     saveClientUseCase(ClientModel(name = state.clientName, numDoc = state.clientDoc))
                 }
 
+                val storeId = sessionManager.getStoreId() ?: ""
                 val ticket = SaleModel(
                     saleId = sessionTicketId,
+                    storeId = storeId,
                     saleDate = date,
                     totalAmount = state.total,
                     isSynced = true,
@@ -162,8 +169,10 @@ class FastSaleViewModel(
         val state = _uiState.value
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
+            val storeId = sessionManager.getStoreId() ?: ""
             val ticket = SaleModel(
                 saleId = sessionTicketId,
+                storeId = storeId,
                 saleDate = GetCurrentDateTime().getCurrentDateTime(),
                 totalAmount = state.total
             )

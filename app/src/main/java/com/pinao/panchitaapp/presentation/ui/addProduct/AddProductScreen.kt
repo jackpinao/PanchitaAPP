@@ -98,6 +98,8 @@ fun AddProductScreen(
         onSaveNewClick = viewModel::saveProduct,
         onSaveInfoClick = viewModel::saveProductInfo,
         onRegisterStockClick = viewModel::registerStockEntry,
+        onStockMinChange = viewModel::onStockMinChange,
+        onExpiryDateChange = viewModel::onExpiryDateChange,
         onBackClick = { navController.popBackStack() },
         onIgvToggle = viewModel::onIgvToggle,
         onPercepcionToggle = viewModel::onPercepcionToggle,
@@ -121,6 +123,8 @@ fun AddProductContent(
     onSaveNewClick: () -> Unit,
     onSaveInfoClick: () -> Unit,
     onRegisterStockClick: () -> Unit,
+    onStockMinChange: (String) -> Unit,
+    onExpiryDateChange: (String) -> Unit,
     onBackClick: () -> Unit,
     onIgvToggle: (Boolean) -> Unit = {},
     onPercepcionToggle: (Boolean) -> Unit = {},
@@ -170,6 +174,8 @@ fun AddProductContent(
                                     onPriceChange = onPriceChange,
                                     onStockChange = onStockChange,
                                     onRegisterStockClick = onRegisterStockClick,
+                                    onStockMinChange = onStockMinChange,
+                                    onExpiryDateChange = onExpiryDateChange,
                                     onIgvToggle = onIgvToggle,
                                     onPercepcionToggle = onPercepcionToggle
                                 )
@@ -202,6 +208,8 @@ fun AddProductContent(
                                     uiState = uiState,
                                     onPriceChange = onPriceChange,
                                     onStockChange = onStockChange,
+                                    onStockMinChange = onStockMinChange,
+                                    onExpiryDateChange = onExpiryDateChange,
                                     onManualPriceChange = onManualPriceChange,
                                     onSaveClick = onSaveNewClick,
                                     onIgvToggle = onIgvToggle,
@@ -224,6 +232,8 @@ fun AddProductContent(
                                 uiState = uiState,
                                 onPriceChange = onPriceChange,
                                 onStockChange = onStockChange,
+                                onStockMinChange = onStockMinChange,
+                                onExpiryDateChange = onExpiryDateChange,
                                 onManualPriceChange = onManualPriceChange,
                                 onSaveClick = onSaveNewClick,
                                 onIgvToggle = onIgvToggle,
@@ -378,6 +388,8 @@ private fun StockTabContent(
     uiState: AddProductUiState,
     onPriceChange: (String) -> Unit,
     onStockChange: (String) -> Unit,
+    onStockMinChange: (String) -> Unit,
+    onExpiryDateChange: (String) -> Unit,
     onRegisterStockClick: () -> Unit,
     onIgvToggle: (Boolean) -> Unit = {},
     onPercepcionToggle: (Boolean) -> Unit = {}
@@ -457,6 +469,32 @@ private fun StockTabContent(
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 2.dp)
+    )
+
+    Spacer(modifier = Modifier.padding(8.dp))
+
+    TextField(
+        value = uiState.productStockMin,
+        onValueChange = onStockMinChange,
+        label = { Text("Stock MÃ­nimo") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        supportingText = { Text("Avisar cuando el stock sea menor a este valor") }
+    )
+
+    Spacer(modifier = Modifier.padding(8.dp))
+
+    TextField(
+        value = uiState.productExpiryDate,
+        onValueChange = onExpiryDateChange,
+        label = { Text("Fecha de Vencimiento") },
+        placeholder = { Text("DD/MM/YYYY") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp),
+        supportingText = { Text("Ejemplo: 31/12/2025") }
     )
 
 
@@ -590,6 +628,8 @@ private fun NewProductRightContent(
     uiState: AddProductUiState,
     onPriceChange: (String) -> Unit,
     onStockChange: (String) -> Unit,
+    onStockMinChange: (String) -> Unit,
+    onExpiryDateChange: (String) -> Unit,
     onManualPriceChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onIgvToggle: (Boolean) -> Unit = {},
@@ -651,6 +691,30 @@ private fun NewProductRightContent(
             .fillMaxWidth()
             .padding(horizontal = 30.dp),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+    )
+    Spacer(modifier = Modifier.padding(8.dp))
+
+    TextField(
+        value = uiState.productStockMin,
+        onValueChange = onStockMinChange,
+        label = { Text("Stock MÃ­nimo") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        supportingText = { Text("Avisar cuando el stock sea menor a este valor") }
+    )
+    Spacer(modifier = Modifier.padding(8.dp))
+
+    TextField(
+        value = uiState.productExpiryDate,
+        onValueChange = onExpiryDateChange,
+        label = { Text("Fecha de Vencimiento") },
+        placeholder = { Text("DD/MM/YYYY") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp),
+        supportingText = { Text("Ejemplo: 31/12/2025") }
     )
     Spacer(modifier = Modifier.padding(8.dp))
 
@@ -737,7 +801,8 @@ fun AddProductScreenPreview() {
         onNameChange = {}, onCodeChange = {}, onPriceChange = {}, onStockChange = {},
         onCategoryChange = {}, onManualPriceChange = {},
         onTabSelected = {}, onScannedClick = {}, onCategoryClick = {},
-        onSaveNewClick = {}, onSaveInfoClick = {}, onRegisterStockClick = {}, onBackClick = {}
+        onSaveNewClick = {}, onSaveInfoClick = {}, onRegisterStockClick = {},
+        onStockMinChange = {}, onExpiryDateChange = {}, onBackClick = {}
     )
 }
 

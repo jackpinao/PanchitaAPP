@@ -18,6 +18,7 @@ data class ProductModel(
     val barcode: String = "",
     val image: String = "",
     val lastUpdated: String = "",
+    val expiryDate: String? = null,
     val isSynced: Boolean = false,
     val isDeleted: Boolean = false
 )

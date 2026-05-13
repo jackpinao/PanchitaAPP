@@ -40,7 +40,7 @@ import com.pinao.panchitaapp.data.source.local.entity.UserEntity
         StockEntryEntity::class
     ],
     exportSchema = true,
-    version = 22,
+    version = 23,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
