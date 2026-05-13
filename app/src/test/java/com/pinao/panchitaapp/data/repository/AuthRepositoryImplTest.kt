@@ -53,14 +53,14 @@ class AuthRepositoryImplTest {
     }
 
     @Test
-    fun `isUserLoggedIn should return true when currentUser is not null`() {
-        every { mockAuth.currentUserOrNull() } returns mockk()
+    fun `isUserLoggedIn should return true when currentUser is not null`() = runTest {
+        every { mockAuth.sessionStatus } returns kotlinx.coroutines.flow.MutableStateFlow(io.github.jan.supabase.auth.status.SessionStatus.Authenticated(mockk()))
         assertTrue(repository.isUserLoggedIn())
     }
 
     @Test
-    fun `isUserLoggedIn should return false when currentUser is null`() {
-        every { mockAuth.currentUserOrNull() } returns null
+    fun `isUserLoggedIn should return false when currentUser is null`() = runTest {
+        every { mockAuth.sessionStatus } returns kotlinx.coroutines.flow.MutableStateFlow(io.github.jan.supabase.auth.status.SessionStatus.NotAuthenticated)
         assertFalse(repository.isUserLoggedIn())
     }
 

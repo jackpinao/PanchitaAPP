@@ -11,7 +11,7 @@ interface AuthRepository {
     /**
      * Verifica si el usuario ya está autenticado.
      */
-    fun isUserLoggedIn(): Boolean
+    suspend fun isUserLoggedIn(): Boolean
 
     /**
      * Cierra la sesión del usuario.

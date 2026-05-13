@@ -17,6 +17,7 @@ import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.coroutines.flow.first
 
 class AuthRepositoryImpl(
     private val supabaseClient: SupabaseClient,
@@ -97,7 +98,11 @@ class AuthRepositoryImpl(
         }
     }
 
-    override fun isUserLoggedIn(): Boolean = supabaseClient.auth.currentUserOrNull() != null
+    override suspend fun isUserLoggedIn(): Boolean {
+        // Wait until the session has finished loading from storage
+        val status = supabaseClient.auth.sessionStatus.first { it !is io.github.jan.supabase.auth.status.SessionStatus.LoadingFromStorage }
+        return status is io.github.jan.supabase.auth.status.SessionStatus.Authenticated
+    }
 
     override fun getCurrentUserId(): String =
         sessionManager.getUserId() ?: supabaseClient.auth.currentUserOrNull()?.id ?: ""

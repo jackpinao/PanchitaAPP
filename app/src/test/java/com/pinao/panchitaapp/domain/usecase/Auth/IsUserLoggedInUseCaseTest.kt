@@ -6,8 +6,11 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import io.mockk.coEvery
+import io.mockk.coVerify
 
 class IsUserLoggedInUseCaseTest {
 
@@ -20,22 +23,22 @@ class IsUserLoggedInUseCaseTest {
     }
 
     @Test
-    fun `invoke should return true when repository says user is logged in`() {
-        every { repository.isUserLoggedIn() } returns true
+    fun `invoke should return true when repository says user is logged in`() = runTest {
+        coEvery { repository.isUserLoggedIn() } returns true
 
         val result = useCase()
 
         assertTrue(result)
-        verify(exactly = 1) { repository.isUserLoggedIn() }
+        coVerify(exactly = 1) { repository.isUserLoggedIn() }
     }
 
     @Test
-    fun `invoke should return false when repository says user is not logged in`() {
-        every { repository.isUserLoggedIn() } returns false
+    fun `invoke should return false when repository says user is not logged in`() = runTest {
+        coEvery { repository.isUserLoggedIn() } returns false
 
         val result = useCase()
 
         assertFalse(result)
-        verify(exactly = 1) { repository.isUserLoggedIn() }
+        coVerify(exactly = 1) { repository.isUserLoggedIn() }
     }
 }
