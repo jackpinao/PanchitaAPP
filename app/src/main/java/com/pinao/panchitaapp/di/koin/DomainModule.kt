@@ -263,11 +263,13 @@ class DomainModule {
     fun provideAuthUseCase(
         signInUseCase: SignInUseCase,
         isUserLoggedInUseCase: IsUserLoggedInUseCase,
-        signOutUseCase: SignOutUseCase
+        signOutUseCase: SignOutUseCase,
+        ensureCurrentUserUseCase: EnsureCurrentUserUseCase
     ) = AuthUseCase(
         signInUseCase = signInUseCase,
         isUserLoggedInUseCase = isUserLoggedInUseCase,
-        signOutUseCase = signOutUseCase
+        signOutUseCase = signOutUseCase,
+        ensureCurrentUserUseCase = ensureCurrentUserUseCase
     )
 
 

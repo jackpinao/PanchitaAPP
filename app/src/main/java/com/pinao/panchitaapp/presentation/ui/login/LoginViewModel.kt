@@ -32,9 +32,12 @@ class LoginViewModel(
     }
 
     private fun checkUserSession() {
-        if (authUseCase.isUserLoggedInUseCase()) {
-            _uiState.value = LoginUiState.Success(UserModel())
-            syncData()
+        viewModelScope.launch {
+            if (authUseCase.isUserLoggedInUseCase()) {
+                authUseCase.ensureCurrentUserUseCase()
+                _uiState.value = LoginUiState.Success(UserModel())
+                syncData()
+            }
         }
     }
 

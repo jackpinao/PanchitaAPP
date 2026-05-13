@@ -88,12 +88,12 @@ app/src/main/java/com/pinao/panchitaapp/
 ├── presentation/
 │   ├── navigation/    # AppNavGraph, AllDestinations
 │   └── ui/{feature}/  # Screens + ViewModels por funcionalidad
-└── utils/             # Utilidades compartidas (PriceUtils, etc.)
+└── utils/             # Utilidades compartidas (PriceUtils, DateUtils, etc.)
 ```
 
 ---
 
-## Base de Datos (Room v22)
+## Base de Datos (Room v23)
 
 - Nombre: `panchita_app`
 - Schema exportado en `app/schemas/`

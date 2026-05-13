@@ -97,7 +97,7 @@ class AuthRepositoryImpl(
         }
     }
 
-    override fun isUserLoggedIn(): Boolean = supabaseClient.auth.currentUserOrNull() != null
+    override suspend fun isUserLoggedIn(): Boolean = supabaseClient.auth.currentUserOrNull() != null
 
     override fun getCurrentUserId(): String =
         sessionManager.getUserId() ?: supabaseClient.auth.currentUserOrNull()?.id ?: ""

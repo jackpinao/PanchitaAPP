@@ -40,7 +40,8 @@ class LoginViewModelTest {
         every { Log.e(any(), any(), any()) } returns 0
 
         // Por defecto, usuario no logueado
-        every { authUseCase.isUserLoggedInUseCase() } returns false
+        coEvery { authUseCase.isUserLoggedInUseCase() } returns false
+        coEvery { authUseCase.ensureCurrentUserUseCase() } returns ""
         coEvery { refreshProductsUseCase() } returns Unit
     }
 
@@ -52,7 +53,7 @@ class LoginViewModelTest {
     @Test
     fun `init should update state to Success and sync data if user is already logged in`() = runTest {
         // Arrange
-        every { authUseCase.isUserLoggedInUseCase() } returns true
+        coEvery { authUseCase.isUserLoggedInUseCase() } returns true
 
         // Act
         viewModel = LoginViewModel(authUseCase, refreshProductsUseCase)
@@ -175,7 +176,7 @@ class LoginViewModelTest {
 
     @Test
     fun `init when user is logged in and syncData throws should keep Success state`() = runTest {
-        every { authUseCase.isUserLoggedInUseCase() } returns true
+        coEvery { authUseCase.isUserLoggedInUseCase() } returns true
         coEvery { refreshProductsUseCase() } throws Exception("Network error during sync")
 
         viewModel = LoginViewModel(authUseCase, refreshProductsUseCase)

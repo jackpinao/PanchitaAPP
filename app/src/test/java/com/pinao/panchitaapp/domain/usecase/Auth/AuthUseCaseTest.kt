@@ -15,8 +15,9 @@ class AuthUseCaseTest {
         val isLogged = IsUserLoggedInUseCase(authRepository)
         val signOut = SignOutUseCase(authRepository)
 
-        val bundle1 = AuthUseCase(signIn, isLogged, signOut)
-        val bundle2 = AuthUseCase(signIn, isLogged, signOut)
+        val ensureUser = EnsureCurrentUserUseCase(authRepository)
+        val bundle1 = AuthUseCase(signIn, isLogged, signOut, ensureUser)
+        val bundle2 = AuthUseCase(signIn, isLogged, signOut, ensureUser)
 
         assertThat(bundle1).isEqualTo(bundle2)
     }
@@ -27,9 +28,10 @@ class AuthUseCaseTest {
         val signIn2 = SignInUseCase(mockk())
         val isLogged = IsUserLoggedInUseCase(authRepository)
         val signOut = SignOutUseCase(authRepository)
+        val ensureUser = EnsureCurrentUserUseCase(authRepository)
 
-        val bundle1 = AuthUseCase(signIn1, isLogged, signOut)
-        val bundle2 = AuthUseCase(signIn2, isLogged, signOut)
+        val bundle1 = AuthUseCase(signIn1, isLogged, signOut, ensureUser)
+        val bundle2 = AuthUseCase(signIn2, isLogged, signOut, ensureUser)
 
         assertThat(bundle1).isNotEqualTo(bundle2)
     }
@@ -39,7 +41,8 @@ class AuthUseCaseTest {
         val bundle = AuthUseCase(
             SignInUseCase(authRepository),
             IsUserLoggedInUseCase(authRepository),
-            SignOutUseCase(authRepository)
+            SignOutUseCase(authRepository),
+            EnsureCurrentUserUseCase(authRepository)
         )
 
         assertThat(bundle).isNotEqualTo(null)
@@ -51,8 +54,9 @@ class AuthUseCaseTest {
         val isLogged = IsUserLoggedInUseCase(authRepository)
         val signOut = SignOutUseCase(authRepository)
 
-        val bundle1 = AuthUseCase(signIn, isLogged, signOut)
-        val bundle2 = AuthUseCase(signIn, isLogged, signOut)
+        val ensureUser = EnsureCurrentUserUseCase(authRepository)
+        val bundle1 = AuthUseCase(signIn, isLogged, signOut, ensureUser)
+        val bundle2 = AuthUseCase(signIn, isLogged, signOut, ensureUser)
 
         assertThat(bundle1.hashCode()).isEqualTo(bundle2.hashCode())
     }

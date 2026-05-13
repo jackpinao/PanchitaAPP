@@ -6,6 +6,9 @@ import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanner
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.android.gms.common.moduleinstall.ModuleInstall
+import com.google.android.gms.common.moduleinstall.ModuleInstallClient
+import com.google.android.gms.common.moduleinstall.ModuleInstallResponse
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -25,6 +28,8 @@ class GmsBarcodeScannerImplTest {
     private val mockContext: Context = mockk()
     private val mockScanner: GmsBarcodeScanner = mockk()
     private val mockBarcode: Barcode = mockk()
+    private val mockModuleInstallClient: ModuleInstallClient = mockk()
+    private val mockModuleInstallResponse: ModuleInstallResponse = mockk()
 
     @Before
     fun setup() {
@@ -35,6 +40,11 @@ class GmsBarcodeScannerImplTest {
         mockkStatic(GmsBarcodeScanning::class)
         every { GmsBarcodeScanning.getClient(mockContext, any()) } returns mockScanner
 
+        // Mockeamos el módulo de instalación de GMS
+        mockkStatic(ModuleInstall::class)
+        every { ModuleInstall.getClient(mockContext) } returns mockModuleInstallClient
+        every { mockModuleInstallClient.installModules(any()) } returns Tasks.forResult(mockModuleInstallResponse)
+
         scannerImpl = GmsBarcodeScannerImpl(mockContext)
     }
 
@@ -42,6 +52,7 @@ class GmsBarcodeScannerImplTest {
     fun tearDown() {
         unmockkStatic(Log::class)
         unmockkStatic(GmsBarcodeScanning::class)
+        unmockkStatic(ModuleInstall::class)
     }
 
     @Test

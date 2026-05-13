@@ -4,6 +4,7 @@ import com.pinao.panchitaapp.data.source.local.entity.ProductsEntity
 import com.pinao.panchitaapp.data.source.remote.dto.FirebaseProductDto
 import com.pinao.panchitaapp.data.source.remote.dto.SupabaseProductDto
 import com.pinao.panchitaapp.domain.model.ProductModel
+import com.pinao.panchitaapp.utils.DateUtils
 
 object ProductMapper {
     fun toDomain(entity: ProductsEntity): ProductModel {
@@ -107,7 +108,7 @@ object ProductMapper {
             barcode = dto.barcode ?: "",
             image = dto.imageUrl ?: "",
             lastUpdated = dto.updatedAt ?: "",
-            expiryDate = dto.expiryDate,
+            expiryDate = DateUtils.toDisplayFormat(dto.expiryDate),
             isSynced = true,
             isDeleted = !dto.isActive
         )
@@ -127,7 +128,7 @@ object ProductMapper {
             minStock = model.stockMin,
             barcode = model.barcode.takeIf { it.isNotEmpty() },
             imageUrl = model.image.takeIf { it.isNotEmpty() },
-            expiryDate = model.expiryDate,
+            expiryDate = DateUtils.toDatabaseFormat(model.expiryDate),
             isActive = !model.isDeleted
         )
     }

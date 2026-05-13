@@ -53,13 +53,13 @@ class AuthRepositoryImplTest {
     }
 
     @Test
-    fun `isUserLoggedIn should return true when currentUser is not null`() {
+    fun `isUserLoggedIn should return true when currentUser is not null`() = runTest {
         every { mockAuth.currentUserOrNull() } returns mockk()
         assertTrue(repository.isUserLoggedIn())
     }
 
     @Test
-    fun `isUserLoggedIn should return false when currentUser is null`() {
+    fun `isUserLoggedIn should return false when currentUser is null`() = runTest {
         every { mockAuth.currentUserOrNull() } returns null
         assertFalse(repository.isUserLoggedIn())
     }
