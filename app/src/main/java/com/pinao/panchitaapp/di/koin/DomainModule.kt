@@ -48,6 +48,8 @@ import com.pinao.panchitaapp.domain.usecase.ticket.CompleteSaleUseCase
 import com.pinao.panchitaapp.domain.usecase.ticket.DetailTicketUseCases
 import com.pinao.panchitaapp.domain.usecase.ticket.GetDetailsByTicketIdUseCase
 import com.pinao.panchitaapp.domain.usecase.ticket.SaveDetailTicketUseCase
+import com.pinao.panchitaapp.domain.usecase.ticket.PrintTicketUseCase
+import com.pinao.panchitaapp.domain.service.BluetoothPrinterService
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
 
@@ -213,6 +215,11 @@ class DomainModule {
     fun provideCompleteSaleUseCase(
         saleRepository: SaleRepository
     ) = CompleteSaleUseCase(saleRepository)
+
+    @Factory
+    fun providePrintTicketUseCase(
+        printerService: BluetoothPrinterService
+    ) = PrintTicketUseCase(printerService)
 
     @Factory
     fun provideGetAllTemporaryProductsUseCase(

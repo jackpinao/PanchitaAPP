@@ -14,6 +14,7 @@ object AllDestinations {
     const val INVENTORY_LIST = "inventoryList"
     const val FAST_SALE = "fastSale"
     const val FAST_SALE_PREVIEW = "fastSalePreview"
+    const val SETTINGS = "settings"
 }
 
 class AppNavigationActions(
@@ -81,6 +82,12 @@ class AppNavigationActions(
     }
     fun navigateToFastSalePreview() {
         navController.navigate(AllDestinations.FAST_SALE_PREVIEW) {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    fun navigateToSettings() {
+        navController.navigate(AllDestinations.SETTINGS) {
             launchSingleTop = true
             restoreState = true
         }

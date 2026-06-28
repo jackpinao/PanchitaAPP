@@ -54,6 +54,8 @@ import com.pinao.panchitaapp.presentation.ui.moduloVenta.GuiaRemisionScreen
 import com.pinao.panchitaapp.presentation.ui.moduloVenta.GuiaRemisionViewModel
 import com.pinao.panchitaapp.presentation.ui.moduloVenta.PreviewTicketScreen
 import com.pinao.panchitaapp.presentation.ui.moduloVenta.search.ProductSearchScreen
+import com.pinao.panchitaapp.presentation.ui.settings.SettingsScreen
+import com.pinao.panchitaapp.presentation.ui.settings.SettingsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -72,7 +74,8 @@ fun AppNavGraph(
     loginViewModel: LoginViewModel = koinViewModel(),
     guiaRemisionViewModel: GuiaRemisionViewModel = koinViewModel(),
     inventaryViewModel: InventoryListViewModel = koinViewModel(),
-    fastSaleViewModel: FastSaleViewModel = koinViewModel()
+    fastSaleViewModel: FastSaleViewModel = koinViewModel(),
+    settingsViewModel: SettingsViewModel = koinViewModel()
 ) {
     val sessionManager: SessionManager = koinInject()
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
@@ -88,7 +91,8 @@ fun AppNavGraph(
         AppScreens.Recarga.route,
         AppScreens.GuiaRemision.route,
         AppScreens.InventoryList.route,
-        AppScreens.FastSale.route
+        AppScreens.FastSale.route,
+        AppScreens.Settings.route
     )
     val showGlobalTopBar = currentRouteBase in screensWithGlobalTopBar
 
@@ -98,6 +102,7 @@ fun AppNavGraph(
         AppScreens.GuiaRemision.route -> stringResource(R.string.guia_remision)
         AppScreens.InventoryList.route -> stringResource(R.string.inventory_title)
         AppScreens.FastSale.route -> stringResource(R.string.fast_sale_title)
+        AppScreens.Settings.route -> stringResource(R.string.settings)
         else -> "PanchitaAPP"
     }
 
@@ -119,6 +124,7 @@ fun AppNavGraph(
                 navigationToAddProduct = { navigationActions.navigateToAddProduct() },
                 navigationToInventoryList = { navigationActions.navigateToInventary() },
                 navigationToFastSale = { navigationActions.navigateToFastSale() },
+                navigationToSettings = { navigationActions.navigateToSettings() },
                 onLogout = {
                     loginViewModel.logout()
                     navController.navigate(AppScreens.Login.route) {
@@ -267,6 +273,13 @@ fun AppNavGraph(
                 composable(route = AppScreens.FastSalePreview.route) {
                     FastSalePreviewScreen(
                         viewModel = fastSaleViewModel,
+                        navController = navController
+                    )
+                }
+
+                composable(route = AppScreens.Settings.route) {
+                    SettingsScreen(
+                        viewModel = settingsViewModel,
                         navController = navController
                     )
                 }

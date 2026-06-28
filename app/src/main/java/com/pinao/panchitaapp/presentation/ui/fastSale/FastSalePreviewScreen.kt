@@ -20,6 +20,7 @@ import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import com.pinao.panchitaapp.presentation.common.toCurrency
 import com.pinao.panchitaapp.presentation.ui.Screen
+import com.pinao.panchitaapp.presentation.ui.common.PrinterSelectionBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +57,17 @@ fun FastSalePreviewScreen(
             navController.popBackStack()
             viewModel.resetSale()
         }
+    }
+
+    if (uiState.showPrinterSelection) {
+        PrinterSelectionBottomSheet(
+            onDismissRequest = { viewModel.showPrinterSelectionSheet(false) },
+            pairedPrinters = uiState.pairedPrinters,
+            selectedPrinterAddress = uiState.selectedPrinterAddress,
+            onPrinterSelected = viewModel::selectPrinter,
+            isBluetoothEnabled = viewModel.isBluetoothEnabled(),
+            onRefreshPrinters = viewModel::loadPairedPrinters
+        )
     }
 
     Screen {

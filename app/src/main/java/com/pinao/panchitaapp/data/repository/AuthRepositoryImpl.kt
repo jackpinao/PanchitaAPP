@@ -37,6 +37,16 @@ class AuthRepositoryImpl(
         @SerialName("is_active") val isActive: Boolean
     )
 
+    @Serializable
+    private data class SupabaseTenantDto(
+        @SerialName("id") val id: String,
+        @SerialName("name") val name: String,
+        @SerialName("ruc") val ruc: String? = "",
+        @SerialName("address") val address: String? = "",
+        @SerialName("phone") val phone: String? = "",
+        @SerialName("business_name") val businessName: String? = ""
+    )
+
     override suspend fun signIn(email: String, pass: String): Result<UserModel> {
         return try {
             Log.d("AuthRepositoryImpl", "Intentando login con email: $email")
@@ -68,6 +78,32 @@ class AuthRepositoryImpl(
 
             // Persistimos en SessionManager
             sessionManager.saveSession(userDto.tenantId, userDto.role, userDto.id, userDto.fullName)
+
+            // Buscar datos de la bodega (tenant) desde Supabase
+            try {
+                Log.d("AuthRepositoryImpl", "Buscando datos del negocio con tenant_id: ${userDto.tenantId}")
+                val tenantDto = supabaseClient.postgrest
+                    .from("tenants")
+                    .select {
+                        filter {
+                            eq("id", userDto.tenantId)
+                        }
+                    }
+                    .decodeList<SupabaseTenantDto>()
+                    .firstOrNull()
+
+                if (tenantDto != null) {
+                    Log.d("AuthRepositoryImpl", "Negocio encontrado: $tenantDto")
+                    sessionManager.saveStoreDetails(
+                        name = tenantDto.name,
+                        ruc = tenantDto.ruc ?: "",
+                        address = tenantDto.address ?: "",
+                        phone = tenantDto.phone ?: ""
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e("AuthRepositoryImpl", "Error al traer datos de la tienda", e)
+            }
 
             // Guardamos en Room
             userDao.upsert(
@@ -141,6 +177,33 @@ class AuthRepositoryImpl(
             }
 
             sessionManager.saveSession(userDto.tenantId, userDto.role, userDto.id, userDto.fullName)
+
+            // Buscar datos de la bodega (tenant) desde Supabase
+            try {
+                Log.d("AuthRepositoryImpl", "ensureCurrentUserInRoom: Buscando datos del negocio con tenant_id: ${userDto.tenantId}")
+                val tenantDto = supabaseClient.postgrest
+                    .from("tenants")
+                    .select {
+                        filter {
+                            eq("id", userDto.tenantId)
+                        }
+                    }
+                    .decodeList<SupabaseTenantDto>()
+                    .firstOrNull()
+
+                if (tenantDto != null) {
+                    Log.d("AuthRepositoryImpl", "ensureCurrentUserInRoom: Negocio encontrado: $tenantDto")
+                    sessionManager.saveStoreDetails(
+                        name = tenantDto.name,
+                        ruc = tenantDto.ruc ?: "",
+                        address = tenantDto.address ?: "",
+                        phone = tenantDto.phone ?: ""
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e("AuthRepositoryImpl", "ensureCurrentUserInRoom: Error al traer datos de la tienda", e)
+            }
+
             userDao.upsert(
                 UserEntity(
                     userId = userDto.id,

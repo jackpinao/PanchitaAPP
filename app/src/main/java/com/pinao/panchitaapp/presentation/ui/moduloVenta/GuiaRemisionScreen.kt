@@ -264,7 +264,7 @@ fun GuiaRemisionContent(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 80.dp)
                     ) {
-                        items(uiState.products, key = { it.productId }) { product ->
+                        items(uiState.products, key = { it.detailTicketEntityId }) { product ->
                             ListItem(
                                 modifier = Modifier.combinedClickable(
                                     onClick = { /* Opcional */ },

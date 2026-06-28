@@ -25,6 +25,11 @@ import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 import java.util.UUID
 
+import com.pinao.panchitaapp.domain.model.BluetoothDeviceModel
+import com.pinao.panchitaapp.domain.service.BluetoothPrinterService
+import com.pinao.panchitaapp.domain.usecase.ticket.PrintTicketUseCase
+import com.pinao.panchitaapp.data.source.local.SessionManager
+
 /**
  * Estado único para la pantalla de Guía de Remisión.
  */
@@ -42,7 +47,10 @@ data class GuiaRemisionUiState(
     val lastScannedCode: String = "",
     val downloadStatus: String? = null,
     val printingStatus: String? = null,
-    val isEditing: Boolean = false
+    val isEditing: Boolean = false,
+    val pairedPrinters: List<BluetoothDeviceModel> = emptyList(),
+    val selectedPrinterAddress: String? = null,
+    val showPrinterSelection: Boolean = false
 )
 
 /**
@@ -56,7 +64,10 @@ class GuiaRemisionViewModel(
     private val completeSaleUseCase: CompleteSaleUseCase,
     private val pdfService: TicketPdfService,
     private val temporaryProductUseCases: TemporaryProductUseCases,
-    private val ensureCurrentUserUseCase: EnsureCurrentUserUseCase
+    private val ensureCurrentUserUseCase: EnsureCurrentUserUseCase,
+    private val printTicketUseCase: PrintTicketUseCase,
+    private val printerService: BluetoothPrinterService,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GuiaRemisionUiState())
@@ -66,6 +77,7 @@ class GuiaRemisionViewModel(
 
     init {
         refreshAndObserveProducts()
+        loadPrinterSettings()
     }
 
     private fun refreshAndObserveProducts() {
@@ -359,9 +371,82 @@ class GuiaRemisionViewModel(
         }
     }
 
+    private fun loadPrinterSettings() {
+        val savedAddress = sessionManager.getPrinterAddress()
+        _uiState.update { it.copy(selectedPrinterAddress = savedAddress) }
+    }
+
+    fun isBluetoothEnabled(): Boolean {
+        return printerService.isBluetoothEnabled()
+    }
+
+    fun loadPairedPrinters() {
+        val printers = printerService.getPairedPrinters()
+        _uiState.update { it.copy(pairedPrinters = printers) }
+    }
+
+    fun selectPrinter(printer: BluetoothDeviceModel) {
+        sessionManager.savePrinterAddress(printer.address)
+        _uiState.update { 
+            it.copy(
+                selectedPrinterAddress = printer.address,
+                showPrinterSelection = false
+            )
+        }
+        initiatePrintTicket()
+    }
+
+    fun showPrinterSelectionSheet(show: Boolean) {
+        if (show) {
+            loadPairedPrinters()
+        }
+        _uiState.update { it.copy(showPrinterSelection = show) }
+    }
+
     fun initiatePrintTicket() {
-        _uiState.update { it.copy(printingStatus = "Iniciando impresión...") }
-        // Aquí iría la lógica real de impresión
+        val state = _uiState.value
+        val address = state.selectedPrinterAddress
+
+        if (address == null) {
+            showPrinterSelectionSheet(true)
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(printingStatus = "Imprimiendo ticket...") }
+                
+                val ticket = SaleModel(
+                    saleId = sessionTicketId,
+                    saleDate = GetCurrentDateTime().getCurrentDateTime(),
+                    totalAmount = state.products.sumOf { it.priceSell * it.stockQuantity }
+                )
+
+                printTicketUseCase(
+                    deviceAddress = address,
+                    ticket = ticket,
+                    products = state.products,
+                    clientName = state.clientName,
+                    clientDoc = state.clientDoc
+                ).onSuccess {
+                    _uiState.update { it.copy(printingStatus = "Impresión exitosa") }
+                }.onFailure { e ->
+                    _uiState.update { 
+                        it.copy(
+                            printingStatus = null,
+                            errorMessage = e.message ?: "Error al conectar con la impresora"
+                        ) 
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update { 
+                    it.copy(
+                        printingStatus = null,
+                        errorMessage = "Error de impresión: ${e.message}"
+                    ) 
+                }
+            }
+        }
     }
 
     fun closeDialogs() {

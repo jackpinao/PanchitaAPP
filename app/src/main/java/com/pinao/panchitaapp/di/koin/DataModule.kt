@@ -22,6 +22,7 @@ import com.pinao.panchitaapp.data.repository.RechangeRepositoryImpl
 import com.pinao.panchitaapp.data.repository.SaleRepositoryImpl
 import com.pinao.panchitaapp.data.repository.TemporaryProductRepositoryImpl
 import com.pinao.panchitaapp.data.service.AndroidTicketPdfService
+import com.pinao.panchitaapp.data.service.AndroidBluetoothPrinterService
 import com.pinao.panchitaapp.data.source.local.SessionManager
 
 import com.pinao.panchitaapp.data.source.local.dao.CategoryDao
@@ -51,6 +52,7 @@ import com.pinao.panchitaapp.domain.repository.RechangeRepository
 import com.pinao.panchitaapp.domain.repository.SaleRepository
 import com.pinao.panchitaapp.domain.repository.TemporaryProductRepository
 import com.pinao.panchitaapp.domain.service.TicketPdfService
+import com.pinao.panchitaapp.domain.service.BluetoothPrinterService
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
@@ -239,6 +241,11 @@ class DataModule {
     @Single
     fun provideTicketPdfService(context: Context): TicketPdfService {
         return AndroidTicketPdfService(context)
+    }
+
+    @Single
+    fun provideBluetoothPrinterService(context: Context, sessionManager: SessionManager): BluetoothPrinterService {
+        return AndroidBluetoothPrinterService(context, sessionManager)
     }
 
     @Single

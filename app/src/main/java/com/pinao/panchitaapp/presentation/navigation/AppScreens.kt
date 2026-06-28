@@ -13,6 +13,7 @@ sealed class AppScreens(val route: String){
     data object InventoryList: AppScreens("inventoryList")
     data object FastSale: AppScreens("fastSale")
     data object FastSalePreview: AppScreens("fastSalePreview")
+    data object Settings: AppScreens("settings")
 
     companion object {
         const val ADD_PRODUCT_ROUTE = "addProduct"

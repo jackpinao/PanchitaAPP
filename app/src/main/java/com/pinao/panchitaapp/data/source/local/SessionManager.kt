@@ -13,6 +13,26 @@ class SessionManager(private val sharedPreferences: SharedPreferences) {
     fun getUserRole(): String? = sharedPreferences.getString("user_role", null)
     fun getUserId(): String? = sharedPreferences.getString("current_user_id", null)
     fun getUserName(): String? = sharedPreferences.getString("user_name", null)
+    fun getPrinterAddress(): String? = sharedPreferences.getString("selected_printer_address", null)
+
+    fun getStoreName(): String? = sharedPreferences.getString("store_name", null)
+    fun getStoreRuc(): String? = sharedPreferences.getString("store_ruc", null)
+    fun getStoreAddress(): String? = sharedPreferences.getString("store_address", null)
+    fun getStorePhone(): String? = sharedPreferences.getString("store_phone", null)
+
+    fun savePrinterAddress(address: String) {
+        sharedPreferences.edit().putString("selected_printer_address", address).apply()
+    }
+
+    fun saveStoreDetails(name: String, ruc: String, address: String, phone: String) {
+        sharedPreferences.edit().apply {
+            putString("store_name", name)
+            putString("store_ruc", ruc)
+            putString("store_address", address)
+            putString("store_phone", phone)
+            apply()
+        }
+    }
 
     fun saveSession(storeId: String, role: String, userId: String = "", userName: String = "") {
         sharedPreferences.edit().apply {

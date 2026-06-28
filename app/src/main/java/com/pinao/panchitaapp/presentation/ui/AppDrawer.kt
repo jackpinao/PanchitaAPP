@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AddShoppingCart
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -48,6 +49,7 @@ fun AppDrawer(
     navigationToAddProduct: () -> Unit = {},
     navigationToInventoryList: () -> Unit = {},
     navigationToFastSale: () -> Unit = {},
+    navigationToSettings: () -> Unit = {},
     onLogout: () -> Unit = {},
     closeDrawer: () -> Unit = {},
     isPermanent: Boolean = false
@@ -172,6 +174,27 @@ fun AppDrawer(
                 Icon(
                     imageVector = Icons.Default.AddShoppingCart,
                     contentDescription = stringResource(id = R.string.fast_sale_title)
+                )
+            },
+            shape = MaterialTheme.shapes.small
+        )
+
+        NavigationDrawerItem(
+            label = {
+                Text(
+                    text = stringResource(id = R.string.settings),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            },
+            selected = route == AppScreens.Settings.route,
+            onClick = {
+                closeDrawer()
+                navigationToSettings()
+            },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = stringResource(id = R.string.settings)
                 )
             },
             shape = MaterialTheme.shapes.small

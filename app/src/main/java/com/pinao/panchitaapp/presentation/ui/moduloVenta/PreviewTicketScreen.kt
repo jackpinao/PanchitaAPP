@@ -17,6 +17,7 @@ import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import com.pinao.panchitaapp.presentation.ui.Screen
+import com.pinao.panchitaapp.presentation.ui.common.PrinterSelectionBottomSheet
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -50,6 +51,17 @@ fun PreviewTicketScreen(
         uiState.errorMessage?.let {
             snackbarHostState.showSnackbar(it)
         }
+    }
+
+    if (uiState.showPrinterSelection) {
+        PrinterSelectionBottomSheet(
+            onDismissRequest = { viewModel.showPrinterSelectionSheet(false) },
+            pairedPrinters = uiState.pairedPrinters,
+            selectedPrinterAddress = uiState.selectedPrinterAddress,
+            onPrinterSelected = viewModel::selectPrinter,
+            isBluetoothEnabled = viewModel.isBluetoothEnabled(),
+            onRefreshPrinters = viewModel::loadPairedPrinters
+        )
     }
 
     Screen {
