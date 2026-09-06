@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -26,11 +25,13 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,10 +52,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.pinao.panchitaapp.domain.model.BluetoothDeviceModel
+import com.pinao.panchitaapp.domain.model.UsbDeviceModel
 import com.pinao.panchitaapp.presentation.ui.Screen
 
 @Composable
@@ -80,9 +81,8 @@ fun SettingsScreen(
         }
     }
 
-    // Recargar dispositivos al abrir
     LaunchedEffect(Unit) {
-        viewModel.refreshPairedDevices()
+        viewModel.refreshPrinters()
     }
 
     Screen {
@@ -104,7 +104,8 @@ fun SettingsScreen(
                 item {
                     PrinterSection(
                         uiState = uiState,
-                        onRefreshClick = { viewModel.refreshPairedDevices() },
+                        onConnectionTypeChange = { viewModel.setPrinterConnectionType(it) },
+                        onRefreshClick = { viewModel.refreshPrinters() },
                         onDeviceSelect = { viewModel.selectPrinter(it) },
                         onPrintTestClick = { viewModel.printTestTicket() },
                         onOpenBluetoothSettings = {
@@ -136,6 +137,7 @@ fun SettingsScreen(
 @Composable
 fun PrinterSection(
     uiState: SettingsUiState,
+    onConnectionTypeChange: (String) -> Unit,
     onRefreshClick: () -> Unit,
     onDeviceSelect: (String) -> Unit,
     onPrintTestClick: () -> Unit,
@@ -169,7 +171,7 @@ fun PrinterSection(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                
+
                 OutlinedButton(
                     onClick = onRefreshClick,
                     shape = RoundedCornerShape(8.dp),
@@ -187,77 +189,151 @@ fun PrinterSection(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Estado de Bluetooth
-            if (!uiState.isBluetoothEnabled) {
-                OutlinedCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.outlinedCardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+            // Selector de Tipo de Conexión (Bluetooth / USB)
+            Text(
+                text = "Tipo de Conexión:",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                modifier = Modifier.padding(bottom = 6.dp)
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = uiState.printerConnectionType == "BLUETOOTH",
+                    onClick = { onConnectionTypeChange("BLUETOOTH") },
+                    label = { Text("Bluetooth") },
+                    leadingIcon = {
                         Icon(
-                            imageVector = Icons.Default.BluetoothDisabled,
-                            contentDescription = "Bluetooth Apagado",
-                            tint = MaterialTheme.colorScheme.error
+                            imageVector = Icons.Default.Bluetooth,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                "Bluetooth Desactivado",
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                            Text(
-                                "Enciende el Bluetooth para listar impresoras.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f)
-                            )
-                        }
-                        Button(
-                            onClick = onOpenBluetoothSettings,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error
-                            )
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                FilterChip(
+                    selected = uiState.printerConnectionType == "USB",
+                    onClick = { onConnectionTypeChange("USB") },
+                    label = { Text("USB OTG") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Usb,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (uiState.printerConnectionType == "BLUETOOTH") {
+                // Estado y Lista de Bluetooth
+                if (!uiState.isBluetoothEnabled) {
+                    OutlinedCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.outlinedCardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Activar", style = MaterialTheme.typography.bodySmall)
+                            Icon(
+                                imageVector = Icons.Default.BluetoothDisabled,
+                                contentDescription = "Bluetooth Apagado",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    "Bluetooth Desactivado",
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                                Text(
+                                    "Enciende el Bluetooth para listar impresoras.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f)
+                                )
+                            }
+                            Button(
+                                onClick = onOpenBluetoothSettings,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error
+                                )
+                            ) {
+                                Text("Activar", style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                    }
+                } else {
+                    Text(
+                        text = "Dispositivos Bluetooth Vinculados:",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    if (uiState.pairedDevices.isEmpty()) {
+                        Text(
+                            text = "No se encontraron dispositivos Bluetooth vinculados. Vincule su impresora térmica en los ajustes de su celular.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                        OutlinedButton(
+                            onClick = onOpenBluetoothSettings,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Vincular nuevo dispositivo")
+                        }
+                    } else {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            uiState.pairedDevices.forEach { device ->
+                                val isSelected = device.address == uiState.selectedPrinterAddress
+                                BluetoothDeviceItem(
+                                    device = device,
+                                    isSelected = isSelected,
+                                    onClick = { onDeviceSelect(device.address) }
+                                )
+                            }
                         }
                     }
                 }
             } else {
+                // Lista de Dispositivos USB
                 Text(
-                    text = "Dispositivos Vinculados:",
+                    text = "Dispositivos USB Conectados:",
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                if (uiState.pairedDevices.isEmpty()) {
+                if (uiState.connectedUsbDevices.isEmpty()) {
                     Text(
-                        text = "No se encontraron dispositivos Bluetooth vinculados. Vincule su impresora térmica en los ajustes de su celular.",
+                        text = "No se detectó ninguna impresora conectada por cable USB OTG. Asegúrese de que el cable esté firme y la impresora encendida.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
-                    OutlinedButton(
-                        onClick = onOpenBluetoothSettings,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Vincular nuevo dispositivo")
-                    }
                 } else {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        uiState.pairedDevices.forEach { device ->
-                            val isSelected = device.address == uiState.selectedPrinterAddress
-                            DeviceItem(
+                        uiState.connectedUsbDevices.forEach { device ->
+                            val deviceIdStr = device.deviceId.toString()
+                            val isSelected = deviceIdStr == uiState.selectedPrinterAddress
+                            UsbDeviceItem(
                                 device = device,
                                 isSelected = isSelected,
-                                onClick = { onDeviceSelect(device.address) }
+                                onClick = { onDeviceSelect(deviceIdStr) }
                             )
                         }
                     }
@@ -301,7 +377,7 @@ fun PrinterSection(
 }
 
 @Composable
-fun DeviceItem(
+fun BluetoothDeviceItem(
     device: BluetoothDeviceModel,
     isSelected: Boolean,
     onClick: () -> Unit
@@ -340,6 +416,62 @@ fun DeviceItem(
                     )
                     Text(
                         text = device.address,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            }
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Seleccionada",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun UsbDeviceItem(
+    device: UsbDeviceModel,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+            else MaterialTheme.colorScheme.surface
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Usb,
+                    contentDescription = "USB",
+                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = device.name,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "ID Dispositivo: ${device.deviceId}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )

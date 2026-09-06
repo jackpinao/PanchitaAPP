@@ -3,10 +3,11 @@ package com.pinao.panchitaapp.presentation.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pinao.panchitaapp.data.source.local.SessionManager
-import com.pinao.panchitaapp.domain.model.BluetoothDeviceModel
 import com.pinao.panchitaapp.domain.model.ProductModel
 import com.pinao.panchitaapp.domain.model.SaleModel
 import com.pinao.panchitaapp.domain.service.BluetoothPrinterService
+import com.pinao.panchitaapp.domain.service.UsbPrinterService
+import com.pinao.panchitaapp.domain.usecase.ticket.PrintTicketUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -22,7 +23,9 @@ import java.util.Locale
 @KoinViewModel
 class SettingsViewModel(
     private val sessionManager: SessionManager,
-    private val printerService: BluetoothPrinterService
+    private val bluetoothPrinterService: BluetoothPrinterService,
+    private val usbPrinterService: UsbPrinterService,
+    private val printTicketUseCase: PrintTicketUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -37,8 +40,9 @@ class SettingsViewModel(
         val ruc = sessionManager.getStoreRuc() ?: ""
         val address = sessionManager.getStoreAddress() ?: ""
         val phone = sessionManager.getStorePhone() ?: ""
+        val connectionType = sessionManager.getPrinterConnectionType()
         val printerAddress = sessionManager.getPrinterAddress()
-        val isBtEnabled = printerService.isBluetoothEnabled()
+        val isBtEnabled = bluetoothPrinterService.isBluetoothEnabled()
 
         _uiState.update {
             it.copy(
@@ -46,29 +50,64 @@ class SettingsViewModel(
                 storeRuc = ruc,
                 storeAddress = address,
                 storePhone = phone,
+                printerConnectionType = connectionType,
                 selectedPrinterAddress = printerAddress,
                 isBluetoothEnabled = isBtEnabled
             )
         }
 
-        if (isBtEnabled) {
-            refreshPairedDevices()
+        refreshPrinters()
+    }
+
+    fun setPrinterConnectionType(type: String) {
+        sessionManager.savePrinterConnectionType(type)
+        _uiState.update {
+            it.copy(
+                printerConnectionType = type,
+                selectedPrinterAddress = sessionManager.getPrinterAddress()
+            )
+        }
+        refreshPrinters()
+    }
+
+    fun refreshPrinters() {
+        val connectionType = sessionManager.getPrinterConnectionType()
+        if (connectionType == "USB") {
+            val usbDevices = usbPrinterService.getConnectedPrinters()
+            _uiState.update {
+                it.copy(connectedUsbDevices = usbDevices)
+            }
+        } else {
+            val isBtEnabled = bluetoothPrinterService.isBluetoothEnabled()
+            val btDevices = if (isBtEnabled) {
+                bluetoothPrinterService.getPairedPrinters()
+            } else {
+                emptyList()
+            }
+            _uiState.update {
+                it.copy(
+                    isBluetoothEnabled = isBtEnabled,
+                    pairedDevices = btDevices
+                )
+            }
         }
     }
 
-    fun refreshPairedDevices() {
-        val isBtEnabled = printerService.isBluetoothEnabled()
-        val devices = if (isBtEnabled) {
-            printerService.getPairedPrinters()
-        } else {
-            emptyList()
-        }
-
+    fun selectPrinter(addressOrId: String) {
+        sessionManager.savePrinterAddress(addressOrId)
         _uiState.update {
             it.copy(
-                isBluetoothEnabled = isBtEnabled,
-                pairedDevices = devices
+                selectedPrinterAddress = addressOrId,
+                successMessage = "Impresora predeterminada guardada"
             )
+        }
+
+        // Si es USB, solicitar permiso si no se tiene
+        if (_uiState.value.printerConnectionType == "USB") {
+            val deviceId = addressOrId.toIntOrNull()
+            if (deviceId != null && !usbPrinterService.hasPermission(deviceId)) {
+                usbPrinterService.requestPermission(deviceId)
+            }
         }
     }
 
@@ -86,16 +125,6 @@ class SettingsViewModel(
 
     fun onStorePhoneChange(value: String) {
         _uiState.update { it.copy(storePhone = value) }
-    }
-
-    fun selectPrinter(address: String) {
-        sessionManager.savePrinterAddress(address)
-        _uiState.update {
-            it.copy(
-                selectedPrinterAddress = address,
-                successMessage = "Impresora predeterminada guardada"
-            )
-        }
     }
 
     fun saveStoreDetails() {
@@ -163,7 +192,7 @@ class SettingsViewModel(
                 )
             )
 
-            val result = printerService.printTicket(
+            val result = printTicketUseCase(
                 deviceAddress = address,
                 ticket = testSale,
                 products = testProducts,

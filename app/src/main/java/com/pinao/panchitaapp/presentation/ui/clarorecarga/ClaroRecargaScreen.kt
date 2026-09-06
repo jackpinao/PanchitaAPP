@@ -64,10 +64,14 @@ import com.pinao.panchitaapp.R
 import com.pinao.panchitaapp.domain.model.RechangeModel
 import com.pinao.panchitaapp.presentation.common.GetCurrentDateTime
 import com.pinao.panchitaapp.presentation.ui.Screen
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.foundation.layout.Box
 
 @Composable
 fun ClaroRecargaScreen(
-    claroRecargaViewModel: ClaroRecargaViewModel
+    claroRecargaViewModel: ClaroRecargaViewModel,
+    windowSize: WindowSizeClass? = null
 ) {
 
     var isEnabled by rememberSaveable { mutableStateOf(false) }
@@ -105,7 +109,8 @@ fun ClaroRecargaScreen(
                 isNumPhone,
                 onNumPhone = { isNumPhone = it },
                 context,
-                (uiState as RechangeUiState.Success).rechangeModelList
+                (uiState as RechangeUiState.Success).rechangeModelList,
+                windowSize
             )
         }
     }
@@ -121,23 +126,54 @@ fun ClaroRecargaScreenContent(
     isNumPhone: String,
     onNumPhone: (String) -> Unit,
     context: Context,
-    listRechangeModel: List<RechangeModel>
+    listRechangeModel: List<RechangeModel>,
+    windowSize: WindowSizeClass? = null
 ) {
+    val isWideScreen = windowSize?.widthSizeClass != WindowWidthSizeClass.Compact
 
     Screen {
-        TopBar(
-            PaddingValues(10.dp),
-            isEnabled,
-            onEnable,
-            isValRechargeAmount,
-            onValRechargeAmount,
-            claroRecargaViewModel,
-            isNumPhone,
-            onNumPhone,
-            context,
-            listRechangeModel
-        )
-
+        if (isWideScreen) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                Box(modifier = Modifier.weight(1.1f)) {
+                    CenterApp(
+                        PaddingValues(0.dp),
+                        isEnabled,
+                        onEnable,
+                        isValRechargeAmount,
+                        onValRechargeAmount,
+                        isNumPhone,
+                        onNumPhone,
+                        claroRecargaViewModel,
+                        context
+                    )
+                }
+                Box(modifier = Modifier.weight(0.9f)) {
+                    CenterApp2(
+                        PaddingValues(0.dp),
+                        claroRecargaViewModel,
+                        listRechangeModel = listRechangeModel
+                    )
+                }
+            }
+        } else {
+            TopBar(
+                PaddingValues(10.dp),
+                isEnabled,
+                onEnable,
+                isValRechargeAmount,
+                onValRechargeAmount,
+                claroRecargaViewModel,
+                isNumPhone,
+                onNumPhone,
+                context,
+                listRechangeModel
+            )
+        }
     }
 }
 
@@ -324,19 +360,43 @@ private fun CenterApp2(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Text(GetCurrentDateTime().formatToDisplay(isDate))
-            IconButton(
-                onClick = {
-                    openDialog.value = true
+            if (filterDate == "") {
+                Text(stringResource(R.string.all_recharges_label))
+            } else {
+                Text(GetCurrentDateTime().formatToDisplay(isDate))
+            }
 
-                },
-                modifier = Modifier.padding(end = 10.dp, start = 10.dp),
-                enabled = true
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.baseline_calendar_month_24),
-                    contentDescription = stringResource(R.string.recharge_date)
-                )
+                IconButton(
+                    onClick = {
+                        openDialog.value = true
+                    },
+                    modifier = Modifier.padding(end = 4.dp),
+                    enabled = true
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.baseline_calendar_month_24),
+                        contentDescription = stringResource(R.string.recharge_date)
+                    )
+                }
+
+                if (filterDate.isNotEmpty()) {
+                    IconButton(
+                        onClick = {
+                            filterDate = ""
+                            onDate(dateTime)
+                            claroRecargaViewModel.getForDateRechange("")
+                        }
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.outline_auto_delete_24),
+                            contentDescription = "Clear Filter",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             }
             if (openDialog.value) {
                 val confirmEnabled = remember {
@@ -351,16 +411,13 @@ private fun CenterApp2(
                     confirmButton = {
                         TextButton(
                             onClick = {
+                                datePickerState.selectedDateMillis?.let {
+                                    val formattedDate = GetCurrentDateTime().getCurrentDateTime3(it)
+                                    filterDate = formattedDate
+                                    onDate(formattedDate)
+                                    claroRecargaViewModel.getForDateRechange(formattedDate)
+                                }
                                 openDialog.value = false
-
-                                filterDate = datePickerState.selectedDateMillis?.let {
-                                    GetCurrentDateTime().getCurrentDateTime3(
-                                        it
-                                    )
-                                }.toString()
-                                println(filterDate)
-                                onDate(filterDate)
-                                claroRecargaViewModel.getForDateRechange(filterDate)
                             },
                             enabled = confirmEnabled.value
                         ) {

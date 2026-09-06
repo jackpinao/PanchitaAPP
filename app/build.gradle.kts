@@ -106,9 +106,10 @@ android {
         buildConfigField("String", "KOTZILLA_APP_ID", "\"${localProperties.getProperty("KOTZILLA_APP_ID") ?: ""}\"")
         buildConfigField("String", "KOTZILLA_KEY_ID", "\"${localProperties.getProperty("KOTZILLA_KEY_ID") ?: ""}\"")
         buildConfigField("String", "KOTZILLA_API_KEY", "\"${localProperties.getProperty("KOTZILLA_API_KEY") ?: ""}\"")
-        
-        buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL") ?: ""}\"")
+                buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL") ?: ""}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY") ?: ""}\"")
+        buildConfigField("String", "BASE_API_URL", "\"${localProperties.getProperty("BASE_API_URL") ?: "http://10.0.2.2:3000/"}\"")
+
     }
 
     // Asegurar que el JSON se genere antes de compilar

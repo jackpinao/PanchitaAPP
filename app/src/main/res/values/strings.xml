@@ -157,6 +157,7 @@
     <string name="soles_label">Soles</string>
     <string name="others_label">Otros</string>
     <string name="recharge_button">RECARGAR</string>
+    <string name="all_recharges_label">Todas las recargas</string>
 
     <string name="product_search_placeholder">Nombre o código</string>
     <string name="search_product_placeholder">Buscar producto</string>

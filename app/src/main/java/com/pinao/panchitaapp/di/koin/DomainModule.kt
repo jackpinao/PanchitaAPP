@@ -7,6 +7,7 @@ import com.pinao.panchitaapp.domain.repository.CategoryRepository
 import com.pinao.panchitaapp.domain.repository.ClientRepository
 import com.pinao.panchitaapp.domain.repository.DetailTicketRepository
 import com.pinao.panchitaapp.domain.repository.ProductRepository
+import com.pinao.panchitaapp.domain.repository.PrinterSettingsRepository
 import com.pinao.panchitaapp.domain.repository.RechangeRepository
 import com.pinao.panchitaapp.domain.repository.SaleRepository
 import com.pinao.panchitaapp.domain.repository.TemporaryProductRepository
@@ -49,6 +50,7 @@ import com.pinao.panchitaapp.domain.usecase.ticket.DetailTicketUseCases
 import com.pinao.panchitaapp.domain.usecase.ticket.GetDetailsByTicketIdUseCase
 import com.pinao.panchitaapp.domain.usecase.ticket.SaveDetailTicketUseCase
 import com.pinao.panchitaapp.domain.usecase.ticket.PrintTicketUseCase
+import com.pinao.panchitaapp.domain.usecase.ticket.SyncUnsyncedSalesUseCase
 import com.pinao.panchitaapp.domain.service.BluetoothPrinterService
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
@@ -218,8 +220,15 @@ class DomainModule {
 
     @Factory
     fun providePrintTicketUseCase(
-        printerService: BluetoothPrinterService
-    ) = PrintTicketUseCase(printerService)
+        bluetoothPrinterService: BluetoothPrinterService,
+        usbPrinterService: com.pinao.panchitaapp.domain.service.UsbPrinterService,
+        printerSettingsRepository: PrinterSettingsRepository
+    ) = PrintTicketUseCase(bluetoothPrinterService, usbPrinterService, printerSettingsRepository)
+
+    @Factory
+    fun provideSyncUnsyncedSalesUseCase(
+        saleRepository: SaleRepository
+    ) = SyncUnsyncedSalesUseCase(saleRepository)
 
     @Factory
     fun provideGetAllTemporaryProductsUseCase(

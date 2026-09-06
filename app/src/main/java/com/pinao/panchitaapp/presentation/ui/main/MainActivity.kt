@@ -15,6 +15,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.pinao.panchitaapp.data.service.SyncWorker
 import com.pinao.panchitaapp.domain.usecase.products.SyncUnsyncedProductsUseCase
+import com.pinao.panchitaapp.domain.usecase.ticket.SyncUnsyncedSalesUseCase
 import com.pinao.panchitaapp.presentation.navigation.AppNavGraph
 import com.pinao.panchitaapp.presentation.theme.resource.PanchitaAPPTheme
 import kotlinx.coroutines.launch
@@ -27,6 +28,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 class MainActivity : ComponentActivity() {
 
     private val syncUnsyncedProductsUseCase: SyncUnsyncedProductsUseCase by inject()
+    private val syncUnsyncedSalesUseCase: SyncUnsyncedSalesUseCase by inject()
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +38,7 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             try {
                 syncUnsyncedProductsUseCase()
+                syncUnsyncedSalesUseCase()
             } catch (e: Exception) {
                 e.printStackTrace()
             }

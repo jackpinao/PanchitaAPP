@@ -204,7 +204,8 @@ fun AppNavGraph(
                 composable(route = AppScreens.Login.route) {
                     LoginScreen(
                         viewModel = loginViewModel,
-                        navController = navController
+                        navController = navController,
+                        windowSize = windowSize
                     )
                 }
                 composable(route = AppScreens.Home.route) {
@@ -215,13 +216,15 @@ fun AppNavGraph(
                 }
                 composable(route = AppScreens.Recarga.route) {
                     ClaroRecargaScreen(
-                        claroRecargaViewModel = rechargeViewModel
+                        claroRecargaViewModel = rechargeViewModel,
+                        windowSize = windowSize
                     )
                 }
                 composable(route = AppScreens.GuiaRemision.route) {
                     GuiaRemisionScreen(
                         viewModel = guiaRemisionViewModel,
-                        navController = navController
+                        navController = navController,
+                        windowSize = windowSize
                     )
                 }
                 composable(route = AppScreens.PreviewTicket.route) {
@@ -233,7 +236,8 @@ fun AppNavGraph(
                 composable(route = AppScreens.InventoryList.route) {
                     InventoryListScreen(
                         navController = navController,
-                        viewModel = inventaryViewModel
+                        viewModel = inventaryViewModel,
+                        windowSize = windowSize
                     )
                 }
 
@@ -266,7 +270,8 @@ fun AppNavGraph(
                 composable(route = AppScreens.FastSale.route) {
                     FastSaleScreen(
                         viewModel = fastSaleViewModel,
-                        navController = navController
+                        navController = navController,
+                        windowSize = windowSize
                     )
                 }
 

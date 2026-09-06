@@ -3,7 +3,9 @@ package com.pinao.panchitaapp.presentation.ui.fastSale
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -22,15 +24,19 @@ import com.pinao.panchitaapp.presentation.common.toCurrency
 import com.pinao.panchitaapp.presentation.navigation.AppScreens
 import com.pinao.panchitaapp.presentation.ui.Screen
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FastSaleScreen(
     viewModel: FastSaleViewModel,
-    navController: NavController
+    navController: NavController,
+    windowSize: WindowSizeClass? = null
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val isWideScreen = windowSize?.widthSizeClass != WindowWidthSizeClass.Compact
 
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let {
@@ -43,7 +49,7 @@ fun FastSaleScreen(
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
-                if (uiState.items.isNotEmpty()) {
+                if (uiState.items.isNotEmpty() && !isWideScreen) {
                     Surface(
                         tonalElevation = 8.dp,
                         shadowElevation = 8.dp
@@ -81,140 +87,229 @@ fun FastSaleScreen(
                 }
             }
         ) { padding ->
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.fast_sale_title),
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-
-                // Inline Form
-                OutlinedCard(
-                    modifier = Modifier.fillMaxWidth()
+            if (isWideScreen) {
+                Row(
+                    modifier = Modifier
+                        .padding(padding)
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
+                    // Columna Izquierda: Entrada de Producto e Info del Cliente
                     Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier
+                            .weight(1.1f)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        OutlinedTextField(
-                            value = uiState.productNameInput,
-                            onValueChange = viewModel::onProductNameChange,
-                            label = { Text(stringResource(R.string.fast_sale_item_name_placeholder)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
+                        Text(
+                            text = stringResource(R.string.fast_sale_title),
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                        FastSaleFormSection(uiState = uiState, viewModel = viewModel)
+                        ClientInfoSection(uiState = uiState, viewModel = viewModel)
+                    }
+
+                    // Columna Derecha: Detalle de Venta y Botones
+                    Column(
+                        modifier = Modifier.weight(0.9f),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.cart_products_title),
+                            style = MaterialTheme.typography.titleMedium
                         )
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            OutlinedTextField(
-                                value = uiState.productPriceInput,
-                                onValueChange = viewModel::onProductPriceChange,
-                                label = { Text(stringResource(R.string.fast_sale_item_price_placeholder)) },
-                                modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                singleLine = true
-                            )
-                            OutlinedTextField(
-                                value = uiState.productQuantityInput,
-                                onValueChange = viewModel::onProductQuantityChange,
-                                label = { Text(stringResource(R.string.fast_sale_item_quantity_placeholder)) },
-                                modifier = Modifier.weight(0.6f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                singleLine = true
-                            )
-                            IconButton(
-                                onClick = viewModel::addItem,
-                                modifier = Modifier
-                                    .align(Alignment.CenterVertically)
-                                    .size(56.dp),
-                                colors = IconButtonDefaults.filledIconButtonColors()
+                        Box(modifier = Modifier.weight(1f)) {
+                            CartListSection(uiState = uiState, viewModel = viewModel)
+                        }
+
+                        if (uiState.items.isNotEmpty()) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                                )
                             ) {
-                                Icon(Icons.Default.Add, contentDescription = "Add Item")
+                                Column(
+                                    modifier = Modifier.padding(16.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Total:",
+                                            style = MaterialTheme.typography.titleLarge
+                                        )
+                                        Text(
+                                            text = uiState.total.toCurrency(),
+                                            style = MaterialTheme.typography.headlineMedium,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Button(
+                                        onClick = { navController.navigate(AppScreens.FastSalePreview.route) },
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text(stringResource(R.string.finish_sale_action))
+                                    }
+                                }
                             }
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Client Info (Optional)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+            } else {
+                Column(
+                    modifier = Modifier
+                        .padding(padding)
+                        .fillMaxSize()
+                        .padding(16.dp)
                 ) {
-                    OutlinedTextField(
-                        value = uiState.clientName,
-                        onValueChange = viewModel::onClientNameChange,
-                        label = { Text(stringResource(R.string.client_name_label)) },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true
+                    Text(
+                        text = stringResource(R.string.fast_sale_title),
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
-                    OutlinedTextField(
-                        value = uiState.clientDoc,
-                        onValueChange = viewModel::onClientDocChange,
-                        label = { Text(stringResource(R.string.client_doc_label)) },
-                        modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true
+
+                    FastSaleFormSection(uiState = uiState, viewModel = viewModel)
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    ClientInfoSection(uiState = uiState, viewModel = viewModel)
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = stringResource(R.string.cart_products_title),
+                        style = MaterialTheme.typography.titleMedium
                     )
-                }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Cart List
-                Text(
-                    text = stringResource(R.string.cart_products_title),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                
-                if (uiState.items.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = stringResource(R.string.fast_sale_cart_empty),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    Box(modifier = Modifier.weight(1f)) {
+                        CartListSection(uiState = uiState, viewModel = viewModel)
                     }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(uiState.items, key = { it.id }) { item ->
-                            ListItem(
-                                headlineContent = { Text(item.name, fontWeight = FontWeight.Bold) },
-                                supportingContent = {
-                                    Text("${item.quantity} x ${item.price.toCurrency()} = ${(item.quantity * item.price).toCurrency()}")
-                                },
-                                trailingContent = {
-                                    IconButton(onClick = { viewModel.removeItem(item) }) {
-                                        Icon(
-                                            Icons.Default.Delete,
-                                            contentDescription = "Delete",
-                                            tint = MaterialTheme.colorScheme.error
-                                        )
-                                    }
-                                },
-                                colors = ListItemDefaults.colors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                                )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun FastSaleFormSection(uiState: FastSaleUiState, viewModel: FastSaleViewModel) {
+    OutlinedCard(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = uiState.productNameInput,
+                onValueChange = viewModel::onProductNameChange,
+                label = { Text(stringResource(R.string.fast_sale_item_name_placeholder)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = uiState.productPriceInput,
+                    onValueChange = viewModel::onProductPriceChange,
+                    label = { Text(stringResource(R.string.fast_sale_item_price_placeholder)) },
+                    modifier = Modifier.weight(1f),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = uiState.productQuantityInput,
+                    onValueChange = viewModel::onProductQuantityChange,
+                    label = { Text(stringResource(R.string.fast_sale_item_quantity_placeholder)) },
+                    modifier = Modifier.weight(0.6f),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true
+                )
+                IconButton(
+                    onClick = viewModel::addItem,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .size(56.dp),
+                    colors = IconButtonDefaults.filledIconButtonColors()
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Item")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ClientInfoSection(uiState: FastSaleUiState, viewModel: FastSaleViewModel) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        OutlinedTextField(
+            value = uiState.clientName,
+            onValueChange = viewModel::onClientNameChange,
+            label = { Text(stringResource(R.string.client_name_label)) },
+            modifier = Modifier.weight(1f),
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = uiState.clientDoc,
+            onValueChange = viewModel::onClientDocChange,
+            label = { Text(stringResource(R.string.client_doc_label)) },
+            modifier = Modifier.weight(1f),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true
+        )
+    }
+}
+
+@Composable
+fun CartListSection(uiState: FastSaleUiState, viewModel: FastSaleViewModel) {
+    if (uiState.items.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.fast_sale_cart_empty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(uiState.items, key = { it.id }) { item ->
+                ListItem(
+                    headlineContent = { Text(item.name, fontWeight = FontWeight.Bold) },
+                    supportingContent = {
+                        Text("${item.quantity} x ${item.price.toCurrency()} = ${(item.quantity * item.price).toCurrency()}")
+                    },
+                    trailingContent = {
+                        IconButton(onClick = { viewModel.removeItem(item) }) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = "Delete",
+                                tint = MaterialTheme.colorScheme.error
                             )
                         }
-                    }
-                }
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    )
+                )
             }
         }
     }

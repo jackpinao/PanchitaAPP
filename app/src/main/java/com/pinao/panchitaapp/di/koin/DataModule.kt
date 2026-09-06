@@ -48,6 +48,7 @@ import com.pinao.panchitaapp.domain.repository.CategoryRepository
 import com.pinao.panchitaapp.domain.repository.ClientRepository
 import com.pinao.panchitaapp.domain.repository.DetailTicketRepository
 import com.pinao.panchitaapp.domain.repository.ProductRepository
+import com.pinao.panchitaapp.domain.repository.PrinterSettingsRepository
 import com.pinao.panchitaapp.domain.repository.RechangeRepository
 import com.pinao.panchitaapp.domain.repository.SaleRepository
 import com.pinao.panchitaapp.domain.repository.TemporaryProductRepository
@@ -64,6 +65,8 @@ import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import com.pinao.panchitaapp.data.network.pos.SaleApiClient
 
 @Module
 class DataModule {
@@ -123,9 +126,15 @@ class DataModule {
     }
 
     @Single
+    fun providePrinterSettingsRepository(sessionManager: SessionManager): PrinterSettingsRepository {
+        return sessionManager
+    }
+
+    @Single
     fun provideRetrofitClient(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://api.example.com/") // Replace with your base URL
+            .baseUrl(BuildConfig.BASE_API_URL)
+            .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
@@ -133,6 +142,12 @@ class DataModule {
     fun provideRechangeApiClient(retrofit: Retrofit): RechangeApiClient {
         return retrofit.create(RechangeApiClient::class.java)
     }
+
+    @Single
+    fun provideSaleApiClient(retrofit: Retrofit): SaleApiClient {
+        return retrofit.create(SaleApiClient::class.java)
+    }
+
 
     @Single
     fun provideRechangeDao(database: AppDatabase): RechangeDao {
@@ -249,18 +264,17 @@ class DataModule {
     }
 
     @Single
+    fun provideUsbPrinterService(context: Context, sessionManager: SessionManager): com.pinao.panchitaapp.domain.service.UsbPrinterService {
+        return com.pinao.panchitaapp.data.service.AndroidUsbPrinterService(context, sessionManager)
+    }
+
+    @Single
     fun provideTicketRepository(
         saleDao: SaleDao,
         saleDetailDao: SaleDetailDao,
-        supabaseClient: SupabaseClient,
-        firestore: FirebaseFirestore
+        saleApiClient: SaleApiClient
     ): SaleRepository {
-        return SaleRepositoryImpl(
-            saleDao,
-            saleDetailDao,
-            supabaseClient,
-            firestore
-        )
+        return SaleRepositoryImpl(saleDao, saleDetailDao, saleApiClient)
     }
 
     @Single

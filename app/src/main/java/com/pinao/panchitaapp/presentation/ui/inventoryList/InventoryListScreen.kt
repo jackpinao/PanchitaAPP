@@ -59,12 +59,18 @@ import com.pinao.panchitaapp.presentation.ui.login.UiText
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import java.util.Locale
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InventoryListScreen(
     viewModel: InventoryListViewModel = koinViewModel(),
-    navController: NavController
+    navController: NavController,
+    windowSize: WindowSizeClass? = null
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
@@ -137,7 +143,8 @@ fun InventoryListScreen(
                         },
                         onDeleteClick = { product ->
                             viewModel.onDeleteClick(product.productId)
-                        }
+                        },
+                        windowSize = windowSize
                     )
                 }
             }
@@ -156,8 +163,15 @@ fun InventoryListContent(
     onSearchQueryChange: (String) -> Unit = {},
     onItemClick: (ProductModel) -> Unit = {},
     onDeleteClick: (ProductModel) -> Unit = {},
+    windowSize: WindowSizeClass? = null
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val columns = when (windowSize?.widthSizeClass) {
+        WindowWidthSizeClass.Compact -> 1
+        WindowWidthSizeClass.Medium -> 2
+        WindowWidthSizeClass.Expanded -> 3
+        else -> 1
+    }
 
     Column(
         modifier = Modifier
@@ -205,10 +219,12 @@ fun InventoryListContent(
             expanded = expanded,
             onExpandedChange = { expanded = it },
         ) {
-            LazyColumn(
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(columns),
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(products, key = { it.productId }) { item ->
                     InventoryItemCard(
@@ -229,10 +245,12 @@ fun InventoryListContent(
                 onRefresh = onRefresh,
                 modifier = Modifier.fillMaxSize()
             ) {
-                LazyColumn(
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(columns),
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(products, key = { it.productId }) { item ->
                         InventoryItemCard(

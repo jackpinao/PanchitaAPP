@@ -15,6 +15,7 @@
     <!-- BLUETOOTH_SCAN puede requerir ACCESS_FINE_LOCATION para funcionar -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
+    <uses-feature android:name="android.hardware.usb.host" android:required="false" />
 
     <queries>
         <package android:name="com.google.android.gms" />

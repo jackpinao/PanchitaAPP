@@ -14,4 +14,7 @@ interface SaleDetailDao {
     @Query("SELECT * FROM sale_detail WHERE sale_id = :sale_id")
     fun getDetailsByTicketId(sale_id: String): Flow<List<SaleDetailEntity>>
 
+    @Query("SELECT * FROM sale_detail WHERE sale_id = :saleId")
+    suspend fun getDetailsBySaleId(saleId: String): List<SaleDetailEntity>
+
 }

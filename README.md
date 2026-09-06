@@ -8,19 +8,19 @@ Aplicación Android de Punto de Venta (POS) para gestión de ventas, inventario,
 
 | Área | Tecnología |
 |------|-----------|
-| UI | Jetpack Compose + Material 3 |
+| UI | Jetpack Compose + Material 3 (Adaptativo a Tablets y Landscape) |
 | Arquitectura | Clean Architecture + MVVM |
 | DI | Koin 4 + KSP |
 | Base de datos local | Room (SQLite) |
 | Base de datos remota | Supabase (PostgreSQL + RLS) |
-| Red | Supabase Client (Ktor) |
+| Red | Supabase Client (Ktor) + Retrofit (API POS) |
 | Navegación | Compose Navigation (rutas tipadas) |
-| Impresión Bluetooth | RFCOMM Sockets (ESC/POS 80mm) |
-| Background sync | WorkManager |
+| Impresión | Bluetooth RFCOMM + USB OTG (ESC/POS 80mm) |
+| Background sync | WorkManager (productos y ventas pendientes) |
 | Tests | JUnit + MockK + Turbine |
 | Cobertura | Kover (mín. 60%) |
 
-- **Java 17** · **Kotlin 2.1.0** · **minSdk 26** · **compileSdk 36**
+- **Java 17** · **Kotlin 2.2.10** · **minSdk 26** · **compileSdk 36**
 
 ---
 
@@ -47,12 +47,14 @@ Presentation  ──►  Domain  ──►  Data
 | **Auth** | Login con Supabase Auth |
 | **Inventario** | Listado, búsqueda y gestión de productos |
 | **Agregar Producto** | Alta/edición con ingreso manual de precios, cálculo de costo unitario (PPP), soporte multi-tenant y autogeneración de códigos de barras |
-| **Módulo de Venta** | Registro de ventas con carrito temporal e impresión directa de ticket térmico de 80mm vía Bluetooth |
-| **Venta Rápida** | Punto de venta independiente del stock con carga manual (Nombre/Precio/Cantidad), impresión de ticket de 80mm vía Bluetooth y exportación PDF |
-| **Impresión Bluetooth** | Conexión directa a impresoras térmicas de 80mm (48 columnas) vía Bluetooth SPP, con selección interactiva de impresora mediante Bottom Sheet, persistencia de preferencias de dispositivo, formateador ESC/POS robusto adaptado para caracteres latinos, cabeceras dinámicas basadas en los datos de la tienda sincronizados desde Supabase y precorte (pre-cut) parcial obligatorio al final del ticket. |
-| **Módulo de Ajustes** | Pantalla dedicada de Configuraciones accesible desde el menú lateral para establecer/cambiar la impresora predeterminada, listar los dispositivos vinculados, disparar la impresión de un ticket de prueba formateado, y personalizar localmente los datos del negocio (Nombre de tienda, RUC, Dirección y Teléfono). |
+| **Módulo de Venta** | Registro de ventas con carrito temporal, persistencia local offline-first, sincronización con la API POS y emisión de tickets térmicos de 80mm |
+| **Venta Rápida** | Punto de venta independiente del stock con carga manual (Nombre/Precio/Cantidad), impresión de ticket de 80mm y exportación PDF |
+| **Impresión Bluetooth** | Conexión directa a impresoras térmicas de 80mm (48 columnas) vía Bluetooth SPP, selección interactiva de impresora, preferencias persistentes, formateador ESC/POS compatible con caracteres latinos y precorte parcial obligatorio. |
+| **Impresión USB** | Detección de impresoras USB OTG con endpoint Bulk OUT, solicitud de permisos del sistema y transmisión ESC/POS en bloques. |
+| **Módulo de Ajustes** | Pantalla accesible desde el menú lateral para seleccionar impresoras Bluetooth o USB, listar dispositivos, imprimir un ticket de prueba y personalizar los datos del negocio. |
 | **Recargas Claro** | Registro y consulta de recargas telefónicas |
 | **Categorías** | Gestión de categorías de producto |
+| **Diseño Adaptativo** | Interfaz optimizada para tablets y pantallas anchas (landscape) que utiliza diseños de dos columnas en formularios/ventas y grids adaptativos en listas para maximizar la usabilidad en pantallas de gran tamaño. |
 
 ---
 

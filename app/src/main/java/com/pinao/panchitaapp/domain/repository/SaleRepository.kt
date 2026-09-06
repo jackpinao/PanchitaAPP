@@ -5,4 +5,5 @@ import com.pinao.panchitaapp.domain.model.SaleModel
 
 interface SaleRepository {
     suspend fun saveFullSale(ticket: SaleModel, products: List<ProductModel>)
+    suspend fun syncUnsyncedSales()
 }

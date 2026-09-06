@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -62,6 +63,12 @@ import com.pinao.panchitaapp.presentation.navigation.AppScreens
 import com.pinao.panchitaapp.presentation.ui.Screen
 import org.koin.androidx.compose.koinViewModel
 
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.height
+
 /**
  * Pantalla principal del Módulo de Ventas refactorizada.
  */
@@ -69,7 +76,8 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun GuiaRemisionScreen(
     viewModel: GuiaRemisionViewModel = koinViewModel(),
-    navController: NavController
+    navController: NavController,
+    windowSize: WindowSizeClass? = null
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -171,7 +179,8 @@ fun GuiaRemisionScreen(
         onProductLongClick = viewModel::onProductLongClick,
         onNavigateToPreview = {
             navController.navigate(AppScreens.PreviewTicket.route)
-        }
+        },
+        windowSize = windowSize
     )
 }
 
@@ -185,140 +194,297 @@ fun GuiaRemisionContent(
     onScanClick: () -> Unit,
     onRemoveProduct: (ProductModel) -> Unit,
     onProductLongClick: (ProductModel) -> Unit,
-    onNavigateToPreview: () -> Unit
+    onNavigateToPreview: () -> Unit,
+    windowSize: WindowSizeClass? = null
 ) {
-
+    val isWideScreen = windowSize?.widthSizeClass != WindowWidthSizeClass.Compact
     val listState = rememberLazyListState()
 
     Screen {
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             floatingActionButton = {
-                FloatingActionButton(onClick = onScanClick) {
-                    Icon(
-                        Icons.Default.QrCodeScanner,
-                        contentDescription = stringResource(R.string.add_product_title)
-                    )
+                if (!isWideScreen) {
+                    FloatingActionButton(onClick = onScanClick) {
+                        Icon(
+                            Icons.Default.QrCodeScanner,
+                            contentDescription = stringResource(R.string.add_product_title)
+                        )
+                    }
                 }
             },
             bottomBar = {
-                Button(
-                    onClick = onNavigateToPreview,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    enabled = uiState.products.isNotEmpty() && !uiState.isLoading
-                ) {
-                    Text(
-                        if (uiState.isLoading) stringResource(R.string.processing_action) else stringResource(
-                            R.string.finish_sale_action
+                if (!isWideScreen) {
+                    Button(
+                        onClick = onNavigateToPreview,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        enabled = uiState.products.isNotEmpty() && !uiState.isLoading
+                    ) {
+                        Text(
+                            if (uiState.isLoading) stringResource(R.string.processing_action) else stringResource(
+                                R.string.finish_sale_action
+                            )
                         )
-                    )
+                    }
                 }
             }
         ) { padding ->
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .padding(16.dp)
-            ) {
-                Text(
-                    stringResource(R.string.minimarket_sale_title),
-                    style = MaterialTheme.typography.headlineMedium
-                )
-
-                OutlinedTextField(
-                    value = uiState.clientName,
-                    onValueChange = onClientNameChange,
-                    label = { Text(stringResource(R.string.client_name_label)) },
+            if (isWideScreen) {
+                Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                )
-
-                OutlinedTextField(
-                    value = uiState.clientDoc,
-                    onValueChange = onClientDocChange,
-                    label = { Text(stringResource(R.string.client_doc_label)) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-
-                Spacer(modifier = Modifier.padding(12.dp))
-
-                Text(
-                    stringResource(R.string.cart_products_title),
-                    style = MaterialTheme.typography.titleSmall
-                )
-
-                OutlinedCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                        .weight(1f)
+                        .padding(padding)
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 80.dp)
+                    // Columna Izquierda: Datos del cliente y escaneo
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        items(uiState.products, key = { it.detailTicketEntityId }) { product ->
-                            ListItem(
-                                modifier = Modifier.combinedClickable(
-                                    onClick = { /* Opcional */ },
-                                    onLongClick = { onProductLongClick(product) }
-                                ),
-                                headlineContent = {
-                                    Text(
-                                        product.name,
-                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
-                                    )
-                                },
-                                supportingContent = {
-                                    Text(
-                                        stringResource(
-                                            R.string.product_details_format,
-                                            product.stockQuantity.toString(),
-                                            product.priceSell.toCurrency(),
-                                            product.priceExcludingIGV.toCurrency(),
-                                            (product.priceSell * product.stockQuantity).toCurrency()
-                                        )
-                                    )
-                                },
-                                trailingContent = {
-                                    IconButton(onClick = { onRemoveProduct(product) }) {
-                                        Icon(
-                                            Icons.Default.Delete,
-                                            contentDescription = stringResource(R.string.delete_produdct),
-                                            tint = MaterialTheme.colorScheme.error
-                                        )
-                                    }
-                                }
+                        Text(
+                            stringResource(R.string.minimarket_sale_title),
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+
+                        OutlinedTextField(
+                            value = uiState.clientName,
+                            onValueChange = onClientNameChange,
+                            label = { Text(stringResource(R.string.client_name_label)) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        OutlinedTextField(
+                            value = uiState.clientDoc,
+                            onValueChange = onClientDocChange,
+                            label = { Text(stringResource(R.string.client_doc_label)) },
+                            modifier = Modifier.fillMaxWidth(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Button(
+                            onClick = onScanClick,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                Icons.Default.QrCodeScanner,
+                                contentDescription = null,
+                                modifier = Modifier.padding(end = 8.dp)
                             )
-                            HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
+                            Text(stringResource(R.string.add_product_title))
+                        }
+                    }
+
+                    // Columna Derecha: Carrito, totales y finalizar
+                    Column(
+                        modifier = Modifier.weight(1.1f),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.cart_products_title),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        OutlinedCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                        ) {
+                            LazyColumn(
+                                state = listState,
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(bottom = 16.dp)
+                            ) {
+                                items(uiState.products, key = { it.detailTicketEntityId }) { product ->
+                                    ListItem(
+                                        modifier = Modifier.combinedClickable(
+                                            onClick = { /* Opcional */ },
+                                            onLongClick = { onProductLongClick(product) }
+                                        ),
+                                        headlineContent = {
+                                            Text(
+                                                product.name,
+                                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                                            )
+                                        },
+                                        supportingContent = {
+                                            Text(
+                                                stringResource(
+                                                    R.string.product_details_format,
+                                                    product.stockQuantity.toString(),
+                                                    product.priceSell.toCurrency(),
+                                                    product.priceExcludingIGV.toCurrency(),
+                                                    (product.priceSell * product.stockQuantity).toCurrency()
+                                                )
+                                            )
+                                        },
+                                        trailingContent = {
+                                            IconButton(onClick = { onRemoveProduct(product) }) {
+                                                Icon(
+                                                    Icons.Default.Delete,
+                                                    contentDescription = stringResource(R.string.delete_produdct),
+                                                    tint = MaterialTheme.colorScheme.error
+                                                )
+                                            }
+                                        }
+                                    )
+                                    HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
+                                }
+                            }
                         }
 
-                        // Resumen de Total al final de la lista
-                        item {
-                            val total = uiState.products.sumOf { it.priceSell * it.stockQuantity }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                        // Resumen de Total y Botón de Pago en Tarjeta
+                        val total = uiState.products.sumOf { it.priceSell * it.stockQuantity }
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Text(
-                                    stringResource(R.string.total_to_pay_label),
-                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        stringResource(R.string.total_to_pay_label),
+                                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold)
+                                    )
+                                    Text(
+                                        text = total.toCurrency(),
+                                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                        color = MaterialTheme.colorScheme.tertiary
+                                    )
+                                }
+                                Button(
+                                    onClick = onNavigateToPreview,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    enabled = uiState.products.isNotEmpty() && !uiState.isLoading
+                                ) {
+                                    Text(
+                                        if (uiState.isLoading) stringResource(R.string.processing_action)
+                                        else stringResource(R.string.finish_sale_action)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .padding(padding)
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.minimarket_sale_title),
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+
+                    OutlinedTextField(
+                        value = uiState.clientName,
+                        onValueChange = onClientNameChange,
+                        label = { Text(stringResource(R.string.client_name_label)) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = uiState.clientDoc,
+                        onValueChange = onClientDocChange,
+                        label = { Text(stringResource(R.string.client_doc_label)) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+
+                    Spacer(modifier = Modifier.padding(12.dp))
+
+                    Text(
+                        stringResource(R.string.cart_products_title),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+
+                    OutlinedCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                            .weight(1f)
+                    ) {
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = 80.dp)
+                        ) {
+                            items(uiState.products, key = { it.detailTicketEntityId }) { product ->
+                                ListItem(
+                                    modifier = Modifier.combinedClickable(
+                                        onClick = { /* Opcional */ },
+                                        onLongClick = { onProductLongClick(product) }
+                                    ),
+                                    headlineContent = {
+                                        Text(
+                                            product.name,
+                                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                                        )
+                                    },
+                                    supportingContent = {
+                                        Text(
+                                            stringResource(
+                                                R.string.product_details_format,
+                                                product.stockQuantity.toString(),
+                                                product.priceSell.toCurrency(),
+                                                product.priceExcludingIGV.toCurrency(),
+                                                (product.priceSell * product.stockQuantity).toCurrency()
+                                            )
+                                        )
+                                    },
+                                    trailingContent = {
+                                        IconButton(onClick = { onRemoveProduct(product) }) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = stringResource(R.string.delete_produdct),
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
+                                        }
+                                    }
                                 )
-                                Text(
-                                    text = total.toCurrency(),
-                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = MaterialTheme.colorScheme.tertiary
-                                )
+                                HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
+                            }
+
+                            // Resumen de Total al final de la lista
+                            item {
+                                val total = uiState.products.sumOf { it.priceSell * it.stockQuantity }
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        stringResource(R.string.total_to_pay_label),
+                                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold)
+                                    )
+                                    Text(
+                                        text = total.toCurrency(),
+                                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                        color = MaterialTheme.colorScheme.tertiary
+                                    )
+                                }
                             }
                         }
                     }

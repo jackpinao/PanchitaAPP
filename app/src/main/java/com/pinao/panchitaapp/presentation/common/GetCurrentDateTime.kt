@@ -31,8 +31,7 @@ class GetCurrentDateTime {
     }
 
     fun getCurrentDateTime3(dateTime: Long): String {
-        val dt = addOneDay(dateTime)
-        val instant = Instant.ofEpochMilli(dt)
+        val instant = Instant.ofEpochMilli(addOneDay(dateTime))
         val formatter = DateTimeFormatter.ofPattern(DB_FORMAT_SHORT)
             .withZone(ZoneId.systemDefault())
         return formatter.format(instant)

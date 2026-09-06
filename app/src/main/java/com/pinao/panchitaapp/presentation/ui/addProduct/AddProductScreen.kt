@@ -103,7 +103,7 @@ fun AddProductScreen(
         onBackClick = { navController.popBackStack() },
         onIgvToggle = viewModel::onIgvToggle,
         onPercepcionToggle = viewModel::onPercepcionToggle,
-        isExpanded = windowSize?.widthSizeClass == WindowWidthSizeClass.Expanded
+        isExpanded = windowSize?.widthSizeClass != WindowWidthSizeClass.Compact
     )
 }
 
@@ -138,28 +138,15 @@ fun AddProductContent(
         ) { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
                 if (uiState.isEditMode) {
-                    PrimaryTabRow(selectedTabIndex = uiState.selectedTab) {
-                        Tab(
-                            selected = uiState.selectedTab == 0,
-                            onClick = { onTabSelected(0) },
-                               text = { Text(stringResource(R.string.tab_info)) }
-                        )
-                        Tab(
-                            selected = uiState.selectedTab == 1,
-                            onClick = { onTabSelected(1) },
-                               text = { Text(stringResource(R.string.stock_label)) }
-                        )
-                    }
-
-                    AnimatedContent(
-                        targetState = uiState.selectedTab,
-                        label = "edit_tab_content"
-                    ) { tab ->
-                        Column(
-                            modifier = Modifier.verticalScroll(rememberScrollState())
+                    if (isExpanded) {
+                        Row(
+                            modifier = Modifier
+                                .verticalScroll(rememberScrollState())
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.Top
                         ) {
-                            Spacer(modifier = Modifier.padding(8.dp))
-                            if (tab == 0) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Spacer(modifier = Modifier.padding(8.dp))
                                 InfoTabContent(
                                     uiState = uiState,
                                     onNameChange = onNameChange,
@@ -168,7 +155,9 @@ fun AddProductContent(
                                     onCategoryClick = onCategoryClick,
                                     onSaveInfoClick = onSaveInfoClick
                                 )
-                            } else {
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Spacer(modifier = Modifier.padding(8.dp))
                                 StockTabContent(
                                     uiState = uiState,
                                     onPriceChange = onPriceChange,
@@ -179,6 +168,51 @@ fun AddProductContent(
                                     onIgvToggle = onIgvToggle,
                                     onPercepcionToggle = onPercepcionToggle
                                 )
+                            }
+                        }
+                    } else {
+                        PrimaryTabRow(selectedTabIndex = uiState.selectedTab) {
+                            Tab(
+                                selected = uiState.selectedTab == 0,
+                                onClick = { onTabSelected(0) },
+                                text = { Text(stringResource(R.string.tab_info)) }
+                            )
+                            Tab(
+                                selected = uiState.selectedTab == 1,
+                                onClick = { onTabSelected(1) },
+                                text = { Text(stringResource(R.string.stock_label)) }
+                            )
+                        }
+
+                        AnimatedContent(
+                            targetState = uiState.selectedTab,
+                            label = "edit_tab_content"
+                        ) { tab ->
+                            Column(
+                                modifier = Modifier.verticalScroll(rememberScrollState())
+                            ) {
+                                Spacer(modifier = Modifier.padding(8.dp))
+                                if (tab == 0) {
+                                    InfoTabContent(
+                                        uiState = uiState,
+                                        onNameChange = onNameChange,
+                                        onCategoryChange = onCategoryChange,
+                                        onManualPriceChange = onManualPriceChange,
+                                        onCategoryClick = onCategoryClick,
+                                        onSaveInfoClick = onSaveInfoClick
+                                    )
+                                } else {
+                                    StockTabContent(
+                                        uiState = uiState,
+                                        onPriceChange = onPriceChange,
+                                        onStockChange = onStockChange,
+                                        onRegisterStockClick = onRegisterStockClick,
+                                        onStockMinChange = onStockMinChange,
+                                        onExpiryDateChange = onExpiryDateChange,
+                                        onIgvToggle = onIgvToggle,
+                                        onPercepcionToggle = onPercepcionToggle
+                                    )
+                                }
                             }
                         }
                     }
